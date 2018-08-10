@@ -1,7 +1,7 @@
 +++
 title = "cs140e-assignments-0-blinky"
 date = 2018-03-30
-
+draft = true
 [taxonomies]
 categories = ["Rust"]
 tags = ["Rust", "RaspberryPI", "OS", "cs140e"]
@@ -44,4 +44,4 @@ make fetch
 
 本节要用C语言写出gpio16-blink.bin.首先要安装编译器,安装指示做就行了.注意修改完环境变量后需要重启终端或重新登陆.
 
-随后我们需要补全blinky.c.根据 
+...

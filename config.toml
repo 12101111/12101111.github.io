@@ -1,31 +1,49 @@
-# The URL the site will be built for
+# 网站域名,必选
 base_url = "https://12101111.github.io"
 
-# Whether to automatically compile all Sass files in the sass directory
-compile_sass = true
+# 标题,用于RSS而不是网页
+title = ""
 
-# Whether to do syntax highlighting
-# Theme can be customised by setting the `highlight_theme` variable to a theme supported by Gutenberg
-highlight_code = true
-
-highlight_theme = "solarized-light"
-# Whether to build a search index to be used later on by a JavaScript library
-# build_search_index = true
-
+# 介绍,用于RSS而不是网页
 description = ""
 
+# 主题名
 theme = "even"
 
-title = "Coding..."
-# default_language = "zh-cn"
+# 使用代码高亮
+highlight_code = true
 
+# 代码高亮主题,列表见上面的官方文档
+highlight_theme = "solarized-light"
+
+# 生成RSS文件
+generate_rss = false
+
+# 是否编译 sass
+compile_sass = true
+
+# 生成搜索索引,支持搜索与否取决于主题
+build_search_index = false
+
+# 检查外部死链,极其耗时
+check_external_links = false
+
+# taxonomies是页面的分类方式,这些变量先在这里定义,随后会根据模板生成对应的分类页面
+# 模板在theme或者templates下的name文件夹,需要
+# `list.html`(分类列表)和`single.html`(每个分类下的文章列表)
+# 定义格式:{name: "名称",paginate_by: 5, rss: 是否生成RSS}
+# paginate_by:文章列表一个页面的文章数量(可选,0为不分页)
+# 建议如下
 taxonomies = [
-    {name = "categories", rss = true},
-    {name = "tags", rss = true},
+    {name = "tags"},
+    {name = "categories"},
 ]
 
+# 不对content文件夹中满足以下通配符的文件进行处理和渲染
+ignored_content = ["*.{tmp,xlsx}", "*draft.md"]
+
+# extra存放没有被程序定义的变量,可以被模板和主题使用
 [extra]
-# Put all your custom variables here
 even_title = "Coding..."
 
 even_menu = [
