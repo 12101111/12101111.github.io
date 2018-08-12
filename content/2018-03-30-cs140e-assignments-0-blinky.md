@@ -36,12 +36,101 @@ make fetch
 
 把tf卡插到电脑上,格式化成FAT32,将`files/firmware`中的文件复制到分区根目录,再将`files/activity-led-blink.bin`这个文件复制到分区根目录并重命名为`kernel8.img`.然后拔出tf卡,插进树莓派,将CP2102插到电脑上,接通电源(如果需要的话),树莓派上microUSB处有一个绿灯在闪,同时CP2102上的灯也会闪,这代表有数据正在通过串口传输,执行 `sudo screen /dev/<your-path> 115200` 就能看到传输的数据,"On!"和"Off!"伴随着灯的开关出现,按下CTRL+A,再按下k,再按下y来退出.
 
+注意,如果你正在使用树莓派3B+,你需要下载Raspbian Stretch Lite并从中提取FAT分区的文件,并替换`files/firmware`中的二进制固件`start.elf`.
+
 # 0x2:控制LED小灯
 
-按照第一张图连好,灯应该会亮,再将`files/gpio16-blink.bin`重命名为`kernel8.img`放到tf卡根目录,将连线改为第二张图,小灯应该会闪烁.接下来两部我们要自己写出`gpio16-blink.bin`这个程序.
+按照第一张图连好(一定要使用合适的电阻),灯应该会亮.再将`files/gpio16-blink.bin`重命名为`kernel8.img`放到tf卡根目录,将连线改为第二张图,小灯应该会闪烁.接下来两部我们要自己写出`gpio16-blink.bin`这个程序.
 
 # 0x3:C
 
-本节要用C语言写出gpio16-blink.bin.首先要安装编译器,安装指示做就行了.注意修改完环境变量后需要重启终端或重新登陆.
+本节要用C语言写出`gpio16-blink.bin`.首先要安装编译器,安装指示做就行了.注意修改完环境变量后需要重启终端或重新登陆.
 
-...
+在大多数现代Soc上,与外部设备的IO是直接通过读写设备映射在内存空间的特殊地址来进行的,与内存不同,有些地址只读,有些地址只写.
+
+我们需要使用C语言对`GPFSEL1`写入数据来使`Pin16`作为输出,`GPFSEL1`是可读写的,根据92页的表格,对`FSEL16`也就是`GPFSEL1`的18-20位写入001即可.为了不影响其他pin,这里用两次操作来完成.
+
+```c
+ *GPIO_FSEL1&=~(0x11<<19);
+ *GPIO_FSEL1|=0x1<<18;
+```
+
+随后交替对`GPSET0`和`GPCLR0`第16位写入1即可,由于对这些位写0没有影响,同时这些地址不可读,因此直接对地址赋值.
+
+```c
+  for(;;){
+  	*GPIO_SET0=0x1<<16;
+  	spin_sleep_ms(250);
+  	*GPIO_CLR0=0x1<<16;
+  	spin_sleep_ms(250);
+  }
+```
+
+运行`make`,将`blinky.bin`保存到SD卡重命名为`kernel8.img`,上电,led开始闪烁.
+
+# 0x4:Rust
+
+安装Rust,Xargo
+
+```bash
+curl https://sh.rustup.rs -sSf | sh
+rustup default nightly
+rustup component add rust-src
+cargo install xargo
+```
+
+同时对文件进行修改以适应最新版的Rust,并修正一个bug.
+
+```diff
+diff --git a/phase4/src/lang_items.rs b/phase4/src/lang_items.rs
+index 134f657..89b3467 100644
+--- a/phase4/src/lang_items.rs
++++ b/phase4/src/lang_items.rs
+@@ -1,7 +1,11 @@
+ #[lang = "eh_personality"] pub extern fn eh_personality() {}
++use core::intrinsics;
++use core::panic::PanicInfo;
+ 
+-#[lang = "panic_fmt"] #[no_mangle] pub extern fn panic_fmt() -> ! { loop{} }
+-
++#[panic_implementation]
++fn panic(_info: &PanicInfo) -> ! {
++    unsafe { intrinsics::abort() }
++}
+ #[no_mangle]
+ pub unsafe extern fn memcpy(dest: *mut u8, src: *const u8,
+                             n: usize) -> *mut u8 {
+diff --git a/phase4/src/lib.rs b/phase4/src/lib.rs
+index 8019dbf..470c1aa 100644
+--- a/phase4/src/lib.rs
++++ b/phase4/src/lib.rs
+@@ -2,8 +2,8 @@
+ #![no_builtins]
+ #![no_std]
+ 
+-extern crate compiler_builtins;
+-
++#![feature(panic_implementation)]
++#![feature(core_intrinsics)]
+ pub mod lang_items;
+ 
+ const GPIO_BASE: usize = 0x3F000000 + 0x200000;
+@@ -14,7 +14,7 @@ const GPIO_CLR0: *mut u32 = (GPIO_BASE + 0x28) as *mut u32;
+ 
+ #[inline(never)]
+ fn spin_sleep_ms(ms: usize) {
+-    for _ in 0..(ms * 600) {
++    for _ in 0..(ms * 6000) {
+         unsafe { asm!("nop" :::: "volatile"); }
+     }
+ }
+ ```
+
+ 随后照葫芦画瓢就行了.
+
+ # 参考
+
+ 如果我写的太差,你可以看一看知乎上两位上海交大的大佬写的.
+
+ [https://zhuanlan.zhihu.com/p/38674307](https://zhuanlan.zhihu.com/p/38674307)
+ [https://zhuanlan.zhihu.com/p/33115552](https://zhuanlan.zhihu.com/p/33115552)
