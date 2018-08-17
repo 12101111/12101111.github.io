@@ -1,7 +1,6 @@
 +++
 title = "cs140e-assignments-0-blinky"
 date = 2018-03-30
-draft = true
 [taxonomies]
 categories = ["Rust"]
 tags = ["Rust", "RaspberryPI", "OS", "cs140e"]
