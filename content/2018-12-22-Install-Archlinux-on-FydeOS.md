@@ -92,7 +92,8 @@ crosh> vmc start termina
 +---------+---------+-----------------------+------+------------+-----------+
 | NAME    | STATE   | IPV4                  | IPV6 | TYPE       | SNAPSHOTS |
 +---------+---------+-----------------------+------+------------+-----------+
-| penguin | RUNNING | 100.115.92.202 (eth0) |      | PERSISTENT | 0         | +---------+---------+-----------------------+------+------------+-----------+
+| penguin | RUNNING | 100.115.92.202 (eth0) |      | PERSISTENT | 0         |
++---------+---------+-----------------------+------+------------+-----------+
 ```
 
 使用`run_container.sh`命令可以下载并安装`Archlinux`容器.
@@ -126,7 +127,7 @@ lxc init "google:${FLAGS_lxd_image}" "${FLAGS_container_name}" || \
     die "Unable to create container from image '${FLAGS_lxd_image}'"
 ```
 
-运行以下命令.请确保用户名是设置应用里显示的用户名.你可以自行选择`lxd_image`指定的linux镜像,或者`lxd_remote`指定的镜像源.
+运行以下命令.请确保用户名是设置应用里显示的用户名.你可以自行选择`container_name`指定的镜像名,`lxd_image`指定的linux镜像id,或者`lxd_remote`指定的镜像源.
 
 ```output
 (termina) chronos@localhost /tmp $ bash ./run_container.sh --container_name arch --user 你的用户名 --lxd_image archlinux/current --lxd_remote https://mirrors.tuna.tsinghua.edu.cn/lxc-images/
@@ -160,7 +161,7 @@ vi /etc/pacman.conf
 Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
 
 #安装依赖
-pacman -Syu base-devel git gtk3 openssh xdg-utils xkeyboard-config
+pacman -Syu base-devel git gtk3 openssh xdg-utils xkeyboard-config archlinuxcn-keyring
 
 #启用sudo无密码
 visudo
@@ -173,7 +174,7 @@ visudo
 exit
 ```
 
-使用另一种方式**登录**到你创建的用户(之前的执行bash的方法无法加载服务).
+使用另一种方式**登录**到你创建的用户(之前的执行bash的方法不是登录,无法加载服务).
 
 运行`lxc console arch`
 
@@ -248,10 +249,61 @@ systemctl --user enable cros-garcon.service
 由于一些限制,目前`Crostini`的Chromium OS集成仅名为`penguin`的容器可以启用,因此需要重命名容器.不要删除自带的Debian容器.
 
 ```bash
-lxc stop arch
-lxc stop penguin
-lxc rename penguin debian
-lxc rename arch penguin
+[你的用户名@arch ~]$ exit
+按下ctrl-A Q
+(termina) chronos@localhost /tmp $ lxc stop arch
+(termina) chronos@localhost /tmp $ lxc stop penguin
+(termina) chronos@localhost /tmp $ lxc rename penguin debian
+(termina) chronos@localhost /tmp $ lxc rename arch penguin
 ```
 
 随后重启系统.
+
+打开终端应用,等待几秒,archlinux就启动了,随后做一些本地化
+
+首先设置中文语言
+
+创建`$HOME/.config/locale.conf`
+
+```bash
+cat << EOF > $HOME/.config/locale.conf
+LANG="zh_CN.UTF-8"
+LANGUAGE="zh_CN.UTF-8"
+LC_CTYPE="zh_CN.UTF-8"
+LC_NUMERIC="zh_CN.UTF-8"
+LC_TIME="zh_CN.UTF-8"
+LC_COLLATE="zh_CN.UTF-8"
+LC_MONETARY="zh_CN.UTF-8"
+LC_MESSAGES="zh_CN.UTF-8"
+LC_PAPER="zh_CN.UTF-8"
+LC_NAME="zh_CN.UTF-8"
+LC_ADDRESS="zh_CN.UTF-8"
+LC_TELEPHONE="zh_CN.UTF-8"
+LC_MEASUREMENT="zh_CN.UTF-8"
+LC_IDENTIFICATION="zh_CN.UTF-8"
+EOF
+```
+
+安装字体,输入法
+
+```bash
+sudo pacman -S fcitx-im fcitx-configtool fcitx-sogoupinyin wqy-microhei
+```
+
+打开`/usr/lib/systemd/user/cros-garcon.service.d/cros-garcon-override.conf`
+
+插入
+
+```bash
+Environment="GTK_IM_MODULE=fcitx"
+Environment="QT_IM_MODULE=fcitx"
+Environment="XMODIFIERS=@im=fcitx"
+```
+
+执行
+
+```bash
+echo /usr/bin/fcitx-autostart > $HOME/.sommelierrc
+```
+
+重启系统.
