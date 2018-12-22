@@ -11,7 +11,7 @@ tags = ["Linux","ChromiumOS"]
 FydeOS是一个国产的ChromiumOS发行版,是目前唯一像ChromeOS一样支持安装Android应用的ChromiumOS发行版.FydeOS像ChromeOS一样也支持运行Linux程序,但是默认的发行版是Debian,包又老又少,因此决定换Archlinux.
 <!-- more -->
 
-# Crostini结构
+# -1.Crostini结构
 
 ChromiumOS运行Linux的项目叫Crostini.[ChromiumOS的文档](https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md#Glossary)详细的介绍了其架构.
 
@@ -62,30 +62,20 @@ Sommelier(侍酒师)是Wayland代理合成器，在容器内运行。Sommelier�
 
 penguin(企鹅)是默认的容器。
 
-# 安装Archlinux容器
+# 0.已知问题
 
-使用CTRL-ALT-T可以打开打开`crosh`.不要输入`shell`进入`bash`.输入以下命令以测试你来到了正确的地方,并查看`vmc`,虚拟机控制命令的用法.
+Linux支持处于测试版阶段,有一定概率启动失败,`终端`应用无限转圈,尤其是执行`sudo reboot`后.正常的启动时间为10秒,如果一分钟之后启动不了,可以重启系统重试.
 
-```output
-crosh> vmc --help
-vmc [ start <name> | stop <name> | destroy <name> | export <vm name> <file name> [removable storage name] | list | share <vm name> <path> ] Manage a VM.
-```
+# 1.进入Termina,安装容器
 
-启动`Termina`
+使用CTRL-ALT-T可以打开打开`crosh`.在其中输入`vmc start termina`以启动`Termina`虚拟机.
 
 ```output
 crosh> vmc start termina
 (termina) chronos@localhost ~ $
 ```
 
-查看Linux容器命令`lxc`的用法.
-
-```output
-(termina) chronos@localhost ~ $ lxc --help
-....
-```
-
-列出已经安装的容器.
+`lxc list`列出已经安装的容器.
 
 ```output
 (termina) chronos@localhost ~ $ lxc list
@@ -96,13 +86,12 @@ crosh> vmc start termina
 +---------+---------+-----------------------+------+------------+-----------+
 ```
 
-使用`run_container.sh`命令可以下载并安装`Archlinux`容器.
-由于FydeOS相对于ChromiumOS对此命令进行了修改,编辑这个sh脚本撤销更改.
+使用`run_container.sh`命令可以下载并安装`Archlinux`容器.由于FydeOS相对于ChromiumOS对此命令进行了修改,编辑这个sh脚本撤销更改.由于termina是只读的,将脚本复制到临时目录/tmp
 
 ```output
-(termina) chronos@localhost ~ $ cp /usr/bin/run_container.sh /tmp
-(termina) chronos@localhost ~ $ cd /tmp
-(termina) chronos@localhost ~ $ vim run_container.sh
+cp /usr/bin/run_container.sh /tmp
+cd /tmp
+vim run_container.sh
 ```
 
 找到以下片段
@@ -127,13 +116,17 @@ lxc init "google:${FLAGS_lxd_image}" "${FLAGS_container_name}" || \
     die "Unable to create container from image '${FLAGS_lxd_image}'"
 ```
 
-运行以下命令.请确保用户名是设置应用里显示的用户名.你可以自行选择`container_name`指定的镜像名,`lxd_image`指定的linux镜像id,或者`lxd_remote`指定的镜像源.
+运行以下命令.请确保用户名是**设置**应用里显示的用户名.你可以自行选择`container_name`指定的容器名,`lxd_image`指定的linux镜像,或者`lxd_remote`指定的镜像源.
 
 ```output
-(termina) chronos@localhost /tmp $ bash ./run_container.sh --container_name arch --user 你的用户名 --lxd_image archlinux/current --lxd_remote https://mirrors.tuna.tsinghua.edu.cn/lxc-images/
+bash ./run_container.sh --container_name arch --user 你的用户名 --lxd_image archlinux/current --lxd_remote https://mirrors.tuna.tsinghua.edu.cn/lxc-images/
 ```
 
-确保下载成功并且创建用户成功(忽略那几个用户组的错误).启动镜像的shell
+确保下载成功并且创建用户成功(忽略那几个无法加入用户组的错误).
+
+# 2.进入容器的shell
+
+执行`lxc exec arch -- bash`以执行容器的shell
 
 ```output
 (termina) chronos@localhost /tmp $ lxc exec arch -- bash
@@ -145,38 +138,50 @@ lxc init "google:${FLAGS_lxd_image}" "${FLAGS_container_name}" || \
 ```bash
 #设置密码.千万不要给root设置密码,否则ChromiumOS集成服务将无法运行
 passwd 你的用户名
-
 #把用户加入wheel组
 usermod -aG wheel 你的用户名
-
-#设置源,把tuna ustc等中国的镜像源剪切粘贴到前面.vim中dd剪切整行,p粘贴,/搜索
-vi /etc/pacman.d/mirrorlist
-
-#设置archlinuxcn源等
-vi /etc/pacman.conf
-
-粘贴以下两行
-
-[archlinuxcn]
-Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
-
-#安装依赖
-pacman -Syu base-devel git gtk3 openssh xdg-utils xkeyboard-config archlinuxcn-keyring
-
-#启用sudo无密码
-visudo
-
-删除以下行前的注释#
-
-%wheel   ALL=(ALL:ALL) NOPASSWD: ALL
-
-#退出
-exit
 ```
 
-使用另一种方式**登录**到你创建的用户(之前的执行bash的方法不是登录,无法加载服务).
+设置源,把tuna ustc 163等中国的源剪切粘贴到前面.vi中dd剪切整行,p粘贴,/搜索
 
-运行`lxc console arch`
+```bash
+vi /etc/pacman.d/mirrorlist
+```
+
+设置archlinuxcn源
+
+```bash
+vi /etc/pacman.conf
+```
+
+在最后插入
+
+```ini
+[archlinuxcn]
+Server = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch
+```
+
+安装依赖
+
+```bash
+pacman -Syu archlinuxcn-keyring base-devel git gtk3 openssh xdg-utils xkeyboard-config
+```
+
+启用sudo无密码,执行`visudo`
+
+删除以下行前的注释
+
+```ini
+%wheel   ALL=(ALL:ALL) NOPASSWD: ALL
+```
+
+退出到termina `exit`
+
+# 3.登录到容器
+
+**登录**到你创建的用户(之前执行bash的方法不是登录,无法加载服务).
+
+运行`lxc console arch`,然后直接输入用户名.
 
 ```output
 (termina) chronos@localhost /tmp $ lxc console arch
@@ -186,7 +191,7 @@ Password:
 [你的用户名@arch ~]$
 ```
 
-登录成功后安装aur上的`cros-container-guest-tools-git`.由于需要从`chromium.googlesource.com`下载文件,因此自行解决网络故障.注意,Android或者Chromium OS里的代理设置不会应用到虚拟机.
+登录成功后安装aur上的`cros-container-guest-tools-git`.由于需要从`chromium.googlesource.com`下载文件,因此请自行解决网络问题.注意,Android或者Chromium OS里的代理设置不会应用到虚拟机.
 
 ```bash
 git clone https://aur.archlinux.org/cros-container-guest-tools-git.git
@@ -197,10 +202,10 @@ mkdir ~/.config
 xdg-settings set default-web-browser garcon_host_browser.desktop
 ```
 
-解决Archlinux里`xkeyboard-config`太新`Sommelier`不支持两个键码的问题
+解决Archlinux里`xkeyboard-config`更新导致`Sommelier`不支持两个键码的问题
 打开`/usr/share/X11/xkb/keycodes/evdev`,注释或者删除`<i372>` 和 `<i374>`开头的两行.
 
-`cros-container-guest-tools-git`应用于ChromiumOS的最新版本,FydeOS暂时没有更新到R71,不支持`x-auth`功能,因此需要修改文件.
+`cros-container-guest-tools-git`应用于ChromiumOS的最新版本,FydeOS暂时没有更新到R71,不支持`x-auth`功能,因此需要修改文件(更新后就不用改了).
 
 打开`/usr/lib/systemd/user/sommelier-x@.service`,把
 
@@ -246,7 +251,9 @@ systemctl --user enable sommelier-x@1.service
 systemctl --user enable cros-garcon.service
 ```
 
-由于一些限制,目前`Crostini`的Chromium OS集成仅名为`penguin`的容器可以启用,因此需要重命名容器.不要删除自带的Debian容器.
+# 4.重命名容器
+
+由于一些限制,目前`Crostini`的Chromium OS集成仅名为`penguin`的容器可以启用,因此需要重命名容器.(不要删除自带的Debian容器)
 
 ```bash
 [你的用户名@arch ~]$ exit
@@ -257,16 +264,25 @@ systemctl --user enable cros-garcon.service
 (termina) chronos@localhost /tmp $ lxc rename arch penguin
 ```
 
-随后重启系统.
+重启虚拟机
+
+```bash
+sudo reboot
+```
+
+# 5.本地化
 
 打开终端应用,等待几秒,archlinux就启动了,随后做一些本地化
 
-首先设置中文语言
+设置时区`sudo timedatectl set-timezone Asia/Shanghai`
 
-创建`$HOME/.config/locale.conf`
+设置中文语言
+
+编辑`/etc/locale.gen`,删除`zh_CN.UTF-8`前的注释,然后执行`sudo locale-gen`
+
+修改`/etc/locale.conf`
 
 ```bash
-cat << EOF > $HOME/.config/locale.conf
 LANG="zh_CN.UTF-8"
 LANGUAGE="zh_CN.UTF-8"
 LC_CTYPE="zh_CN.UTF-8"
@@ -281,10 +297,9 @@ LC_ADDRESS="zh_CN.UTF-8"
 LC_TELEPHONE="zh_CN.UTF-8"
 LC_MEASUREMENT="zh_CN.UTF-8"
 LC_IDENTIFICATION="zh_CN.UTF-8"
-EOF
 ```
 
-安装字体,输入法
+安装字体,输入法.这里还安装了搜狗输入法,可能会出现bug,请酌情选择.
 
 ```bash
 sudo pacman -S fcitx-im fcitx-configtool fcitx-sogoupinyin wqy-microhei
@@ -306,4 +321,14 @@ Environment="XMODIFIERS=@im=fcitx"
 echo /usr/bin/fcitx-autostart > $HOME/.sommelierrc
 ```
 
-重启系统.
+重启容器
+
+```bash
+sudo reboot
+```
+
+运行`fcitx-config-gtk3`配置输入法.
+
+# 参考
+
+[https://www.reddit.com/r/Crostini/wiki/howto/run-arch-linux](https://www.reddit.com/r/Crostini/wiki/howto/run-arch-linux)
