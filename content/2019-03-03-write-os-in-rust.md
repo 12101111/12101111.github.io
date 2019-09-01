@@ -142,6 +142,6 @@ rustup target add <目标>
 
 对于`tire3`目标或自定义目标,官方不提供`core`的二进制文件.编译自己的库时,必须同时编译`core`和`compiler_builtins`两个只有源代码的库.
 
-这些内置库目前不能由cargo自动编译,可以使用第三方工具`xbuild`来编译.
+这些内置库目前不能由cargo自动编译,可以使用第三方工具`cargo-xbuild`来编译.
 
 有关如何编写目标配置文件并编译的示例,见[blog os第二篇文章](https://os.phil-opp.com/minimal-rust-kernel/),[(中文翻译)](https://zhuanlan.zhihu.com/p/56433770)
