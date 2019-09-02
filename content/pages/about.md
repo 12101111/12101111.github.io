@@ -36,7 +36,7 @@ Github: [github.com/12101111/](https://github.com/12101111/)
 
 [uart_16550](https://github.com/12101111/uart_16550): x86平台的16550串口芯片的驱动程序库.
 
-### 2.[Linux 0.11](github.com/12101111/Linux-0.11)
+### 2.[Linux 0.11](https://github.com/12101111/Linux-0.11)
 
 改造Linux0.11的`makefile`及部分源码,将Linux 0.11移植到现代编译器(GCC/Clang),并可以在Linux,Windows,macOS和Android上编译,运行,调试.
 
