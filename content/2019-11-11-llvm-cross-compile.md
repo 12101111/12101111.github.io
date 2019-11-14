@@ -1,0 +1,253 @@
++++
+title = "LLVM cross-compiled Linux From Scratch"
+date = 2019-11-14
+[taxonomies]
+categories = ["Linux"]
+tags = ["Linux","LLVM"]
++++
+
+通常一份GNU工具链只能针对一个目标进行编译,但是LLVM是天生的交叉编译器,一份LLVM工具链可以同时为不同的目标编译.
+
+要验证这一点,可以查看`llc --version`的输出,以下是我的结果:
+
+```txt
+LLVM (http://llvm.org/):
+  LLVM version 9.0.0libcxx
+  Optimized build.
+  Default target: x86_64-gentoo-linux-musl
+  Host CPU: skylake
+
+  Registered Targets:
+    aarch64    - AArch64 (little endian)
+    aarch64_32 - AArch64 (little endian ILP32)
+    aarch64_be - AArch64 (big endian)
+    arm        - ARM
+    arm64      - ARM64 (little endian)
+    arm64_32   - ARM64 (little endian ILP32)
+    armeb      - ARM (big endian)
+    riscv32    - 32-bit RISC-V
+    riscv64    - 64-bit RISC-V
+    thumb      - Thumb
+    thumbeb    - Thumb (big endian)
+    wasm32     - WebAssembly 32-bit
+    wasm64     - WebAssembly 64-bit
+    x86        - 32-bit X86: Pentium-Pro and above
+    x86-64     - 64-bit X86: EM64T and AMD64
+```
+
+这意味着这份LLVM工具链可以为上面列出来的架构编译.
+
+本文将用LLVM工具链从零交叉编译出目标架构为`armv7a-linux-musleabihf`的Linux操作系统.
+
+本文需要主机上已经安装了一份现代的Linux发行版,以及*必要*的开发工具(如Debian的`build-essential`或ArchLinux的`base-devel`),并且安装了Clang 9,LLVM 9和lld 9.
+
+某些需要的工具为:`bash bzip2 coreutils diffutils findutils gawk grep gzip m4 make ncurses patch sed tar cmake ninja rsync`.这个列表可能不完整,其中某些工具可以被busybox代替,但我没有测试过.
+
+如上文所示,我使用的发行版为Gentoo Linux,并且大部分包通过LLVM工具链编译,但这与本文无关.
+
+## GNU工具链和LLVM工具链的对比
+
+| 项目               | GNU工具链           | LLVM工具链           |
+| ------------------ | ------------------- | -------------------- |
+| C 编译器           | `gcc`               | `clang`              |
+| C++编译器          | `g++`               | `clang++`            |
+| binutils           | GNU binutils        | LLVM binutils        |
+| 汇编器             | GNU `as`            | 集成汇编器           |
+| 链接器             | `ld.bfd`, `ld.gold` | LLVM linker `ld.lld` |
+| 运行时(intrinsics) | `libgcc`            | `compiler-rt`        |
+| 原子操作           | `libatomic`         | `compiler-rt`        |
+| C 语言库           | GNU libc `glibc`    | `musl`               |
+| C++ 标准库         | `libstdc++`         | `libc++`             |
+| C++ ABI            | `Libsupcxx`         | `libc++abi`          |
+| 栈展开(unwind)     | `libgcc_s`          | LLVM `libunwind`     |
+
+1. LLVM项目暂时没有libc库,gcc和clang皆可使用glibc或musl等C语言库.
+2. LLVM项目的汇编器命令行前端集成在Clang中,使用`clang -c`命令行来使用,`llvm-as`用于编译LLVM IR.
+3. 编译器运行时库提供了内建函数(intrinsics或builtins),这些函数提供复杂算数运算的实现.这些运算可能不能转换为单一汇编指令,而是翻译为一段C或汇编函数.
+4. 有三种栈展开库都以`libunwind`命名,分别由LLVM,nongnu.org和PathScale开发,它们与`libgcc_s`都能提供 Itanium C++ ABI要求的`_Unwind_*`系列函数.
+5. 更多详情见LLVM文档:[工具链](https://clang.llvm.org/docs/Toolchain.html)
+
+## 建立根文件夹: sysroot 和 rootfs
+
+```shell
+mkdir -pv /usr/armv7a-linux-musleabihf/{sysroot,rootfs}
+```
+
+sysroot用于存放编译使用的库文件和头文件，rootfs存放编译完的程序和库文件。
+
+## 环境变量
+
+```bash
+export TARGET=armv7a-linux-musleabihf
+export SYSROOT=/usr/${TARGET}/sysroot
+export ROOTFS=/usr/${TARGET}/rootfs
+export CROSS_COMPILE=${TARGET}-
+export CFLAGS="--sysroot=${SYSROOT}"
+export LDFLAGS="-fuse-ld=lld -rtlib=compiler-rt"
+export AS="${CC} -c"
+```
+
+## 使用符号链接建立交叉编译工具链
+
+```shell
+cd /usr/local/bin
+ln -s `which lld` ${CROSS_COMPILE}ld
+ln -s `which clang` ${CROSS_COMPILE}gcc
+ln -s `which clang++` ${CROSS_COMPILE}g++
+for i in ar nm objcopy objdump ranlib strip;do
+  ln -s `which llvm-$i` ${CROSS_COMPILE}$i
+done
+```
+
+## 安装头文件
+
+这一步需要获得Linux源代码,我的编译目标是树莓派3B,因此从树莓派的Github获取Linux源码.对于有主线支持的平台,可以从kernel.org获取Linux源码.
+
+```shell
+git clone --depth=1 --branch rpi-5.4.y https://github.com/raspberrypi/linux
+cd linux
+make ARCH=arm headers_check
+make ARCH=arm INSTALL_HDR_PATH=$SYSROOT headers_install
+```
+
+然后安装musl libc的头文件
+
+```shell
+DESTDIR=$SYSROOT make install-headers
+```
+
+## 交叉编译Compiler-RT
+
+首先要做的是编译一份arm平台的`compiler-rt`
+
+首先下载并解压其源代码.
+
+```shell
+curl -L http://releases.llvm.org/9.0.0/compiler-rt-9.0.0.src.tar.xz | tar xvJ && cd compiler-rt-9.0.0.src
+```
+
+我们需要修改一下`CMakeLists.txt`以跳过对C编译器的检测,手动指定指针长度,因为现在C编译器不能链接出一个可执行的arm程序.
+
+```diff
+--- CMakeLists.txt      2019-08-26 12:32:35.000000000 +0000
++++ CMakeLists.txt      2019-11-11 08:34:05.860000000 +0000
+@@ -5,6 +5,10 @@
+
+ cmake_minimum_required(VERSION 3.4.3)
+
++set(CMAKE_C_COMPILER_WORKS 1)
++set(CMAKE_CXX_COMPILER_WORKS 1)
++set(CMAKE_SIZEOF_VOID_P 4)
++
+ if(POLICY CMP0075)
+   cmake_policy(SET CMP0075 NEW)
+ endif()
+```
+
+```shell
+# 按照cmake的习惯,建立build文件夹
+mkdir build && cd build
+# 生成ninja编译文件,最后的CMAKE_INSTALL_PREFIX应为对应的clang安装到的文件夹,下面应该有lib/linux/clang_rt.crtbegin-*等
+cmake ../ -G Ninja -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld" -DCMAKE_C_COMPILER_TARGET="armv7a-linux-musleabihf" -DCMAKE_ASM_COMPILER_TARGET="armv7a-linux-musleabihf" -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX="/usr/lib/clang/9.0.0/"
+# 编译
+ninja
+# 会安装3个文件clang_rt.crtbegin-armhf.o, clang_rt.crtend-armhf.o, libclang_rt.builtins-armhf.a
+ninja install
+```
+
+## 交叉编译musl libc
+
+```shell
+wget https://www.musl-libc.org/releases/musl-1.1.24.tar.gz
+tar xvf musl-1.1.24.tar.gz
+cd musl-1.1.24
+./configure --prefix=/
+make -j7 # CPU线程数+1
+DESTDIR=$SYSROOT make install
+```
+
+如果`compiler-rt`编译正确,则musl可以正确的编译,如果出现找不到符号,则确认`config.mak`文件中`LIBCC`不为空.
+
+```shell
+LIBCC = /usr/lib/clang/9.0.0/lib/linux/libclang_rt.builtins-armhf.a
+```
+
+## 交叉编译busybox
+
+```shell
+wget https://busybox.net/downloads/busybox-1.31.1.tar.bz2
+tar xvf busybox-1.31.1.tar.bz2
+cd busybox-1.31.1
+make ARCH=arm CFLAGS="-Wignored-optimization-argument ${CFLAGS}" CROSS_COMPILE=$CROSS_COMPILE
+```
+
+## Binutils(GNU as)
+
+像Linux或uboot这样大量使用内联汇编的项目,Clang内置的汇编器有时会不认GNU汇编的语法,因此最好使用GNU的汇编器gas.
+
+```shell
+curl -L https://mirrors.tuna.tsinghua.edu.cn/gnu/binutils/binutils-2.33.1.tar.xz | tar xvJ && cd binutils-2.33.1
+./configure --target=armv7a-linux-musleabihf --disable-nls --disable-werror --disable-ld --disable-gold --disable-gprof --disable-binutils
+```
+
+## 交叉编译libc++和libc++abi
+
+```shell
+curl -L http://releases.llvm.org/9.0.0/libcxx-9.0.0.src.tar.xz | tar xvJ
+curl -L http://releases.llvm.org/9.0.0/libcxxabi-9.0.0.src.tar.xz | tar xvJ
+
+```
+
+## 交叉编译LLVM libunwind
+
+```shell
+curl -L http://releases.llvm.org/9.0.0/libunwind-9.0.0.src.tar.xz | tar xvJ &&  cd libunwind-9.0.0.src
+```
+
+同样的,编辑`CMakeLists.txt`以跳过对C编译器的检测,否则会出错说The C++ compiler is not able to compile a simple test program,因为我们现在没有libc++
+
+```shell
+mkdir build && cd build
+cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLIBUNWIND_ENABLE_SHARED=0 -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_C_COMPILER_TARGET="$TARGET" -DCMAKE_ASM_COMPILER_TARGET="$TARGET" -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT
+```
+
+## 创建文件夹,配置文件
+
+这里我不遵循FHS3.0, 将/usr链接到/
+
+参考[CLFS Chapter 5](http://clfs.org/view/clfs-embedded/arm/final-system/introduction.html)
+
+```shell
+mkdir -pv ${SYSROOT}/{bin,boot,dev,etc,home,lib/{firmware,modules}}
+mkdir -pv ${SYSROOT}/{mnt,opt,proc,sbin,srv,sys}
+mkdir -pv ${SYSROOT}/var/{cache,lib,local,lock,log,opt,run,spool}
+install -dv -m 0750 ${SYSROOT}/root
+install -dv -m 1777 ${SYSROOT}/{var/,}tmp
+ln -s / ${SYSROOT}/usr
+ln -svf /proc/mounts ${SYSROOT}/etc/mtab
+cat > ${SYSROOT}/etc/passwd << "EOF"
+root::0:0:root:/root:/bin/ash
+EOF
+cat > ${SYSROOT}/targetfs/etc/group << "EOF"
+root:x:0:
+bin:x:1:
+sys:x:2:
+kmem:x:3:
+tty:x:4:
+tape:x:5:
+daemon:x:6:
+floppy:x:7:
+disk:x:8:
+lp:x:9:
+dialout:x:10:
+audio:x:11:
+video:x:12:
+utmp:x:13:
+usb:x:14:
+cdrom:x:15:
+EOF
+touch ${SYSROOT}/targetfs/var/log/lastlog
+chmod -v 664 ${SYSROOT}/targetfs/var/log/lastlog
+```
+
+## 编译Linux
