@@ -37,7 +37,7 @@ LLVM (http://llvm.org/):
 
 这意味着这份LLVM工具链可以为上面列出来的架构编译.
 
-本文将用LLVM工具链从零交叉编译出目标架构为`armv7a-linux-musleabihf`的Linux操作系统.
+本文将用LLVM工具链从零交叉编译出目标架构为`aarch64-linux-musl`的Linux操作系统.
 
 本文需要主机上已经安装了一份现代的Linux发行版,以及*必要*的开发工具(如Debian的`build-essential`或ArchLinux的`base-devel`),并且安装了Clang 9,LLVM 9和lld 9.
 
@@ -62,40 +62,45 @@ LLVM (http://llvm.org/):
 | 栈展开(unwind)     | `libgcc_s`          | LLVM `libunwind`     |
 
 1. LLVM项目暂时没有libc库,gcc和clang皆可使用glibc或musl等C语言库.
-2. LLVM项目的汇编器命令行前端集成在Clang中,使用`clang -c`命令行来使用,`llvm-as`用于编译LLVM IR.
+2. LLVM项目的汇编器命令行前端集成在Clang中,使用`clang -c`命令行来使用,`llvm-as`用于编译LLVM IR,而不是各个平台的汇编.clang集成的汇编器有时不能处理GNU汇编的语法,因此我们需要安装GNU as.
 3. 编译器运行时库提供了内建函数(intrinsics或builtins),这些函数提供复杂算数运算的实现.这些运算可能不能转换为单一汇编指令,而是翻译为一段C或汇编函数.
 4. 有三种栈展开库都以`libunwind`命名,分别由LLVM,nongnu.org和PathScale开发,它们与`libgcc_s`都能提供 Itanium C++ ABI要求的`_Unwind_*`系列函数.
 5. 更多详情见LLVM文档:[工具链](https://clang.llvm.org/docs/Toolchain.html)
 
-## 建立根文件夹: sysroot 和 rootfs
-
-```shell
-mkdir -pv /usr/armv7a-linux-musleabihf/{sysroot,rootfs}
-```
-
-sysroot用于存放编译使用的库文件和头文件，rootfs存放编译完的程序和库文件。
-
 ## 环境变量
 
 ```bash
-export TARGET=armv7a-linux-musleabihf
+# 交叉编译的目标(target triple),格式:CPU架构-制造商(可忽略或为unknown)-操作系统-libc库
+export TARGET=aarch64-linux-musl
 export SYSROOT=/usr/${TARGET}/sysroot
 export ROOTFS=/usr/${TARGET}/rootfs
 export CROSS_COMPILE=${TARGET}-
 export CFLAGS="--sysroot=${SYSROOT}"
-export LDFLAGS="-fuse-ld=lld -rtlib=compiler-rt"
-export AS="${CC} -c"
+export CXXFLAGS="-stdlib=libc++ --sysroot=${SYSROOT}"
+export LDFLAGS="-fuse-ld=lld -rtlib=compiler-rt -unwindlib=libunwind"
 ```
+
+请注意,此环境变量需要在root和普通用户都有效,因为部分命令需要root才能执行.
+
+## 建立文件夹
+
+```shell
+mkdir -pv /usr/$TARGET/{sysroot,rootfs}
+```
+
+sysroot用于存放编译使用的库文件和头文件，rootfs存放编译完的程序和库文件.建议此目录保持root所有
 
 ## 使用符号链接建立交叉编译工具链
 
 ```shell
-cd /usr/local/bin
-ln -s `which lld` ${CROSS_COMPILE}ld
-ln -s `which clang` ${CROSS_COMPILE}gcc
-ln -s `which clang++` ${CROSS_COMPILE}g++
+ln -s `which lld` /usr/local/bin/${CROSS_COMPILE}ld
+ln -s `which lld` /usr/local/bin/${CROSS_COMPILE}ld.lld
+ln -s `which clang` /usr/local/bin/${CROSS_COMPILE}gcc
+ln -s `which clang` /usr/local/bin/${CROSS_COMPILE}clang
+ln -s `which clang++` /usr/local/bin/${CROSS_COMPILE}g++
+ln -s `which clang++` /usr/local/bin/${CROSS_COMPILE}clang++
 for i in ar nm objcopy objdump ranlib strip;do
-  ln -s `which llvm-$i` ${CROSS_COMPILE}$i
+  ln -s `which llvm-$i` /usr/local/bin/${CROSS_COMPILE}$i
 done
 ```
 
@@ -104,15 +109,19 @@ done
 这一步需要获得Linux源代码,我的编译目标是树莓派3B,因此从树莓派的Github获取Linux源码.对于有主线支持的平台,可以从kernel.org获取Linux源码.
 
 ```shell
-git clone --depth=1 --branch rpi-5.4.y https://github.com/raspberrypi/linux
+git clone --depth=1 --branch v5.4-rc7 https://mirrors.tuna.tsinghua.edu.cn/git/linux.git
 cd linux
-make ARCH=arm headers_check
-make ARCH=arm INSTALL_HDR_PATH=$SYSROOT headers_install
+make ARCH=arm64 headers_check
+make ARCH=arm64 INSTALL_HDR_PATH=$SYSROOT headers_install
 ```
 
-然后安装musl libc的头文件
+你会看到`which: no aarch64-linux-musl-elfedit in (/usr/lib/llvm/9/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/bin)`,这是正常现象,Linux的Makefile用这个llvm-binutils不存在的工具[寻找GNU工具链的位置](https://github.com/torvalds/linux/commit/ad15006cc78459d059af56729c4d9bed7c7fd860),但我们不需要GNU工具链.
+
+## 安装musl libc的头文件
 
 ```shell
+curl -L https://www.musl-libc.org/releases/musl-1.1.24.tar.gz | tar xvz && cd musl-1.1.24
+./configure --prefix=/
 DESTDIR=$SYSROOT make install-headers
 ```
 
@@ -148,37 +157,42 @@ curl -L http://releases.llvm.org/9.0.0/compiler-rt-9.0.0.src.tar.xz | tar xvJ &&
 # 按照cmake的习惯,建立build文件夹
 mkdir build && cd build
 # 生成ninja编译文件,最后的CMAKE_INSTALL_PREFIX应为对应的clang安装到的文件夹,下面应该有lib/linux/clang_rt.crtbegin-*等
-cmake ../ -G Ninja -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld" -DCMAKE_C_COMPILER_TARGET="armv7a-linux-musleabihf" -DCMAKE_ASM_COMPILER_TARGET="armv7a-linux-musleabihf" -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX="/usr/lib/clang/9.0.0/"
+cmake ../ -G Ninja -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld" -DCMAKE_C_COMPILER_TARGET="aarch64-linux-musl" -DCMAKE_ASM_COMPILER_TARGET="aarch64-linux-musl" -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX="/usr/lib/clang/9.0.0/"
 # 编译
 ninja
-# 会安装3个文件clang_rt.crtbegin-armhf.o, clang_rt.crtend-armhf.o, libclang_rt.builtins-armhf.a
+# 会安装3个文件libclang_rt.builtins-aarch64.a, clang_rt.crtbegin-aarch64.o, clang_rt.crtend-aarch64.o
 ninja install
 ```
 
 ## 交叉编译musl libc
 
 ```shell
-wget https://www.musl-libc.org/releases/musl-1.1.24.tar.gz
-tar xvf musl-1.1.24.tar.gz
 cd musl-1.1.24
+make distclean
 ./configure --prefix=/
 make -j7 # CPU线程数+1
 DESTDIR=$SYSROOT make install
-```
-
-如果`compiler-rt`编译正确,则musl可以正确的编译,如果出现找不到符号,则确认`config.mak`文件中`LIBCC`不为空.
-
-```shell
-LIBCC = /usr/lib/clang/9.0.0/lib/linux/libclang_rt.builtins-armhf.a
+# 有时候clang会强制链接libunwind,但是不需要(也有的clang会链接lgcc_s)
+cp $SYSROOT/lib/libm.a $SYSROOT/lib/libunwind.a
 ```
 
 ## 交叉编译busybox
 
 ```shell
-wget https://busybox.net/downloads/busybox-1.31.1.tar.bz2
-tar xvf busybox-1.31.1.tar.bz2
-cd busybox-1.31.1
-make ARCH=arm CFLAGS="-Wignored-optimization-argument ${CFLAGS}" CROSS_COMPILE=$CROSS_COMPILE
+curl -L https://busybox.net/downloads/busybox-1.31.1.tar.bz2 | tar xvj && cd busybox-1.31.1
+make ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE defconfig
+make ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE menuconfig
+# Settings -> Build static binary (no shared libs)
+make ARCH=arm64 CFLAGS="-Wignored-optimization-argument ${CFLAGS}" CROSS_COMPILE=$CROSS_COMPILE
+```
+
+验证可以使用
+
+```shell
+$file busybox
+busybox: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statically linked, stripped
+$qemu-aarch64-static busybox uname -m
+aarch64
 ```
 
 ## Binutils(GNU as)
@@ -186,9 +200,16 @@ make ARCH=arm CFLAGS="-Wignored-optimization-argument ${CFLAGS}" CROSS_COMPILE=$
 像Linux或uboot这样大量使用内联汇编的项目,Clang内置的汇编器有时会不认GNU汇编的语法,因此最好使用GNU的汇编器gas.
 
 ```shell
+unset CFLAGS CXXFLAGS LDFLAGS
 curl -L https://mirrors.tuna.tsinghua.edu.cn/gnu/binutils/binutils-2.33.1.tar.xz | tar xvJ && cd binutils-2.33.1
-./configure --target=armv7a-linux-musleabihf --disable-nls --disable-werror --disable-ld --disable-gold --disable-gprof --disable-binutils
+./configure --target=$TARGET --disable-nls --disable-werror --disable-ld --disable-gold --disable-gprof --disable-binutils
 ```
+
+<!-- more -->
+
+## 编译Linux
+
+施工中
 
 ## 交叉编译libc++和libc++abi
 
@@ -249,5 +270,3 @@ EOF
 touch ${SYSROOT}/targetfs/var/log/lastlog
 chmod -v 664 ${SYSROOT}/targetfs/var/log/lastlog
 ```
-
-## 编译Linux
