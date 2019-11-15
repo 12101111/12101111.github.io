@@ -1,5 +1,5 @@
 +++
-title = "LLVM cross-compiled Linux From Scratch"
+title = "LLVM cross-compiled Linux From Scratch (1)"
 date = 2019-11-14
 [taxonomies]
 categories = ["Linux"]
@@ -77,7 +77,7 @@ export ROOTFS=/usr/${TARGET}/rootfs
 export CROSS_COMPILE=${TARGET}-
 export CFLAGS="--sysroot=${SYSROOT}"
 export CXXFLAGS="-stdlib=libc++ --sysroot=${SYSROOT}"
-export LDFLAGS="-fuse-ld=lld -rtlib=compiler-rt -unwindlib=libunwind"
+export LDFLAGS="-fuse-ld=lld -rtlib=compiler-rt"
 ```
 
 请注意,此环境变量需要在root和普通用户都有效,因为部分命令需要root才能执行.
@@ -109,8 +109,8 @@ done
 这一步需要获得Linux源代码,我的编译目标是树莓派3B,因此从树莓派的Github获取Linux源码.对于有主线支持的平台,可以从kernel.org获取Linux源码.
 
 ```shell
-git clone --depth=1 --branch v5.4-rc7 https://mirrors.tuna.tsinghua.edu.cn/git/linux.git
-cd linux
+cd ~
+git clone --depth=1 --branch v5.4-rc7 https://mirrors.tuna.tsinghua.edu.cn/git/linux.git && cd linux
 make ARCH=arm64 headers_check
 make ARCH=arm64 INSTALL_HDR_PATH=$SYSROOT headers_install
 ```
@@ -120,6 +120,7 @@ make ARCH=arm64 INSTALL_HDR_PATH=$SYSROOT headers_install
 ## 安装musl libc的头文件
 
 ```shell
+cd ~
 curl -L https://www.musl-libc.org/releases/musl-1.1.24.tar.gz | tar xvz && cd musl-1.1.24
 ./configure --prefix=/
 DESTDIR=$SYSROOT make install-headers
@@ -132,10 +133,13 @@ DESTDIR=$SYSROOT make install-headers
 首先下载并解压其源代码.
 
 ```shell
+cd ~
 curl -L http://releases.llvm.org/9.0.0/compiler-rt-9.0.0.src.tar.xz | tar xvJ && cd compiler-rt-9.0.0.src
 ```
 
-我们需要修改一下`CMakeLists.txt`以跳过对C编译器的检测,手动指定指针长度,因为现在C编译器不能链接出一个可执行的arm程序.
+我们需要修改一下`CMakeLists.txt`以跳过对C编译器的检测,手动指定指针长度,因为现在C编译器不能链接出一个可执行的程序.
+
+对于32位的系统,`CMAKE_SIZEOF_VOID_P`为`4`,64位的系统则为`8`
 
 ```diff
 --- CMakeLists.txt      2019-08-26 12:32:35.000000000 +0000
@@ -146,7 +150,7 @@ curl -L http://releases.llvm.org/9.0.0/compiler-rt-9.0.0.src.tar.xz | tar xvJ &&
 
 +set(CMAKE_C_COMPILER_WORKS 1)
 +set(CMAKE_CXX_COMPILER_WORKS 1)
-+set(CMAKE_SIZEOF_VOID_P 4)
++set(CMAKE_SIZEOF_VOID_P 8)
 +
  if(POLICY CMP0075)
    cmake_policy(SET CMP0075 NEW)
@@ -157,7 +161,7 @@ curl -L http://releases.llvm.org/9.0.0/compiler-rt-9.0.0.src.tar.xz | tar xvJ &&
 # 按照cmake的习惯,建立build文件夹
 mkdir build && cd build
 # 生成ninja编译文件,最后的CMAKE_INSTALL_PREFIX应为对应的clang安装到的文件夹,下面应该有lib/linux/clang_rt.crtbegin-*等
-cmake ../ -G Ninja -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld" -DCMAKE_C_COMPILER_TARGET="aarch64-linux-musl" -DCMAKE_ASM_COMPILER_TARGET="aarch64-linux-musl" -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX="/usr/lib/clang/9.0.0/"
+cmake ../ -G Ninja -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld" -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_ASM_COMPILER_TARGET=$TARGET -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX="/usr/lib/clang/9.0.0/"
 # 编译
 ninja
 # 会安装3个文件libclang_rt.builtins-aarch64.a, clang_rt.crtbegin-aarch64.o, clang_rt.crtend-aarch64.o
@@ -167,23 +171,28 @@ ninja install
 ## 交叉编译musl libc
 
 ```shell
-cd musl-1.1.24
+cd ~/musl-1.1.24
 make distclean
 ./configure --prefix=/
 make -j7 # CPU线程数+1
 DESTDIR=$SYSROOT make install
-# 有时候clang会强制链接libunwind,但是不需要(也有的clang会链接lgcc_s)
-cp $SYSROOT/lib/libm.a $SYSROOT/lib/libunwind.a
+```
+
+请注意configure脚本的输出中,`using compiler runtime libraries:`,此处应为上面安装的`libclang_rt.builtins-aarch64.a`,如果不是,则使用以下的configure命令.
+
+```shell
+./configure --prefix=/ LIBCC=/usr/lib/clang/9.0.0/lib/linux/libclang_rt.builtins-aarch64.a
 ```
 
 ## 交叉编译busybox
 
 ```shell
+cd ~
 curl -L https://busybox.net/downloads/busybox-1.31.1.tar.bz2 | tar xvj && cd busybox-1.31.1
-make ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE defconfig
 make ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE menuconfig
 # Settings -> Build static binary (no shared libs)
-make ARCH=arm64 CFLAGS="-Wignored-optimization-argument ${CFLAGS}" CROSS_COMPILE=$CROSS_COMPILE
+make ARCH=arm64 CFLAGS="-Wignored-optimization-argument ${CFLAGS}" CROSS_COMPILE=$CROSS_COMPILE -j7
+mkdir $ROOTFS/bin && cp busybox $ROOTFS/bin
 ```
 
 验证可以使用
@@ -195,6 +204,62 @@ $qemu-aarch64-static busybox uname -m
 aarch64
 ```
 
+<!-- more -->
+
+## 交叉编译LLVM libunwind
+
+编辑`CMakeLists.txt`以跳过对C编译器的检测,否则会出错说The C++ compiler is not able to compile a simple test program,因为我们现在没有libc++.
+
+只需要加入`set(CMAKE_CXX_COMPILER_WORKS 1)`即可.
+
+```shell
+cd ~
+curl -L http://releases.llvm.org/9.0.0/libunwind-9.0.0.src.tar.xz | tar xvJ &&  cd libunwind-9.0.0.src
+```
+
+应用以下补丁,否则在一些系统上LLVM会寻找libstdc++,而不是我们安装的libc++
+
+```diff
+--- CMakeLists.txt      2019-11-15 21:08:04.680000000 +0800
++++ CMakeLists.txt      2019-11-15 21:08:00.950000000 +0800
+@@ -78,8 +78,8 @@
+     # Enable warnings, otherwise -w gets added to the cflags by HandleLLVMOptions.
+     set(LLVM_ENABLE_WARNINGS ON)
+     list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_PATH}")
+-    include("${LLVM_CMAKE_PATH}/AddLLVM.cmake")
+-    include("${LLVM_CMAKE_PATH}/HandleLLVMOptions.cmake")
++    #include("${LLVM_CMAKE_PATH}/AddLLVM.cmake")
++    #include("${LLVM_CMAKE_PATH}/HandleLLVMOptions.cmake")
+   else()
+     message(WARNING "Not found: ${LLVM_CMAKE_PATH}")
+   endif()
+```
+
+```shell
+mkdir build && cd build
+cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+ninja
+ninja install
+```
+
+## 交叉编译libc++和libc++abi
+
+同样的,编辑`CMakeLists.txt`,加入`set(CMAKE_CXX_COMPILER_WORKS 1)`.
+
+```shell
+cd ~
+curl -L http://releases.llvm.org/9.0.0/libcxx-9.0.0.src.tar.xz | tar xvJ
+curl -L http://releases.llvm.org/9.0.0/libcxxabi-9.0.0.src.tar.xz | tar xvJ && cd libcxxabi-9.0.0.src
+mkdir build && cd build
+cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DLIBCXXABI_USE_COMPILER_RT=YES -DLIBCXXABI_USE_LLVM_UNWINDER=YES -DLIBCXXABI_LIBCXX_PATH="$HOME/libcxx-9.0.0.src"
+ninja
+ninja install
+cd $HOME/libcxx-9.0.0.src && mkdir build && cd build
+cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXX_USE_COMPILER_RT=YES -DLIBCXX_HAS_MUSL_LIBC=ON -DLIBCXX_CXX_ABI_INCLUDE_PATHS="$HOME/libcxxabi-9.0.0.src/include"
+ninja
+ninja install
+```
+
 ## Binutils(GNU as)
 
 像Linux或uboot这样大量使用内联汇编的项目,Clang内置的汇编器有时会不认GNU汇编的语法,因此最好使用GNU的汇编器gas.
@@ -203,70 +268,16 @@ aarch64
 unset CFLAGS CXXFLAGS LDFLAGS
 curl -L https://mirrors.tuna.tsinghua.edu.cn/gnu/binutils/binutils-2.33.1.tar.xz | tar xvJ && cd binutils-2.33.1
 ./configure --target=$TARGET --disable-nls --disable-werror --disable-ld --disable-gold --disable-gprof --disable-binutils
+make -j7
+make install
 ```
-
-<!-- more -->
 
 ## 编译Linux
 
-施工中
-
-## 交叉编译libc++和libc++abi
-
 ```shell
-curl -L http://releases.llvm.org/9.0.0/libcxx-9.0.0.src.tar.xz | tar xvJ
-curl -L http://releases.llvm.org/9.0.0/libcxxabi-9.0.0.src.tar.xz | tar xvJ
-
+cd linux
+make ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE menuconfig
+make ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE Image modules
 ```
 
-## 交叉编译LLVM libunwind
-
-```shell
-curl -L http://releases.llvm.org/9.0.0/libunwind-9.0.0.src.tar.xz | tar xvJ &&  cd libunwind-9.0.0.src
-```
-
-同样的,编辑`CMakeLists.txt`以跳过对C编译器的检测,否则会出错说The C++ compiler is not able to compile a simple test program,因为我们现在没有libc++
-
-```shell
-mkdir build && cd build
-cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLIBUNWIND_ENABLE_SHARED=0 -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_C_COMPILER_TARGET="$TARGET" -DCMAKE_ASM_COMPILER_TARGET="$TARGET" -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT
-```
-
-## 创建文件夹,配置文件
-
-这里我不遵循FHS3.0, 将/usr链接到/
-
-参考[CLFS Chapter 5](http://clfs.org/view/clfs-embedded/arm/final-system/introduction.html)
-
-```shell
-mkdir -pv ${SYSROOT}/{bin,boot,dev,etc,home,lib/{firmware,modules}}
-mkdir -pv ${SYSROOT}/{mnt,opt,proc,sbin,srv,sys}
-mkdir -pv ${SYSROOT}/var/{cache,lib,local,lock,log,opt,run,spool}
-install -dv -m 0750 ${SYSROOT}/root
-install -dv -m 1777 ${SYSROOT}/{var/,}tmp
-ln -s / ${SYSROOT}/usr
-ln -svf /proc/mounts ${SYSROOT}/etc/mtab
-cat > ${SYSROOT}/etc/passwd << "EOF"
-root::0:0:root:/root:/bin/ash
-EOF
-cat > ${SYSROOT}/targetfs/etc/group << "EOF"
-root:x:0:
-bin:x:1:
-sys:x:2:
-kmem:x:3:
-tty:x:4:
-tape:x:5:
-daemon:x:6:
-floppy:x:7:
-disk:x:8:
-lp:x:9:
-dialout:x:10:
-audio:x:11:
-video:x:12:
-utmp:x:13:
-usb:x:14:
-cdrom:x:15:
-EOF
-touch ${SYSROOT}/targetfs/var/log/lastlog
-chmod -v 664 ${SYSROOT}/targetfs/var/log/lastlog
-```
+未完待续...
