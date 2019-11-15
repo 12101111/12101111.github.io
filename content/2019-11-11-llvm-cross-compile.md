@@ -39,6 +39,8 @@ LLVM (http://llvm.org/):
 
 本文将用LLVM工具链从零交叉编译出目标架构为`aarch64-linux-musl`的Linux操作系统.
 
+<!-- more -->
+
 本文需要主机上已经安装了一份现代的Linux发行版,以及*必要*的开发工具(如Debian的`build-essential`或ArchLinux的`base-devel`),并且安装了Clang 9,LLVM 9和lld 9.
 
 某些需要的工具为:`bash bzip2 coreutils diffutils findutils gawk grep gzip m4 make ncurses patch sed tar cmake ninja rsync`.这个列表可能不完整,其中某些工具可以被busybox代替,但我没有测试过.
@@ -203,8 +205,6 @@ busybox: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statically li
 $qemu-aarch64-static busybox uname -m
 aarch64
 ```
-
-<!-- more -->
 
 ## 交叉编译LLVM libunwind
 
