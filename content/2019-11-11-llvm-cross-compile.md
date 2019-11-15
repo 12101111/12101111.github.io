@@ -106,7 +106,7 @@ done
 
 ## 安装头文件
 
-这一步需要获得Linux源代码,我的编译目标是树莓派3B,因此从树莓派的Github获取Linux源码.对于有主线支持的平台,可以从kernel.org获取Linux源码.
+这一步需要获得Linux源代码,对于有主线支持的平台,可以从kernel.org获取Linux源码.
 
 ```shell
 cd ~
@@ -208,16 +208,16 @@ aarch64
 
 ## 交叉编译LLVM libunwind
 
-编辑`CMakeLists.txt`以跳过对C编译器的检测,否则会出错说The C++ compiler is not able to compile a simple test program,因为我们现在没有libc++.
-
-只需要加入`set(CMAKE_CXX_COMPILER_WORKS 1)`即可.
-
 ```shell
 cd ~
 curl -L http://releases.llvm.org/9.0.0/libunwind-9.0.0.src.tar.xz | tar xvJ &&  cd libunwind-9.0.0.src
 ```
 
-应用以下补丁,否则在一些系统上LLVM会寻找libstdc++,而不是我们安装的libc++
+编辑`CMakeLists.txt`以跳过对C编译器的检测,否则会出错说The C++ compiler is not able to compile a simple test program,因为我们现在没有libc++.
+
+只需要加入`set(CMAKE_CXX_COMPILER_WORKS 1)`即可.
+
+再应用以下补丁,否则在一些系统上LLVM会提示libstdc++版本过低.实际上我们不使用libstdc++(GCC的C++标准库),而是使用LLVM的libc++.
 
 ```diff
 --- CMakeLists.txt      2019-11-15 21:08:04.680000000 +0800
