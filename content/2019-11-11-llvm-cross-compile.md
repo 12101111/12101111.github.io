@@ -49,8 +49,9 @@ GNU工具链和LLVM工具链的对比:
 
 由于部分开源软件使用了GNU的C语言非标准扩展,因此暂时无法使用LLVM/musl编译.例如:
 
-1. Electron的构建脚本[不支持musl](https://github.com/electron/electron/issues/9662).Electron已经移植到[FreeBSD](https://github.com/tagattie/FreeBSD-Electron)上,因此完全可以移植到musl上,但需要人手推动此工作.
-2. glibc 使用大量GNU C语言扩展, 而部分GNU扩展LLVM不支持(主要是嵌套函数,一种类似于闭包的语法).见glibc对此的[追踪页](https://sourceware.org/glibc/wiki/GlibcMeetsClang)
+1. glibc 使用大量GNU C语言扩展, 而部分GNU扩展LLVM不支持(主要是嵌套函数,一种类似于闭包的语法).见glibc对此的[追踪页](https://sourceware.org/glibc/wiki/GlibcMeetsClang)
+2. 同样的, elfutils 使用了大量的GNU C语言扩展, 而其包含的libelf是Linux内核的依赖.不过elfutils有BSD的替代:elftoolchain.
+3. Chromium和Electron等软件需要十来个补丁才能编译通过.(本人已经成功将electron移植到musl平台下)
 
 ## 为什么使用LLVM
 
