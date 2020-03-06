@@ -1,3 +1,10 @@
++++
+title = "为什么Linux不能运行FreeBSD的elf"
+date = 2020-02-12
+[taxonomies]
+categories = ["Linux"]
+tags = ["Linux","FreeBSD","ELF"]
++++
 # Linux和FreeBSD都使用ELF,但是诸多差异导致二者二进制并不兼容
 
 查看ELF信息可以使用两个程序,`file`和`readelf`
@@ -146,3 +153,4 @@ FreeBSD则靠这个来检查是否应该用linux兼容层来执行elf文件,还�
 FreeBSD是开源的,Linux兼容层代码并不复杂,就是大量的转换代码:
 
 https://github.com/freebsd/freebsd/tree/master/sys/compat/linux
+
