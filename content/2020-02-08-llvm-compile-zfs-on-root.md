@@ -187,10 +187,22 @@ rescue_shell() {
     echo "Something went wrong: fail to $1. Dropping to a shell."
     [ -e /proc/cmdline ] || $BOX mount -t proc none /proc || echo "Fatal error: unable to mount procfs"
     [ -d /sys/class ] || $BOX mount -t sysfs none /sys || echo "Fatal error: unable to mount sysfs"
+    $BOX mkdir -p /usr/bin
+    $BOX mkdir -p /usr/sbin
+    export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
     $BOX --install -s
     setsid cttyhack ash
     echo "Now poweroff."
+    sleep 10
     poweroff -f
+}
+
+cmdline() {
+    local value
+    value=" $(cat /proc/cmdline) "
+    value="${value##* ${1}=}"
+    value="${value%% *}"
+    [ -n "${value}" ] && echo "${value}"
 }
 
 echo "==> Setup initramfs"
@@ -203,6 +215,10 @@ $BOX mount -t devpts /dev/pts /dev/pts || rescue_shell "mount devpts"
 
 echo 0 > /proc/sys/kernel/printk
 
+if [ -n "$(cmdline failsafe)" ]; then
+    rescue_shell "boot"
+fi
+
 echo "==> Import ZFS pool"
 export ZPOOL_IMPORT_UDEV_TIMEOUT_MS=0
 zpool import -Naf || rescue_shell "import zpool"
@@ -211,8 +227,19 @@ echo "zpool list:"
 zpool list || rescue_shell "list zpool"
 
 echo "==> Mount root dataset"
-mount.zfs data/gentoo /newroot || rescue_shell "mount data/gentoo"
-mount.zfs data/gentoo/usr /newroot/usr || rescue_shell "mount data/gentoo/usr"
+
+export ROOT="$(cmdline ROOT)"
+
+echo "kernel cmdline: ROOT=${ROOT}"
+
+[ -z "${ROOT}" ] && export ROOT="gentoo"
+
+echo "use dataset: /data/$ROOT"
+
+$BOX mkdir /newroot || rescue_shell "mkdir /newroot"
+mount.zfs data/$ROOT /newroot || rescue_shell "mount /"
+mount.zfs data/$ROOT/usr /newroot/usr || rescue_shell "mount /usr"
+mount.zfs data/$ROOT/var /newroot/var || rescue_shell "mount /var"
 
 echo "==> Clean up"
 $BOX umount /sys || rescue_shell "umount /sys"
