@@ -297,7 +297,6 @@ rescue_shell "Failed to run /sbin/init"
 │  ├── libzpool.so -> libzpool.so.2.0.0
 │  ├── libzpool.so.2 -> libzpool.so.2.0.0
 │  └── libzpool.so.2.0.0
-├── newroot
 ├── proc
 ├── sbin
 │  ├── mount.zfs
