@@ -1,6 +1,6 @@
 +++
 title = "LLVM cross-compiled Linux From Scratch: C & C++ libraries"
-date = 2019-11-11
+date = 2020-08-26
 [taxonomies]
 categories = ["Linux"]
 tags = ["Linux","LLVM"]
@@ -61,7 +61,7 @@ GNU工具链和LLVM工具链的对比:
 
 ```txt
 LLVM (http://llvm.org/):
-  LLVM version 9.0.0libcxx
+  LLVM version 10.0.1libcxx
   Optimized build.
   Default target: x86_64-gentoo-linux-musl
   Host CPU: skylake
@@ -70,10 +70,12 @@ LLVM (http://llvm.org/):
     aarch64    - AArch64 (little endian)
     aarch64_32 - AArch64 (little endian ILP32)
     aarch64_be - AArch64 (big endian)
+    amdgcn     - AMD GCN GPUs
     arm        - ARM
     arm64      - ARM64 (little endian)
     arm64_32   - ARM64 (little endian ILP32)
     armeb      - ARM (big endian)
+    r600       - AMD GPUs HD2XXX-HD6XXX
     riscv32    - 32-bit RISC-V
     riscv64    - 64-bit RISC-V
     thumb      - Thumb
@@ -92,7 +94,7 @@ LLVM (http://llvm.org/):
 
 ## 安装LLVM/Clang
 
-本文需要主机上已经安装了一份现代的Linux发行版,以及*必要*的开发工具(如ArchLinux的`base-devel`),并且安装了Clang,LLVM,Compiler-rt和lld, 建议版本号大于等于9.0,本文以9.0.1为例.
+本文需要主机上已经安装了一份现代的Linux发行版,以及*必要*的开发工具(如ArchLinux的`base-devel`),并且安装了Clang,LLVM,Compiler-rt和lld, 建议版本号大于等于9.0,本文以10.0.1为例.
 
 本文在Archlinux,Alpine Linux(Edge分支),Gentoo Linux和Termux下测试.
 
@@ -103,7 +105,7 @@ LLVM (http://llvm.org/):
 以root用户执行以下命令
 
 ```output
-wget -qO- https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main/x86_64/apk-tools-static-2.10.4-r3.apk | tar xvzC /tmp
+wget -qO- https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main/x86_64/apk-tools-static-2.12.0_rc1-r1.apk | tar xvzC /tmp
 mkdir -pv /var/chroot/alpine
 /tmp/sbin/apk.static -X https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main -U --allow-untrusted --root /var/chroot/alpine --initdb add alpine-base
 echo "https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main" >> /var/chroot/alpine/etc/apk/repositories
@@ -130,10 +132,7 @@ chroot /var/chroot/alpine/ /bin/ash -l
 
 ```shell
 apk update
-apk add make cmake ninja llvm9 llvm9-dev llvm9-static clang lld gcc musl-dev rsync python3 ncurses-dev flex bison perl linux-headers libressl-dev elfutils-dev autoconf automake libtool lz4
-# Alpine打包的compiler-rt的路径不太对,本应是/usr/lib/clang/9.0.1/lib/linux/*却放在了/usr/lib/clang/9.0.1/*
-mkdir /usr/lib/clang/9.0.1/lib
-ln -s .. /usr/lib/clang/9.0.1/lib/linux
+apk add make cmake ninja llvm10 llvm10-dev llvm10-static clang lld gcc musl-dev rsync python3 ncurses-dev flex bison perl linux-headers libressl-dev elfutils-dev autoconf automake libtool lz4 compiler-rt compiler-rt-static
 ```
 
 这些软件分别有以下作用:
@@ -198,11 +197,18 @@ export PATH="$XDG_BIN:$PATH"
 ```bash
 #替换为要使用的目标
 export TARGET=aarch64-linux-musl
+#或者
+export TARGET=x86_64-linux-musl
+
 export CROSS_COMPILE=${TARGET}-
 export SYSROOT=$HOME/${TARGET}/sysroot
 export INITRAMFS=$HOME/${TARGET}/initramfs
 export DISTDIR=$HOME/${TARGET}/build
-export COMMON_FLAGS="-mtune=cortex-a76 -O2 -pipe --sysroot=${SYSROOT}"
+
+export COMMON_FLAGS="-mcpu=cortex-a76 -O2 -pipe --sysroot=${SYSROOT}"
+#或者
+export COMMON_FLAGS="-march=skylake -mtune=skylake -O2 -pipe --sysroot=${SYSROOT}"
+
 export CFLAGS="${COMMON_FLAGS}"
 export CXXFLAGS="${COMMON_FLAGS} -stdlib=libc++"
 export LDFLAGS="-fuse-ld=lld -rtlib=compiler-rt -flto=thin"
@@ -221,14 +227,16 @@ source $HOME/aarch64-linux-musl/env
 首先下载Linux源代码.
 
 ```shell
-cd $DISTDIR && wget -qO- https://mirrors.tuna.tsinghua.edu.cn/kernel/v5.x/linux-5.5.2.tar.xz | tar xvJ && mv linux-5.5.2 linux && cd linux
+cd $DISTDIR && wget -qO- https://mirrors.tuna.tsinghua.edu.cn/kernel/v5.x/linux-5.8.3.tar.xz | tar xvJ && mv linux-5.8.3 linux && cd linux
 ```
 
 对于树莓派,从Github获取Linux源码.
 
 ```shell
-cd $DISTDIR && git clone --depth=1 --branch rpi-5.5.y https://github.com/raspberrypi/linux && cd linux
+cd $DISTDIR && git clone --depth=1 --branch rpi-5.8.y https://github.com/raspberrypi/linux && cd linux
 ```
+
+其他开发板根据情况选择主线内核或BSP内核。
 
 然后安装头文件:
 
@@ -240,14 +248,14 @@ make ARCH=arm64 INSTALL_HDR_PATH=$SYSROOT headers_install #这一步需要rsync
 ## 安装musl libc的头文件
 
 ```shell
-cd $DISTDIR && wget -qO- https://www.musl-libc.org/releases/musl-1.1.24.tar.gz | tar xvz && cd musl-1.1.24
+cd $DISTDIR && wget -qO- https://musl.libc.org/releases/musl-1.2.1.tar.gz | tar xvz && cd musl-1.2.1
 ./configure --prefix=/
 DESTDIR=$SYSROOT make install-headers
 ```
 
 ## 交叉编译Compiler-RT builtins
 
-如果你没有在交叉编译,则不需要这一步骤.请确认存在`/usr/lib/clang/9.0.1/lib/linux/libclang_rt.builtins-*.a`这一文件.例如`libclang_rt.builtins-x86_64.a`或`libclang_rt.builtins-aarch64.a`
+如果你没有在交叉编译,则不需要这一步骤.请确认存在`/usr/lib/clang/10.0.1/lib/linux/libclang_rt.builtins-*.a`这一文件.例如`libclang_rt.builtins-x86_64.a`或`libclang_rt.builtins-aarch64.a`
 
 如果没有目标平台的文件,则需要编译`compiler-rt`.下面以aarch64架构为例.
 
@@ -293,17 +301,17 @@ sudo ninja install
 ## 编译musl libc
 
 ```shell
-cd $DISTDIR/musl-1.1.24
+cd $DISTDIR/musl-1.2.1
 make distclean
-./configure --prefix=/ LIBCC=/usr/lib/clang/9.0.1/lib/linux/libclang_rt.builtins-aarch64.a #手动指定上一步编译的文件
-make -j7 # CPU线程数+1
+./configure --prefix=/ LIBCC=/usr/lib/clang/10.0.1/lib/linux/libclang_rt.builtins-aarch64.a #手动指定上一步编译的文件
+make -j13 # CPU线程数+1
 DESTDIR=$SYSROOT make install
 ```
 
 ## 编译LLVM libunwind
 
 ```shell
-cd $DISTDIR && wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/libunwind-9.0.1.src.tar.xz | tar xvJ &&  cd libunwind-9.0.1.src
+cd $DISTDIR && wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.1/libunwind-10.0.1.src.tar.xz | tar xvJ &&  cd libunwind-10.0.1.src
 sed -i '6iset(CMAKE_CXX_COMPILER_WORKS 1)\n' CMakeLists.txt
 sed -i 's/include("${LLVM/#include("${LLVM/g' CMakeLists.txt
 mkdir build && cd build && cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DCMAKE_CXX_FLAGS="$CXXFLAGS"
@@ -315,15 +323,15 @@ cp ../include/*.h $SYSROOT/include
 ## 编译libc++和libc++abi
 
 ```shell
-cd $DISTDIR && wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/libcxx-9.0.1.src.tar.xz | tar xvJ
-wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/libcxxabi-9.0.1.src.tar.xz | tar xvJ && cd libcxxabi-9.0.1.src
+cd $DISTDIR && wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.1/libcxx-10.0.1.src.tar.xz | tar xvJ
+wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.1/libcxxabi-10.0.1.src.tar.xz | tar xvJ && cd libcxxabi-10.0.1.src
 sed -i '9iset(CMAKE_CXX_COMPILER_WORKS 1)\n' CMakeLists.txt
-mkdir build && cd build && cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DLIBCXXABI_USE_COMPILER_RT=YES -DLIBCXXABI_USE_LLVM_UNWINDER=YES -DLIBCXXABI_LIBCXX_PATH="$DISTDIR/libcxx-9.0.1.src"
+mkdir build && cd build && cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DLIBCXXABI_USE_COMPILER_RT=YES -DLIBCXXABI_USE_LLVM_UNWINDER=YES -DLIBCXXABI_LIBCXX_PATH="$DISTDIR/libcxx-10.0.1.src"
 ninja
 ninja install
-cd $DISTDIR/libcxx-9.0.1.src
+cd $DISTDIR/libcxx-10.0.1.src
 sed -i '8iset(CMAKE_CXX_COMPILER_WORKS 1)\n' CMakeLists.txt
-mkdir build && cd build && cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXX_USE_COMPILER_RT=YES -DLIBCXX_HAS_MUSL_LIBC=ON -DLIBCXX_CXX_ABI_INCLUDE_PATHS="$DISTDIR/libcxxabi-9.0.1.src/include"
+mkdir build && cd build && cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXX_USE_COMPILER_RT=YES -DLIBCXX_HAS_MUSL_LIBC=ON -DLIBCXX_CXX_ABI_INCLUDE_PATHS="$DISTDIR/libcxxabi-10.0.1.src/include"
 ninja
 ninja install
 ```

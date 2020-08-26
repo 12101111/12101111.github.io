@@ -1,6 +1,6 @@
 +++
 title = "LLVM cross-compiled Linux From Scratch: Bootable kernel and initramfs"
-date = 2020-01-23
+date = 2020-08-26
 [taxonomies]
 categories = ["Linux"]
 tags = ["Linux","LLVM"]
@@ -15,10 +15,11 @@ tags = ["Linux","LLVM"]
 LLVM提供了大部分binutils的工具,但是LLVM的内置汇编器并不能编译一些Linux的汇编,因此需要编译`gas`
 
 ```shell
-cd $DISTDIR && wget -qO- https://mirrors.tuna.tsinghua.edu.cn/gnu/binutils/binutils-2.33.1.tar.xz | tar xvJ && cd binutils-2.33.1
+cd $DISTDIR && wget -qO- https://mirrors.tuna.tsinghua.edu.cn/gnu/binutils/binutils-2.35.tar.xz | tar xvJ && cd binutils-2.35
 unset CFLAGS CXXFLAGS LDFLAGS #这部分是为Host编译的
+export acx_cv_cc_gcc_supports_ada=no # 如果你的gcc/cc是clang的链接则需要此环境变量
 ./configure --prefix= --target=$TARGET --disable-nls --disable-werror --disable-ld --disable-gold --disable-gprof --disable-binutils
-make -j7
+make -j13
 DESTDIR=$HOME/.local/ make install
 ```
 
@@ -96,7 +97,7 @@ Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
 busybox将数十个符合POSIX的Unix工具集成到一个不到2M的可执行文件中,非常适合在内存中运行的initramfs环境.
 
 ```shell
-cd $DISTDIR && wget -qO- https://busybox.net/downloads/busybox-1.31.1.tar.bz2 | tar xvj && cd busybox-1.31.1
+cd $DISTDIR && wget -qO- https://busybox.net/downloads/busybox-1.32.0.tar.bz2 | tar xvj && cd busybox-1.32.0
 ```
 
 将[此邮件列表](http://lists.busybox.net/pipermail/busybox/2019-June/087337.html)中的补丁保存为`clang.patch`
@@ -105,7 +106,7 @@ cd $DISTDIR && wget -qO- https://busybox.net/downloads/busybox-1.31.1.tar.bz2 | 
 git apply clang.patch
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE menuconfig
 # 选中Settings -> Don't use /usr 和 Build static binary (no shared libs)
-make ARCH=$ARCH CFLAGS="-Wignored-optimization-argument ${CFLAGS}" CROSS_COMPILE=$CROSS_COMPILE -j7
+make ARCH=$ARCH CFLAGS="-Wignored-optimization-argument ${CFLAGS}" CROSS_COMPILE=$CROSS_COMPILE -j13
 mkdir $INITRAMFS/bin && cp busybox $INITRAMFS/bin
 ```
 
