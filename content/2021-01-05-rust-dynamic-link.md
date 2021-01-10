@@ -6,6 +6,10 @@ categories = ["Rust"]
 tags = ["Rust","Linux"]
 +++
 
+本文探讨一下Rust的crate类型的概念, 以及如何在Rust中使用动态链接编译动态库. 同时对比rust编译出的动态库和使用C语言接口动态库, 看看rust动态库是否能实现C语言接口动态库的功能.
+
+<!-- more -->
+
 # crate类型与链接
 
 crate type是一个rustc的概念,而不是rust语言或者是cargo的概念. 由于大多数rust项目使用[标准的文件目录结构](https://doc.rust-lang.org/cargo/guide/project-layout.html),而cargo会[自动推测目标的类型](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#target-auto-discovery), 因此并不需要手动设置crate类型. 如果需要的话(例如编写proc-macro), 则需要在`Cargo.toml`中[设置](https://doc.rust-lang.org/cargo/reference/cargo-targets.html).
@@ -566,7 +570,7 @@ struct MyVec{
 }
 ```
 
-实际上ptr, cap和len的顺序并不是声明的顺序, 且ptr和cap之间可能并不是连续的, 而是存在8 bytes的填充.而这个填充也可能在cap和len之间, 编译器会根据实际各个字段的使用情况对布局进行优化.正是因为这种不确定性, 一方面rustc会生成效率更高的代码,另一方面rust很难在不限制优化水平的情况下制定一个稳定的ABI. 实际上rust所有支持的调用约定中, 只有C调用约定是稳定的, 但这时布局优化就会时效, 很可能产生对内存和缓存不友好的代码.rust nomicon对rust默认的布局做出了解释: [repr(Rust)](https://doc.rust-lang.org/nomicon/repr-rust.html), rust reference则对[类型布局](https://doc.rust-lang.org/reference/type-layout.html)有更详细的解释.
+实际上ptr, cap和len的顺序并不是声明的顺序, 且ptr和cap之间可能并不是连续的, 可能存在8 bytes的填充.而这个填充也可能在cap和len之间, 编译器会根据实际各个字段的使用情况对布局进行优化.正是因为这种不确定性, 一方面rustc会生成效率更高的代码,另一方面rust很难在不限制优化水平的情况下制定一个稳定的ABI. 实际上rust所有支持的调用约定中, 只有C调用约定是稳定的, 但这时布局优化就会时效, 很可能产生对内存和缓存不友好的代码.rust nomicon对rust默认的布局做出了解释: [repr(Rust)](https://doc.rust-lang.org/nomicon/repr-rust.html), rust reference则对[类型布局](https://doc.rust-lang.org/reference/type-layout.html)有更详细的解释.
 
 要使用C调用约定, 可以使用`#[repr(C)]`修饰结构体, 使用C语言函数调用约定的函数: `extern "C" fn"`. nomicon也有详细的解释: [ffi](https://doc.rust-lang.org/nomicon/ffi.html)
 
@@ -614,7 +618,7 @@ target
 
 注意到这3个crate都重编译了, 我们现在有两份它们的产物, 看看它们的运行结果是什么.
 
-旧libmylib.so+旧程序
+旧libmylib.so+旧程序的结果:
 
 ```
 > LD_LIBRARY_PATH=~/.rustup/toolchains/nightly-x86_64-unknown-linux-musl/lib/rustlib/x86_64-unknown-linux-musl/lib:. ./hello
@@ -632,7 +636,7 @@ Hello, 1 world!
 Hello, 2 world!
 ```
 
-新libmylib.so+新程序
+新libmylib.so+新程序的结果:
 
 ```
 > LD_LIBRARY_PATH=~/.rustup/toolchains/nightly-x86_64-unknown-linux-musl/lib/rustlib/x86_64-unknown-linux-musl/lib:./target/debug ./target/debug/hello
@@ -641,7 +645,7 @@ Hello, 2 world!
 Hello, 4 world!
 ```
 
-新libmylib.so+旧程序, 结果和新libmylib.so+新程序
+新libmylib.so+旧程序, 结果和新libmylib.so+新程序一样
 
 ```
 > LD_LIBRARY_PATH=~/.rustup/toolchains/nightly-x86_64-unknown-linux-musl/lib/rustlib/x86_64-unknown-linux-musl/lib:./target/debug ./hello
@@ -680,4 +684,8 @@ Error relocating ./hi: _ZN5mylib3num17hefef8e0aa2fb2876E: symbol not found
 0000000000000000 N rust_metadata_mylib_1bbf50884b077dacedc7265861b262ff
 ```
 
-注意到libmylib.so符号名后面的hash发生了变化, 这导致elf无法找到原有的符号.实际上, 这个hash是rust实现单crate多版本共存的重要机制, 但是这里限制了我们在动态编译时升级版本的能力.因为rust和C的逻辑不同, C默认函数(符号)名相同则其功能相同, 而rust则认为即使是相同的函数名, 不同的版本下也有可能不同, 前者会导致无意间导致bug的出现, 而后者则导致大型项目因为某些依赖有多个版本而导致二进制文件增大.
+注意到libmylib.so符号名后面的hash发生了变化, 这导致elf无法找到原有的符号.实际上, 这个hash是rust实现单crate多版本共存的重要机制, 被称为SVH (strict version hash), 是整个crate计算得出的hash结果. SVH的计算过程是高度不稳定的rustc内部细节, 我们只能假设当任何crate的依赖, 元数据(例如名称和版本号), 源代码(例如文件名和代码的HIR)发生变化时, SVH就会发生变化, 引起重新编译. 同一crate的不同版本计算可以得到不同的SVH,因此rust允许同时使用同一crate的不同版本, 除非该crate包含了`#[no_mangle]`修饰的符号.
+
+但是SVH限制了我们在动态编译时升级版本的能力.由于版本号的变化, SVH会发生变化, 因此我们在升级动态链接的dylib依赖的版本时也必须重编译所有依赖它的程序.虽然rust使用semver标识向前兼容性, 但是rustc显然不信任人类手动标识的版本号, 而是一刀切的认为所有版本号的变化都是breaking change.而且这也包括rustc本身版本号的变化, 在升级rustc后, 即使是隔着一天的nightly, 所有先前编译的二进制文件都会失效.
+
+到目前为止, 唯一可行的方法就是使用cdylib, 将API都导出为C接口, 这样就可以做到不需要重编译的升级库版本了.目前gtk的依赖, 解析并渲染SVG矢量图的库librsvg就是一个rust编写并导出C API的库, 其维护者使用rust的生态重写了librsvg, 并使其C API和ABI没有变化. 但是纯rust生态下, rustc还没有相关的机制或方法实现类似的效果, 我们必须在将动态库和程序一一绑定.
