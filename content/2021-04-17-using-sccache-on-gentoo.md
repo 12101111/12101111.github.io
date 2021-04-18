@@ -9,7 +9,7 @@ tags = ["Rust","Linux"]
 Firest please fellow the page of [Sccache](https://wiki.gentoo.org/wiki/Sccache) on Gentoo wiki.
 
 After the installation and configuration of sccache, you can try to compile some rust packages.
-It may work fine for the first one, but later you may find some wired sandbox or permission error like "sccache: error : Failed to create temp dir ..." or "sccache: caused by: Permission denied (os error 13)"
+It may work fine for the first one, but later you may find some weird sandbox or permission error like "sccache: error : Failed to create temp dir ..." or "sccache: caused by: Permission denied (os error 13)"
 
 Let's fix this issue.
 
@@ -40,7 +40,7 @@ Since portage will run the ebuild in a sandboxed environment, the `TMPDIR` will 
 #!/bin/bash
 Stop_sccache_server() {
     if [[ ! -z $(pidof sccache) ]]; then
-        sccache --stop-server
+        sccache --stop-server >> /dev/null
     fi
 }
 
@@ -52,7 +52,7 @@ Stop_sccache_server_preinst() {
 }
 
 BashrcdPhase prepare Stop_sccache_server
-BashrcdPhase preinst Stop_sccache_server
+BashrcdPhase preinst Stop_sccache_server_preinst
 ```
 
 And that's it, the script will automatically stop previous sccache server, and print the statistics of this session.
