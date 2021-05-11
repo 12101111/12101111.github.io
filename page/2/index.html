@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title></title>
+
+      
+
+      
+    <script src="https:&#x2F;&#x2F;12101111.github.io&#x2F;slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;about">
+                            About
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;about">
+                                    About
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+                        <div class="posts">
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-cross-compile&#x2F;">LLVM cross-compiled Linux From Scratch: C &amp; C++ libraries</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-08-26</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>本系列文章将介绍如何使用LLVM工具链组装一个可用的Linux发行版.</p>
+<h2 id="mian-xiang-du-zhe">面向读者</h2>
+<p>本文假定读者可以熟练的使用Unix-like系统,具有一定的C/C++编程能力,具有编译开源软件的经验.</p>
+<h2 id="shi-yao-shi-gong-ju-lian">什么是工具链</h2>
+<p>工具链,即一套具有工作顺序,可以编译出软件的工具.某些教科书上讲的&quot;编译-&gt;汇编-&gt;链接&quot;这一过程就粗略的描述了工具链的工作过程.</p>
+<p>广义上讲,工具链除了编译期,汇编器,链接器还包含一些所有程序都会使用的库.</p>
+<p>GNU工具链和LLVM工具链的对比:</p>
+<table><thead><tr><th>项目</th><th>GNU工具链</th><th>LLVM工具链</th></tr></thead><tbody>
+<tr><td>C 编译器</td><td><code>gcc</code></td><td><code>clang</code></td></tr>
+<tr><td>C++编译器</td><td><code>g++</code></td><td><code>clang++</code></td></tr>
+<tr><td>binutils</td><td>GNU binutils</td><td>LLVM binutils</td></tr>
+<tr><td>汇编器</td><td>GNU <code>as</code></td><td>集成汇编器</td></tr>
+<tr><td>链接器</td><td><code>ld.bfd</code>, <code>ld.gold</code></td><td>LLVM linker <code>ld.lld</code></td></tr>
+<tr><td>运行时(intrinsics)</td><td><code>libgcc</code></td><td><code>compiler-rt</code></td></tr>
+<tr><td>原子操作</td><td><code>libatomic</code></td><td><code>compiler-rt</code></td></tr>
+<tr><td>C 语言库</td><td>GNU libc <code>glibc</code></td><td>LLVM libc</td></tr>
+<tr><td>C++ 标准库</td><td><code>libstdc++</code></td><td><code>libc++</code></td></tr>
+<tr><td>C++ ABI</td><td><code>Libsupcxx</code></td><td><code>libc++abi</code></td></tr>
+<tr><td>栈展开(unwind)</td><td><code>libgcc_s</code></td><td>LLVM <code>libunwind</code></td></tr>
+</tbody></table>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-cross-compile&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;linux-freebsd-elf-compat&#x2F;">为什么Linux不能运行FreeBSD的elf</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-02-12</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;linux-freebsd-elf-compat&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;speedtest-net&#x2F;">逆向Speedtest.net 的API和协议</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-09-26</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>目前在国内乃至全球范围内能跑满5G移动网络全速下载的服务器也没有几个,然而Speedtest.net是一个例外.</p>
+<p>处于营销等目的,全国各地移动联通电信架设了多个(63个)Speedtest的测速服务器,其中命名包含5G的有15个(而且全球仅中国的服务器如此),可见运营商大概率在宣传5G网速时也会使用自己架设的Speedtest服务器,以接近理论上的峰值速度.</p>
+<p>处于自动化测速的考虑,需要研究Speedtest的测速机制并且命令行脚本化.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;speedtest-net&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;5g-wifi6&#x2F;">5G芯片及终端和WIFI6芯片及设备</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-09-15</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;5g-wifi6&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust3&#x2F;">使用Rust编写操作系统(三)</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-09-02</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>本文主要解释PC平台的图形显示标准.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust3&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust2&#x2F;">使用Rust编写操作系统(二)</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-09-01</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>众所周期,BIOS作为IBM PC工程师40年前随手写下的一段汇编代码,根本不会想到能用到现在.BIOS中充满了各种各样的hack和历史糟粕.BIOS只支持从MBR分区表的第一个扇区启动,很难安装到硬盘或U盘.甚至Intel即将于2020年在新的芯片上放弃对UEFI CSM的支持,这使得未来很难直接运行只支持BIOS的系统.可惜的是,直到今日,大多数自制x86平台操作系统的资料仍旧只支持BIOS。</p>
+<p>本文试图基于Rust操作系统开发中读者广泛的blog os系列文章提供一个能够在UEFI上运行的教学用OS.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust2&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;oldthing&#x2F;">计算机的旧事</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-03-25</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;oldthing&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust&#x2F;">使用Rust编写操作系统(一)</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-03-22</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <h1 id="qian-yan">前言</h1>
+<p>Rust语言作为C/C++的安全替代,是21世纪新兴语言中最适合开发操作系统的.</p>
+<p>本文介绍有关使用高级语言,Rust,编写操作系统的一些前置知识.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                        </div>
+                        <nav class="pagination">
+                            
+                                <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;">‹ Previous</a>
+                            
+                            
+                                <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;page&#x2F;3&#x2F;">Next ›</a>
+                            
+                        </nav>
+                    
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https:&#x2F;&#x2F;12101111.github.io&#x2F;even.js" ></script>
+      
+    </body>
+
+</html>
