@@ -9,6 +9,8 @@ tags = ["Xbox","OS", "Windows"]
 
 PSEC 2019官方页面, 内附演讲视频: [抵御物理攻击, Xbox one的故事(Guarding Against Physical Attacks: The Xbox One Story)](https://www.platformsecuritysummit.com/2019/speaker/chen/)
 
+<!-- more -->
+
 # [Tony Chen](https://www.microsoft.com/en-us/research/people/tonychen/)是谁
 
 根据其在微软网站上的介绍, 他目前是微软核心操作系统团队软件工程师和安全架构师.
