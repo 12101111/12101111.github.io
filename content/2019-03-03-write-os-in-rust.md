@@ -106,7 +106,7 @@ Rust语言提供了对开发操作系统或裸机程序方便的方法.
 `rustc`具有交叉编译能力,不需要编译`rustc`就可以为其他平台编译代码(但有时你需要合适的链接器).
 这种能力来源于`rustc`使用的`llvm`后端.`rustc`默认支持的所有编译目标可以通过以下命令查询.
 
-```shell
+```sh
 rustc --print target-list
 ```
 
@@ -116,7 +116,7 @@ rustc --print target-list
 
 对于自定义目标,`rustc`不仅需要自定义的目标标识符,更重要的是需要llvm的目标配置(`target spec`)才能为非内置的目标编译.目标配置使用json定义,可以使用以下命令打印目标配置(目前需要nightly版的`rustc`)
 
-```shell
+```sh
 rustc -Z unstable-options --print target-spec-json  # 当前平台的目标信息
 rustc -Z unstable-options --target <内置的目标> --print target-spec-json  # 选择的目标信息
 ```
@@ -135,7 +135,7 @@ error[E0463]: can't find crate for `core`
 
 对于`tire 1`和`tire 2`平台,rust官方提供了二进制的`std`库文件,只需要使用rustup添加即可:
 
-```shell
+```sh
 rustup target list  # 列出所有官方提供`std`库的二进制文件的目标,可见比rustc实际支持的编译目标少
 rustup target add <目标>
 ```

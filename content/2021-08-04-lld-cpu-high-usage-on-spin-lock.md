@@ -51,7 +51,7 @@ musl 1.2.0引入的`mallocng`虽然性能较之前的老`malloc`实现性能高�
 
 使用该命令使得lld自动使用jemalloc:
 
-```shell
+```bash
 sudo patchelf --add-needed libjemalloc.so.2 /usr/bin/lld
 ```
 
@@ -61,7 +61,7 @@ sudo patchelf --add-needed libjemalloc.so.2 /usr/bin/lld
 
 `perf top`的动态界面得到的数据并不精确和直观, 可以使用[`FlameGraph`](https://github.com/brendangregg/FlameGraph)绘制更加直观的图形
 
-```shell
+```bash
 perf record -F 200 -p $PID --call-graph lbr
 perf script -i perf.data > out.perf
 ./FlameGraph/stackcollapse-perf.pl out.perf > out.folded

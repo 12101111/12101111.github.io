@@ -114,7 +114,7 @@ echo "https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/community/" >> /var/chroo
 
 挂载虚拟文件系统.每次重启系统后都需要运行一次.
 
-```shell
+```sh
 mount /dev /var/chroot/alpine/dev --bind
 mount -o remount,ro,bind /var/chroot/alpine/dev
 mount -t proc none /var/chroot/alpine/proc

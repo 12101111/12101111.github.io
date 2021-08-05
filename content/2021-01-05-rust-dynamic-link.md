@@ -359,7 +359,7 @@ Hello, 1 world!
 
 把`hi.rs` 稍作修改: `println!("Hello, {} world!", num() * 2);`
 
-```shell
+```bash
 > cargo clean
 > RUSTFLAGS="-C prefer-dynamic -C target-feature=-crt-static" cargo build -v --bin hello
    Compiling mylib v0.1.0 (/tmp/rust/mylib)

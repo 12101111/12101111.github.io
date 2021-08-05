@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
 
 编译方法:
 
-```shell
+```bash
 gcc xwechathide.c -lxcb -lxcb-util -lxcb-icccm -o xwechathide
 ```
 
