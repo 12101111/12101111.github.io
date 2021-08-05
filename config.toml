@@ -2,22 +2,20 @@
 base_url = "https://12101111.github.io"
 
 # 标题,用于RSS而不是网页
-title = ""
+title = "12101111's blog"
 
 # 介绍,用于RSS而不是网页
 description = ""
 
+default_language = "cn"
+
 # 主题名
 theme = "even"
 
-# 使用代码高亮
-highlight_code = true
-
-# 代码高亮主题,列表见上面的官方文档
-highlight_theme = "solarized-light"
-
 # 生成RSS文件
-generate_rss = true
+generate_feed = true
+
+feed_filename = "rss.xml"
 
 # 是否编译 sass
 compile_sass = true
@@ -41,6 +39,14 @@ taxonomies = [
 
 # 不对content文件夹中满足以下通配符的文件进行处理和渲染
 ignored_content = ["*.{tmp,xlsx}", "*draft.md"]
+
+[markdown]
+
+# 使用代码高亮
+highlight_code = true
+
+# 代码高亮主题,列表见上面的官方文档
+highlight_theme = "solarized-light"
 
 # extra存放没有被程序定义的变量,可以被模板和主题使用
 [extra]
