@@ -17,7 +17,7 @@ highlight_code = true
 highlight_theme = "solarized-light"
 
 # 生成RSS文件
-generate_rss = false
+generate_rss = true
 
 # 是否编译 sass
 compile_sass = true
@@ -50,5 +50,5 @@ even_menu = [
     {url = "$BASE_URL", name = "Home"},
     {url = "$BASE_URL/categories", name = "Categories"},
     {url = "$BASE_URL/tags", name = "Tags"},
-    {url = "$BASE_URL/about", name = "About"},
+    #{url = "$BASE_URL/about", name = "About"},
 ]
