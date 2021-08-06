@@ -172,7 +172,7 @@ const PassInfo *PassRegistry::getPassInfo(const void *TI) const {
 
 而`SmartRWMutex`最终则是对`std::shared_timed_mutex`以及其他的一些锁的封装.
 
-## ## Fix
+## Fix
 
 查看`llvm::TimeTraceScope`的代码, 其构造函数有:
 
@@ -240,3 +240,10 @@ void llvm::timeTraceProfilerEnd() {
 
 显然传入`StringRef`也会立刻复制一遍然后放进闭包里, 所以修复方案就是直接把所有`TimeTraceScope`的构造换成传入闭包的形式, 这样不使用llvm自身的profiler时就不需要计算这个string了.
 
+在替换了所有的函数调用为闭包之后([点此查看补丁文件](https://github.com/12101111/overlay/blob/master/sys-devel/llvm/files/no-lock.patch)), lld的性能提升明显, 链接时间从数十个CPU小时降低为1个CPU小时,修复后的火焰图如下:
+
+![flamegraph](/image/lld2.svg)
+
+<a href="/image/lld2.svg" target="_blank">点击此在新标签页打开该svg图片</a>
+
+原有占用大量CPU的锁不见了.
