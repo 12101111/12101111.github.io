@@ -1,12 +1,12 @@
 +++
 title = "LLVM cross-compiled Linux From Scratch: C & C++ libraries"
-date = 2020-08-26
+date = 2021-11-09
 [taxonomies]
 categories = ["Linux"]
 tags = ["Linux","LLVM"]
 +++
 
-本系列文章将介绍如何使用LLVM工具链组装一个可用的Linux发行版.
+本系列文章将介绍如何使用LLVM工具链组装一个可用的Linux发行版. 本文已经更新以适应LLVM 13发生的一些变化.
 
 ## 面向读者
 
@@ -47,11 +47,7 @@ GNU工具链和LLVM工具链的对比:
 1.Nvidia专有驱动的用户态组件.
 2.QQ Linux版等闭源软件.
 
-由于部分开源软件使用了GNU的C语言非标准扩展,因此暂时无法使用LLVM/musl编译.例如:
-
-1. glibc 使用大量GNU C语言扩展, 而部分GNU扩展LLVM不支持(主要是嵌套函数,一种类似于闭包的语法).见glibc对此的[追踪页](https://sourceware.org/glibc/wiki/GlibcMeetsClang)
-2. 同样的, elfutils 使用了大量的GNU C语言扩展, 而其包含的libelf是Linux内核的依赖.不过elfutils有BSD的替代:elftoolchain.
-3. Chromium和Electron等软件需要十来个补丁才能编译通过.(本人已经成功将electron移植到musl平台下)
+由于部分开源软件使用了GNU的C语言非标准扩展,因此暂时无法使用LLVM/musl编译.例如Chromium和Electron等软件需要十来个补丁才能编译通过.(本人已经成功将electron移植到musl平台下)
 
 ## 为什么使用LLVM
 
@@ -60,8 +56,9 @@ GNU工具链和LLVM工具链的对比:
 要验证这一点,可以查看`llc --version`的输出,以下是我的结果:
 
 ```txt
+> llc --version
 LLVM (http://llvm.org/):
-  LLVM version 10.0.1libcxx
+  LLVM version 13.0.0libcxx
   Optimized build.
   Default target: x86_64-gentoo-linux-musl
   Host CPU: skylake
@@ -75,15 +72,37 @@ LLVM (http://llvm.org/):
     arm64      - ARM64 (little endian)
     arm64_32   - ARM64 (little endian ILP32)
     armeb      - ARM (big endian)
+    avr        - Atmel AVR Microcontroller
+    bpf        - BPF (host endian)
+    bpfeb      - BPF (big endian)
+    bpfel      - BPF (little endian)
+    hexagon    - Hexagon
+    lanai      - Lanai
+    mips       - MIPS (32-bit big endian)
+    mips64     - MIPS (64-bit big endian)
+    mips64el   - MIPS (64-bit little endian)
+    mipsel     - MIPS (32-bit little endian)
+    msp430     - MSP430 [experimental]
+    nvptx      - NVIDIA PTX 32-bit
+    nvptx64    - NVIDIA PTX 64-bit
+    ppc32      - PowerPC 32
+    ppc32le    - PowerPC 32 LE
+    ppc64      - PowerPC 64
+    ppc64le    - PowerPC 64 LE
     r600       - AMD GPUs HD2XXX-HD6XXX
     riscv32    - 32-bit RISC-V
     riscv64    - 64-bit RISC-V
+    sparc      - Sparc
+    sparcel    - Sparc LE
+    sparcv9    - Sparc V9
+    systemz    - SystemZ
     thumb      - Thumb
     thumbeb    - Thumb (big endian)
     wasm32     - WebAssembly 32-bit
     wasm64     - WebAssembly 64-bit
     x86        - 32-bit X86: Pentium-Pro and above
     x86-64     - 64-bit X86: EM64T and AMD64
+    xcore      - XCore
 ```
 
 这意味着这份LLVM工具链可以为上面列出来的架构编译.
@@ -94,23 +113,30 @@ LLVM (http://llvm.org/):
 
 ## 安装LLVM/Clang
 
-本文需要主机上已经安装了一份现代的Linux发行版,以及*必要*的开发工具(如ArchLinux的`base-devel`),并且安装了Clang,LLVM,Compiler-rt和lld, 建议版本号大于等于9.0,本文以10.0.1为例.
+本文需要主机上已经安装了一份现代的Linux发行版,以及*必要*的开发工具(如ArchLinux的`base-devel`),并且安装了Clang,LLVM,Compiler-rt和lld, 建议版本号大于10.0,本文以13.0.0为例.
 
-本文在Archlinux,Alpine Linux(Edge分支),Gentoo Linux和Termux下测试.
+本文在Archlinux,Alpine Linux,Gentoo Linux和Termux下测试.
 
 本文不支持在Debian/Ubuntu/CentOS等发行版上运行,因为其打包的LLVM许多路径和程序名需要进行调整.建议使用[Alpine](https://wiki.alpinelinux.org/wiki/Alpine_Linux_in_a_chroot)进行操作.
 
 ## Example: 安装Alpine Linux chroot环境
 
+本节介绍如何使用chroot安装一个Alpine环境. 也可以使用[systemd-nspawn](https://wiki.archlinux.org/title/systemd-nspawn), docker, lxc等容器工具设置此类环境, 但chroot终究是最通用且传统的方法.
+
 以root用户执行以下命令
 
 ```output
-wget -qO- https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main/x86_64/apk-tools-static-2.12.0_rc1-r1.apk | tar xvzC /tmp
-mkdir -pv /var/chroot/alpine
-/tmp/sbin/apk.static -X https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main -U --allow-untrusted --root /var/chroot/alpine --initdb add alpine-base
-echo "https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main" >> /var/chroot/alpine/etc/apk/repositories
-echo "https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/community/" >> /var/chroot/alpine/etc/apk/repositories
+export CHROOT=/var/chroot/alpine
+wget -qO- http://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main/x86_64/apk-tools-static-2.12.7-r3.apk | tar xvzC /tmp
+mkdir -pv $CHROOT
+/tmp/sbin/apk.static -X http://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main -U --allow-untrusted --root $CHROOT --initdb add alpine-base
+echo "http://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main" >> $CHROOT/etc/apk/repositories
+echo "http://mirrors.tuna.tsinghua.edu.cn/alpine/edge/community/" >> $CHROOT/etc/apk/repositories
 ```
+
+你可以根据自身情况设置`CHROOT`变量,决定该chroot环境的安装地址.
+
+注意开头的`apk-tools-static`的链接可能因版本号变动而失效, 可以通过查看[清华大学开源软件镜像站 Alpine Linux edge 文件列表页面](https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main/x86_64/)找到该工具的最新版链接.
 
 挂载虚拟文件系统.每次重启系统后都需要运行一次.
 
@@ -128,11 +154,11 @@ cp /etc/resolv.conf /var/chroot/alpine/etc/
 chroot /var/chroot/alpine/ /bin/ash -l
 ```
 
-安装需要的软件包
+安装需要的软件包. 请注意alpine并没有更新到llvm13, 因此下文所有的llvm13都应该被替换为llvm12.
 
 ```shell
 apk update
-apk add make cmake ninja llvm10 llvm10-dev llvm10-static clang lld gcc musl-dev rsync python3 ncurses-dev flex bison perl linux-headers libressl-dev elfutils-dev autoconf automake libtool lz4 compiler-rt compiler-rt-static
+apk add make cmake ninja llvm12 llvm12-dev llvm12-static clang lld gcc musl-dev rsync python3 ncurses-dev flex bison perl linux-headers libressl-dev elfutils-dev autoconf automake libtool lz4 compiler-rt compiler-rt-static
 ```
 
 这些软件分别有以下作用:
@@ -227,13 +253,13 @@ source $HOME/aarch64-linux-musl/env
 首先下载Linux源代码.
 
 ```shell
-cd $DISTDIR && wget -qO- https://mirrors.tuna.tsinghua.edu.cn/kernel/v5.x/linux-5.8.3.tar.xz | tar xvJ && mv linux-5.8.3 linux && cd linux
+cd $DISTDIR && wget -qO- https://mirrors.tuna.tsinghua.edu.cn/kernel/v5.x/linux-5.15.1.tar.xz | tar xvJ && mv linux-5.15.1 linux && cd linux
 ```
 
 对于树莓派,从Github获取Linux源码.
 
 ```shell
-cd $DISTDIR && git clone --depth=1 --branch rpi-5.8.y https://github.com/raspberrypi/linux && cd linux
+cd $DISTDIR && git clone --depth=1 --branch rpi-5.15.y https://github.com/raspberrypi/linux && cd linux
 ```
 
 其他开发板根据情况选择主线内核或BSP内核。
@@ -241,57 +267,57 @@ cd $DISTDIR && git clone --depth=1 --branch rpi-5.8.y https://github.com/raspber
 然后安装头文件:
 
 ```shell
-make ARCH=arm64 headers_check # 或ARCH=x86_64,下同,ARCH的可用值为Linux源代码arch目录的子目录名
 make ARCH=arm64 INSTALL_HDR_PATH=$SYSROOT headers_install #这一步需要rsync
 ```
 
 ## 安装musl libc的头文件
 
 ```shell
-cd $DISTDIR && wget -qO- https://musl.libc.org/releases/musl-1.2.1.tar.gz | tar xvz && cd musl-1.2.1
+cd $DISTDIR && wget -qO- https://musl.libc.org/releases/musl-1.2.2.tar.gz | tar xvz && cd musl-1.2.2
 ./configure --prefix=/
 DESTDIR=$SYSROOT make install-headers
 ```
 
 ## 交叉编译Compiler-RT builtins
 
-如果你没有在交叉编译,则不需要这一步骤.请确认存在`/usr/lib/clang/10.0.1/lib/linux/libclang_rt.builtins-*.a`这一文件.例如`libclang_rt.builtins-x86_64.a`或`libclang_rt.builtins-aarch64.a`
+如果你没有在交叉编译,则不需要这一步骤.请确认存在`/usr/lib/clang/13.0.0/lib/linux/libclang_rt.builtins-*.a`这一文件(clang版本号可能有所不同).例如`libclang_rt.builtins-x86_64.a`或`libclang_rt.builtins-aarch64.a`
 
 如果没有目标平台的文件,则需要编译`compiler-rt`.下面以aarch64架构为例.
 
 首先下载并解压其源代码.
 
 ```shell
-cd $DISTDIR && wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/compiler-rt-9.0.1.src.tar.xz | tar xvJ && cd compiler-rt-9.0.1.src
+cd $DISTDIR && wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-project-13.0.0.src.tar.xz | tar xvJ && cd llvm-project-13.0.0.src/compiler-rt
 ```
 
-我们需要修改一下`CMakeLists.txt`以跳过对C编译器的检测,手动指定指针长度,因为现在C编译器不能链接出一个可执行的程序.
-
-对于32位的系统,`CMAKE_SIZEOF_VOID_P`为`4`,64位的系统则为`8`
-
-```diff
---- CMakeLists.txt      2019-08-26 12:32:35.000000000 +0000
-+++ CMakeLists.txt      2019-11-11 08:34:05.860000000 +0000
-@@ -5,6 +5,10 @@
-
- cmake_minimum_required(VERSION 3.4.3)
-
-+set(CMAKE_C_COMPILER_WORKS 1)
-+set(CMAKE_CXX_COMPILER_WORKS 1)
-+set(CMAKE_SIZEOF_VOID_P 8)
-+
- if(POLICY CMP0075)
-   cmake_policy(SET CMP0075 NEW)
- endif()
-```
+开始编译:
 
 ```shell
-#使用sed应用以上修改
-sed -i '8iset(CMAKE_C_COMPILER_WORKS 1)\nset(CMAKE_CXX_COMPILER_WORKS 1)\nset(CMAKE_SIZEOF_VOID_P 8)\n' CMakeLists.txt
 # 按照cmake的习惯,建立build文件夹
 mkdir build && cd build
 # 生成ninja编译文件
-cmake ../ -G Ninja -DCOMPILER_RT_BUILD_BUILTINS=ON -DCOMPILER_RT_INCLUDE_TESTS=OFF -DCOMPILER_RT_BUILD_SANITIZERS=OFF -DCOMPILER_RT_BUILD_XRAY=OFF -DCOMPILER_RT_BUILD_LIBFUZZER=OFF -DCOMPILER_RT_BUILD_PROFILE=OFF -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="-fuse-ld=lld" -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_ASM_COMPILER_TARGET=$TARGET -DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX="/usr/lib/clang/9.0.1/"
+cmake ../ -G Ninja \
+-DCOMPILER_RT_BUILD_BUILTINS=ON \
+-DCOMPILER_RT_INCLUDE_TESTS=OFF \
+-DCOMPILER_RT_BUILD_CRT=ON \
+-DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+-DCOMPILER_RT_BUILD_XRAY=OFF \
+-DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
+-DCOMPILER_RT_BUILD_PROFILE=OFF \
+-DCOMPILER_RT_BUILD_MEMPROF=OFF \
+-DCOMPILER_RT_BUILD_ORC=OFF \
+-DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+-DCMAKE_ASM_COMPILER=clang \
+-DCMAKE_C_COMPILER=clang \
+-DCMAKE_CXX_COMPILER=clang++ \
+-DCMAKE_ASM_COMPILER_TARGET=$TARGET \
+-DCMAKE_C_COMPILER_TARGET=$TARGET \
+-DCMAKE_CXX_COMPILER_TARGET=$TARGET \
+-DCMAKE_SYSROOT=$SYSROOT \
+-DCMAKE_INSTALL_PREFIX="/usr/lib/clang/13.0.0/" \
+-DCMAKE_C_COMPILER_WORKS=1 \
+-DCMAKE_CXX_COMPILER_WORKS=1 \
+-DCMAKE_SIZEOF_VOID_P=8
 # 编译
 ninja
 # 会安装3个文件libclang_rt.builtins-aarch64.a, clang_rt.crtbegin-aarch64.o, clang_rt.crtend-aarch64.o
@@ -301,9 +327,9 @@ sudo ninja install
 ## 编译musl libc
 
 ```shell
-cd $DISTDIR/musl-1.2.1
+cd $DISTDIR/musl-1.2.2
 make distclean
-./configure --prefix=/ LIBCC=/usr/lib/clang/10.0.1/lib/linux/libclang_rt.builtins-aarch64.a #手动指定上一步编译的文件
+./configure --prefix=/ LIBCC=/usr/lib/clang/13.0.0/lib/linux/libclang_rt.builtins-aarch64.a #手动指定上一步编译的文件
 make -j13 # CPU线程数+1
 DESTDIR=$SYSROOT make install
 ```
@@ -311,27 +337,54 @@ DESTDIR=$SYSROOT make install
 ## 编译LLVM libunwind
 
 ```shell
-cd $DISTDIR && wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.1/libunwind-10.0.1.src.tar.xz | tar xvJ &&  cd libunwind-10.0.1.src
-sed -i '6iset(CMAKE_CXX_COMPILER_WORKS 1)\n' CMakeLists.txt
-sed -i 's/include("${LLVM/#include("${LLVM/g' CMakeLists.txt
-mkdir build && cd build && cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+cd $DISTDIR/llvm-project-13.0.0.src/runtimes && mkdir libunwind-build && cd libunwind-build
+
+cmake ../ -G Ninja \
+-DLLVM_ENABLE_RUNTIMES="libunwind" \
+-DLIBUNWIND_USE_COMPILER_RT=ON \
+-DLIBUNWIND_SUPPORTS_FNO_EXCEPTIONS_FLAG=1 \
+-DCMAKE_ASM_COMPILER=clang \
+-DCMAKE_C_COMPILER=clang \
+-DCMAKE_CXX_COMPILER=clang++ \
+-DCMAKE_ASM_COMPILER_TARGET=$TARGET \
+-DCMAKE_C_COMPILER_TARGET=$TARGET \
+-DCMAKE_CXX_COMPILER_TARGET=$TARGET \
+-DCMAKE_C_FLAGS="$CFLAGS" \
+-DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+-DCMAKE_ASM_FLAGS="$CFLAGS" \
+-DCMAKE_SHARED_LINKER_FLAGS="$LDFLAGS -unwindlib=none" \
+-DCMAKE_SYSROOT=$SYSROOT \
+-DCMAKE_INSTALL_PREFIX=$SYSROOT \
+-DCMAKE_C_COMPILER_WORKS=1 \
+-DCMAKE_CXX_COMPILER_WORKS=1
+
 ninja
 ninja install
-cp ../include/*.h $SYSROOT/include
+
+cp $DISTDIR/llvm-project-13.0.0.src/libunwind/include/*.h $SYSROOT/include
 ```
+
+本来libunwind是可以和libc++以及libc++abi一同编译的(`LLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind"`,但是由于一些小问题, `libunwind.so.1`在链接时`clang`会自作聪明插入一个`--as-needed -l:libunwind.so`, 然而我们正在编译的就是libunwind本身,所以必须在命令行中加上`-unwindlib=none`来阻止这个行为. 具体源码见[这里](https://github.com/llvm/llvm-project/blob/d7b669b3a30345cfcdb2fde2af6f48aa4b94845d/clang/lib/Driver/ToolChains/CommonArgs.cpp#L1461), 只要用了`-rtlib=compiler-rt`选项, clang就会自动链接libunwind.
 
 ## 编译libc++和libc++abi
 
 ```shell
-cd $DISTDIR && wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.1/libcxx-10.0.1.src.tar.xz | tar xvJ
-wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.1/libcxxabi-10.0.1.src.tar.xz | tar xvJ && cd libcxxabi-10.0.1.src
-sed -i '9iset(CMAKE_CXX_COMPILER_WORKS 1)\n' CMakeLists.txt
-mkdir build && cd build && cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DLIBCXXABI_USE_COMPILER_RT=YES -DLIBCXXABI_USE_LLVM_UNWINDER=YES -DLIBCXXABI_LIBCXX_PATH="$DISTDIR/libcxx-10.0.1.src"
-ninja
-ninja install
-cd $DISTDIR/libcxx-10.0.1.src
-sed -i '8iset(CMAKE_CXX_COMPILER_WORKS 1)\n' CMakeLists.txt
-mkdir build && cd build && cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_EXE_LINKER_FLAGS="$LDFLAGS" -DCMAKE_CXX_COMPILER_TARGET=$TARGET -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DLIBCXX_CXX_ABI=libcxxabi -DLIBCXX_USE_COMPILER_RT=YES -DLIBCXX_HAS_MUSL_LIBC=ON -DLIBCXX_CXX_ABI_INCLUDE_PATHS="$DISTDIR/libcxxabi-10.0.1.src/include"
+cd $DISTDIR/llvm-project-13.0.0.src/runtimes && mkdir build && cd build
+
+cmake ../ -G Ninja \
+-DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi" \
+-DLIBCXXABI_USE_LLVM_UNWINDER=YES \
+-DLIBCXX_HAS_MUSL_LIBC=ON \
+-DCMAKE_C_COMPILER=clang \
+-DCMAKE_CXX_COMPILER=clang++ \
+-DCMAKE_C_COMPILER_TARGET=$TARGET \
+-DCMAKE_CXX_COMPILER_TARGET=$TARGET \
+-DCMAKE_C_FLAGS="$CFLAGS" \
+-DCMAKE_CXX_FLAGS="$CXXFLAGS" \
+-DCMAKE_SYSROOT=$SYSROOT \
+-DCMAKE_INSTALL_PREFIX=$SYSROOT \
+-DCMAKE_CXX_COMPILER_WORKS=1
+
 ninja
 ninja install
 ```
