@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - Using sccache on gentoo</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/using-sccache-on-gentoo/#reason" class="toc-link">Reason</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/using-sccache-on-gentoo/#solution" class="toc-link">Solution</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;using-sccache-on-gentoo&#x2F;">Using sccache on gentoo</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-04-17</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>Firest please fellow the page of <a href="https://wiki.gentoo.org/wiki/Sccache">Sccache</a> on Gentoo wiki.</p>
+<p>After the installation and configuration of sccache, you can try to compile some rust packages.
+It may work fine for the first one, but later you may find some weird sandbox or permission error like &quot;sccache: error : Failed to create temp dir ...&quot; or &quot;sccache: caused by: Permission denied (os error 13)&quot;</p>
+<p>Let's fix this issue.</p>
+<span id="continue-reading"></span><h2 id="reason">Reason</h2>
+<p>You may notice the Note in wiki: &quot;Not like ccache, sccache can only read statistics from running instance. Those interested in statistics must manually spawn sccache server first&quot;. sccache is designed to work in a C/S model, the client execute the real compiler and submit the compiled object file and the server storage the object into local disk or cloud storage server.</p>
+<blockquote>
+<p>sccache works using a client-server model, where the server runs locally on the same machine as the client. The client-server model allows the server to be more efficient by keeping some state in memory. </p>
+<p>The sccache command will spawn a server process if one is not already running, or you can run sccache --start-server to start the background server process without performing any compilation.</p>
+<p>You can run sccache --stop-server to terminate the server. It will also terminate after (by default) 10 minutes of inactivity.</p>
+<p>Running sccache --show-stats will print a summary of cache statistics.</p>
+</blockquote>
+<p>sccache will create some temp files while running, and the default location of those temp files is depend on the envirentment variable <code>TMPDIR</code>( this is the behavior of function <code>std::env::temp_dir</code> from rust std library ).</p>
+<p>Since portage will run the ebuild in a sandboxed environment, the <code>TMPDIR</code> will set to <code>${T}</code> ( by default it's <code>${PORTDIR}/${CATEGORY}/${PN}/temp</code> ), and sccache server will inherit this envirentment variable. On next portage session, the <code>TMPDIR</code> is changed, but the sccache server still use the old directory, and it will throw some error about &quot;Failed to create temp dir&quot;.</p>
+<h2 id="solution">Solution</h2>
+<ol>
+<li>install <code>app-portage/portage-bashrc-mv</code> from <code>::mv</code> overlay.</li>
+<li>create file <code>/etc/portage/bashrc.d/90-stop-sccache.sh</code>:</li>
+</ol>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#93a1a1;">#!/bin/bash
+</span><span style="color:#b58900;">Stop_sccache_server</span><span>() {
+</span><span>    </span><span style="color:#859900;">if [[ ! </span><span style="color:#268bd2;">-z </span><span style="color:#859900;">$</span><span>(</span><span style="color:#b58900;">pidof</span><span> sccache) </span><span style="color:#859900;">]]; then
+</span><span>        </span><span style="color:#b58900;">sccache</span><span style="color:#268bd2;"> --stop-server </span><span>&gt;&gt; /dev/null
+</span><span>    </span><span style="color:#859900;">fi
+</span><span>}
+</span><span>
+</span><span style="color:#b58900;">Stop_sccache_server_preinst</span><span>() {
+</span><span>    </span><span style="color:#859900;">if [[ ! </span><span style="color:#268bd2;">-z </span><span style="color:#859900;">$</span><span>(</span><span style="color:#b58900;">pidof</span><span> sccache) </span><span style="color:#859900;">]]; then
+</span><span>        </span><span style="color:#268bd2;">info</span><span>=</span><span style="color:#859900;">$</span><span>(</span><span style="color:#b58900;">sccache</span><span style="color:#268bd2;"> --stop-server</span><span>)
+</span><span>        </span><span style="color:#b58900;">einfo </span><span style="color:#839496;">&quot;</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">info</span><span>}</span><span style="color:#839496;">&quot;
+</span><span>    </span><span style="color:#859900;">fi
+</span><span>}
+</span><span>
+</span><span style="color:#b58900;">BashrcdPhase</span><span> prepare Stop_sccache_server
+</span><span style="color:#b58900;">BashrcdPhase</span><span> preinst Stop_sccache_server_preinst
+</span></code></pre>
+<p>And that's it, the script will automatically stop previous sccache server, and print the statistics of this session.</p>
+<pre data-lang="log" style="background-color:#fdf6e3;color:#657b83;" class="language-log "><code class="language-log" data-lang="log"><span>...
+</span><span>&gt;&gt;&gt; Completed installing gnome-base/librsvg-2.50.4 into /tmp/portage/gnome-base/librsvg-2.50.4/image/
+</span><span>
+</span><span> * Final size of build directory: 977604 KiB (954.6 MiB)
+</span><span> * Final size of installed tree:   41468 KiB ( 40.4 MiB)
+</span><span>
+</span><span>Fixing .la files
+</span><span>   usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.la
+</span><span>strip: llvm-strip --strip-unneeded -N __gentoo_check_ldflags__ -R .comment -R .GCC.command.line -R .note.gnu.gold-version
+</span><span>   /usr/bin/rsvg-convert
+</span><span>   /usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so
+</span><span>   /usr/lib/librsvg-2.so.2.47.0
+</span><span>
+</span><span>&gt;&gt;&gt; Installing (1 of 1) gnome-base/librsvg-2.50.4::gentoo
+</span><span> * checking 45 files for package collisions
+</span><span>&gt;&gt;&gt; Merging gnome-base/librsvg-2.50.4 to /
+</span><span> * removing unneeded *.la files
+</span><span> * Stopping sccache server...
+</span><span> * Compile requests                    193
+</span><span> * Compile requests executed           144
+</span><span> * Cache hits                          144
+</span><span> * Cache hits (Rust)                   144
+</span><span> * Cache misses                          0
+</span><span> * Cache timeouts                        0
+</span><span> * Cache read errors                     0
+</span><span> * Forced recaches                       0
+</span><span> * Cache write errors                    0
+</span><span> * Compilation failures                  0
+</span><span> * Cache errors                          0
+</span><span> * Non-cacheable compilations            0
+</span><span> * Non-cacheable calls                  49
+</span><span> * Non-compilation calls                 0
+</span><span> * Unsupported compiler calls            0
+</span><span> * Average cache write               0.000 s
+</span><span> * Average cache read miss           0.000 s
+</span><span> * Average cache read hit            0.000 s
+</span><span> * Failed distributed compilations       0
+</span><span> * 
+</span><span> * Non-cacheable reasons:
+</span><span> * crate-type                           47
+</span><span> * -                                     2
+</span><span> * 
+</span><span> * Cache location                  Local disk: &quot;/var/cache/sccache&quot;
+</span><span> * Cache size                          261 MiB
+</span><span> * Max cache size                       10 GiB
+</span><span>--- /usr/
+</span><span>--- /usr/lib/
+</span><span>--- /usr/lib/girepository-1.0/
+</span><span>&gt;&gt;&gt; /usr/lib/girepository-1.0/Rsvg-2.0.typelib
+</span><span>--- /usr/lib/pkgconfig/
+</span><span>&gt;&gt;&gt; /usr/lib/pkgconfig/librsvg-2.0.pc
+</span><span>&gt;&gt;&gt; /usr/lib/librsvg-2.so.2 -&gt; librsvg-2.so.2.47.0
+</span><span>&gt;&gt;&gt; /usr/lib/librsvg-2.so -&gt; librsvg-2.so.2.47.0
+</span><span>--- /usr/lib/gdk-pixbuf-2.0/
+</span><span>--- /usr/lib/gdk-pixbuf-2.0/2.10.0/
+</span><span>--- /usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/
+</span><span>&gt;&gt;&gt; /usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.la
+</span><span>&gt;&gt;&gt; /usr/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so
+</span><span>...
+</span></code></pre>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/rust/">#Rust</a>
+                    
+                        <a href="https://12101111.github.io/tags/linux/">#Linux</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;block-wine-wechat-black-window&#x2F;">‹ 屏蔽微信在Wine中运行时产生的水印&#x2F;黑块（Linux Edition）</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;xbox-security&#x2F;">Xbox one 的安全措施 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

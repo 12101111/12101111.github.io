@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 使用Rust编写操作系统(三)</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/write-os-in-rust3/#vgayu-gop" class="toc-link">VGA与GOP</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust3&#x2F;">使用Rust编写操作系统(三)</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-09-02</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>本文主要解释PC平台的图形显示标准.</p>
+<span id="continue-reading"></span><h2 id="vgayu-gop">VGA与GOP</h2>
+<p>在古老的IBM XT上，显示器只有简单又复杂的工作:显示文字，古老的MDA(单色显示适配器)和昂贵的CGA(彩色显示适配器)都只能显示文字,只不过后者还能改变文字的颜色.这就是著名的文本模式，至今的显卡仍可以模拟此模式。</p>
+<p>MDA可以显示80列25行字符，每个字符是分辨率为9x11像素的位图，但包括空白后的大小为9x14。因此有效的分辨率为720x350。CGA则可以显示320×200,4种颜色(从16色的硬件调色板选择)/640×200,黑白,也可以支持文本模式:80×25，8×8像素字体.由于CGA文字的分辨率低,因此MDA更加流行,直到第三方的大力士显卡可以同时支持&quot;高清&quot;的MDA字体和720x348的图形模式。随后显存越来越大，第三方显卡可以显示更大的分辨率。</p>
+<p>在字符模式下,由编码生成画面是由显卡完成的。每一张显卡内都具有能容纳256个字符字体的ROM,西方不同地区的字母具有不同的数量，MS-DOS和IBM引入了代码页的概念来区分不同的编码，这一概念延续到当今的Windows上。</p>
+<p>常见的美国地区的代码页是437，字符为：</p>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png" alt="codepage 437" /></p>
+<p>除了ASCII外,ROM中还包含了一些用于模拟图标的线和一些数学符合和图标。</p>
+<p>1987年，IBM在PS/2系列计算机中引入VGA(视频图形阵列)标准,支持640x480/16色,320x200/256色显示，标准还包括沿用至今的15针VGA连接器。这也是当今PC显卡遵守的最后一代IBM制定的标准，后来IBM对PC市场的控制力大大降低，NEC联合8家显卡制造商于1989年成立VESA(视频电子标准协会),制定了800x600/16色的SVGA标准,并随后迅速的扩展颜色数和分辨率.</p>
+<p>在较老的系统,比如DOS/Windows3.x中,进入图形模式需要使用16位的BIOS中断指令:<code>int 10h</code>,VESA标准还包括了VESA BIOS扩展(VBE),允许通过BIOS中断调整到高于VGA标准的分辨率.BIOS中断需要实模式或者虚拟8086模式,因此无法在64位的长模式下使用.</p>
+<p>大多数操作系统处理显示的方法为:</p>
+<ol>
+<li>实模式下的bootloader调用VBE调整显示分辨率和色深,VBE会在内存空间中创造出一块指向DRAM(核显)或者PCI(独显)的帧缓存.</li>
+<li>bootloader加载系统内核并进入保护模式/长模式</li>
+<li>内核加载专门编写的显卡驱动程序,以使用2D/3D加速功能</li>
+</ol>
+<p>可以预见的是，大多数个人开发的操作系统内核，如果没有大量的资金、人手和精力，单独针对每一款硬件开发、逆向工程驱动程序简直是天方夜谭。使用VBE是比较合适的选择。</p>
+<p>而到了UEFI的时代，BIOS中断无法使用。UEFI作为一个标准化的固件规范，提出了一种硬件无关的协议：GOP（图形输出协议）.GOP支持以下特性:</p>
+<ol>
+<li>平台无关,不仅限于x86架构，还支持arm和RISC-V等,不需要显卡继续兼容古老的MDA文本模式和VGA,因此也不需要主板和显卡附带16位x86代码(VBIOS ROM).</li>
+<li>可扩展任意的分辨率,不仅限于VGA/VESA固定的分辨率.同时可以枚举/设置分辨率.</li>
+<li>支持多GPU和多显示器同时工作.</li>
+<li>具有有限的2D加速(Bitblt)功能</li>
+</ol>
+<p>GOP的目标是在系统启动时显示LOGO,本地化的文字,显示图形化的配置屏幕,以及在操作系统没有加载高性能显卡驱动时显示图形.很可惜的是,2D加速功能在退出启动服务后就不能使用了,操作系统只能使用GOP服务创建好的帧缓冲(framebuffer),也不能调整分辨率。</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/rust/">#Rust</a>
+                    
+                        <a href="https://12101111.github.io/tags/os/">#OS</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust2&#x2F;">‹ 使用Rust编写操作系统(二)</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;5g-wifi6&#x2F;">5G芯片及终端和WIFI6芯片及设备 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

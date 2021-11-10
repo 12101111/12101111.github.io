@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 什么, 你不喜欢main函数?</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/rust-no-main/#maintai-nan-ting-liao" class="toc-link">main太难听了</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/rust-no-main/#shui-dong-liao-wo-de-main" class="toc-link">谁动了我的main</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/rust-no-main/#wo-yao-wo-de-main" class="toc-link">我要我的main</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/rust-no-main/#no-std" class="toc-link">no_std</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/rust-no-main/#error-language-item-required-but-not-found-eh-personality" class="toc-link">error: language item required, but not found: eh_personality</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/rust-no-main/#error-panic-handler-function-required-but-not-found" class="toc-link">error: #[panic_handler] function required, but not found</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/rust-no-main/#error-requires-start-lang-item" class="toc-link">error: requires start lang_item</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/rust-no-main/#shi-yao-shi-start-lang-item-he-start-you-shi-yao-qu-bie" class="toc-link">什么是start lang_item, 和#[start]有什么区别</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/rust-no-main/#zui-zhong-fang-an-no-main" class="toc-link">最终方案: no_main</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/rust-no-main/#wo-ye-bu-xiang-yao-cyu-yan-de-main-aka-mainfu-hao" class="toc-link">我也不想要C语言的main(aka. main符号)</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rust-no-main&#x2F;">什么, 你不喜欢main函数?</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-12-14</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>要想编译一个rust的可执行程序, 必须在crate顶层定义<a href="https://doc.rust-lang.org/reference/crates-and-source-files.html#main-functions"><code>main</code>函数</a>. <code>main</code>函数没有参数, 没有trait或生命周期修饰, 返回值为<code>()</code>(或者不写返回值类型), <code>!</code>, <code>Result&lt;(), E&gt; where E: Error</code>或其他实现<a href="https://doc.rust-lang.org/nightly/std/process/trait.Termination.html">std::process::Termination</a> Trait的类型.</p>
+<p>虽然大多数情况下rust的用户只需要老实的写一个<code>main</code>函数就能让他们的程序跑起来了,但是总有一些奇怪的情况使得<code>bin</code>类型的crate没有rust要求的<code>main</code>函数`.</p>
+<span id="continue-reading"></span><h2 id="maintai-nan-ting-liao">main太难听了</h2>
+<p>有一种情况是用户单纯的不喜欢<code>main</code>这个名字, 因此希望使用其他的函数名. 将属性<a href="https://github.com/rust-lang/rust/issues/29634"><code>#[main]</code></a>标准在希望成为入口点的函数上, 该函数就代替main函数的功能了, 该函数的签名需要满足rust中<code>main</code>函数的要求. 这是一个<strong>已经被废弃</strong>且<strong>不稳定</strong>的功能, 由于该功能实在没有什么价值且用户极少, 因此被弃用了, 不会再稳定.</p>
+<h2 id="shui-dong-liao-wo-de-main">谁动了我的main</h2>
+<p>但<code>main</code>函数真的是程序的入口点吗, 并不是. 无论是rust的main函数还是C的main函数都不是程序的入口点, 在过去版本的rust中, 如果设置了<code>RUST_BACKTRACE=1</code>的环境变量, panic发生后默认输出的backtrace会包含很多无用的信息, 在crate的main函数之下, 还有一些函数(现在的rustc版本编译的程序可以通过<code>RUST_BACKTRACE=full</code>输出同样的信息):</p>
+<ul>
+<li><code>std::rt::lang_start::{{closure}}</code></li>
+<li><code>std::rt::lang_start_internal::{{closure}}</code></li>
+<li><code>std::panicking::try::do_call</code></li>
+<li><code>std::panicking::try</code></li>
+<li><code>std::panic::catch_unwind</code></li>
+<li><code>std::rt::lang_start_internal</code></li>
+<li><code>std::rt::lang_start</code></li>
+<li><code>main</code></li>
+<li><code>__libc_start_main</code></li>
+<li><code>_start</code></li>
+</ul>
+<p>这些代码位于文档中隐藏的<a href="https://github.com/rust-lang/rust/blob/master/library/std/src/rt.rs"><code>std::rt</code></a>模块, 这一模块设置了栈溢出的检测, 设置了线程的名称, 存储了main参数的位置(因此rust的main没有参数, 而命令行参数则是从<code>std::env</code>中获取), 并运行crate定义的main函数, 当其panic时则输出backtrace.</p>
+<p>从启动流程上, Linux是<code>_start -&gt; __libc_start_main -&gt; main -&gt; std::rt::lang_start -&gt; ... -&gt; crate::main</code>, 其中<code>_start</code>是由libc的<code>crt1.o</code>提供的, 并通过调用<code>__libc_start_main</code>来调用用户的<code>main</code>函数.Windows类似, 但是msvc和mingw64的crt(C语言运行时)逻辑各不相同. 共同点是crt都会调用<code>main</code>, 这个C语言规定的用户程序入口点(虽然在Windows上有<code>main</code>和<code>WinMain</code>的区分, 但是所有rust程序都使用main作为入口点).
+更多有关C运行时的信息参见<a href="https://github.com/rust-lang/rust/blob/master/compiler/rustc_target/src/spec/crt_objects.rs"><code>rustc</code>所用到的所有crt目标文件的表格</a>, <a href="https://dev.gentoo.org/%7Evapier/crt.txt">Gentoo开发者对crt目标文件的解释</a>, <a href="https://gcc.gnu.org/onlinedocs/gccint/Initialization.html">GCC对crt的解释</a></p>
+<p>那么rust程序中, crt要调用的<code>main</code>函数是从哪里来的呢, 因为rustc在一些目标不需要安装C编译器即可工作, 那么肯定不是来自于C代码. 先看一下<code>hello world</code>的rust程序的main函数反汇编长什么样子.</p>
+<pre data-lang="asm" style="background-color:#fdf6e3;color:#657b83;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#cb4b16;">0000000000001260 </span><span style="color:#b58900;">&lt;main&gt;:
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1260</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">48 83 </span><span style="color:#b58900;">ec </span><span style="color:#cb4b16;">18          	</span><span style="color:#859900;">sub    $</span><span style="color:#cb4b16;">0x18</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsp
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1264</span><span style="color:#b58900;">:	8a </span><span style="color:#cb4b16;">05 </span><span style="color:#b58900;">a6 0d </span><span style="color:#cb4b16;">00 00    	</span><span style="color:#859900;">mov    </span><span style="color:#cb4b16;">0xda6</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rip</span><span style="color:#b58900;">)</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">al        </span><span style="color:#b58900;"># </span><span style="color:#cb4b16;">2010 </span><span style="color:#b58900;">&lt;__rustc_debug_gdb_scripts_section__&gt;
+</span><span style="color:#b58900;">    126a:	</span><span style="color:#cb4b16;">48 63 </span><span style="color:#b58900;">cf             	movslq %</span><span style="color:#268bd2;">edi</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rcx
+</span><span style="color:#b58900;">    126d:	</span><span style="color:#cb4b16;">48 </span><span style="color:#b58900;">8d 3d ac ff ff ff 	</span><span style="color:#859900;">lea    </span><span>-</span><span style="color:#cb4b16;">0x54</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rip</span><span style="color:#b58900;">)</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rdi        </span><span style="color:#b58900;"># </span><span style="color:#cb4b16;">1220 </span><span style="color:#b58900;">&lt;_ZN5hello4main17h5d50f6a5814ba113E&gt;
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1274</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">48 89 74 24 10       	</span><span style="color:#859900;">mov    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsi</span><span>,</span><span style="color:#cb4b16;">0x10</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1279</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">48 89 </span><span style="color:#b58900;">ce             	</span><span style="color:#859900;">mov    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rcx</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsi
+</span><span style="color:#b58900;">    127c:	</span><span style="color:#cb4b16;">48 </span><span style="color:#b58900;">8b </span><span style="color:#cb4b16;">54 24 10       	</span><span style="color:#859900;">mov    </span><span style="color:#cb4b16;">0x10</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rdx
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1281</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">88 44 24 </span><span style="color:#b58900;">0f          	</span><span style="color:#859900;">mov    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">al</span><span>,</span><span style="color:#cb4b16;">0xf</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1285</span><span style="color:#b58900;">:	e8 </span><span style="color:#cb4b16;">16 00 00 00       	</span><span style="color:#b58900;">callq  12a0 &lt;_ZN3std2rt10lang_start17hfc7218ca4db8cb26E&gt;
+</span><span style="color:#b58900;">    128a:	</span><span style="color:#cb4b16;">48 83 </span><span style="color:#b58900;">c4 </span><span style="color:#cb4b16;">18          	</span><span style="color:#859900;">add    $</span><span style="color:#cb4b16;">0x18</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsp
+</span><span style="color:#b58900;">    128e:	c3                   	retq
+</span><span style="color:#b58900;">    128f:	</span><span style="color:#cb4b16;">90                   	</span><span style="color:#859900;">nop
+</span></code></pre>
+<p>可以看到, 除了诡异的__rustc_debug_gdb_scripts_section__地址被放到栈上(0xf(%rsp))之外, C的main函数将rust crate的main(<code>hello::main</code>)函数地址作为第一个参数(%rdi), 原本的第一个参数argc(%edi)先备份到%rcx, 然后作为第二个参数(%rsi), 原本的第二个参数argv(%rsi)先备份到栈上(0x10(%rsp)), 然后再作为第三个参数(%rdx), 最后调用了<code>std::rt::lang_start</code>.这正好对应了<code>std::rt::lang_start</code>的签名:</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#268bd2;">lang </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">start</span><span style="color:#839496;">&quot;</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">lang_start</span><span>(
+</span><span>    </span><span style="color:#268bd2;">main</span><span>: </span><span style="color:#268bd2;">fn</span><span>() -&gt; T,
+</span><span>    </span><span style="color:#268bd2;">argc</span><span>: </span><span style="color:#268bd2;">isize</span><span>,
+</span><span>    </span><span style="color:#268bd2;">argv</span><span>: </span><span style="color:#586e75;">*const *const </span><span style="color:#268bd2;">u8</span><span>,
+</span><span>) -&gt; </span><span style="color:#268bd2;">isize</span><span>;
+</span></code></pre>
+<p>但实际上这个简单的函数并没有对应的C代码, main这个符号和代码是<a href="https://github.com/rust-lang/rust/blob/331e74014a0a2bf18aae7f02495f97958bf9767d/compiler/rustc_codegen_ssa/src/base.rs#L361">动态生成的</a>.在生成了main函数后, rustc调用链接器, 链接到libc和c运行时目标文件.我们称这个自动生成并且直接调用rust函数的main函数为main wrapper.</p>
+<h2 id="wo-yao-wo-de-main">我要我的main</h2>
+<p>处于某些目的或某些场景, 我们可能不想用<code>std::rt::lang_start</code>启动<code>main</code>函数, 这时候可以使用一个不稳定的功能: <a href="https://github.com/rust-lang/rust/issues/29633"><code>#[start]</code></a>. 这个属性指定一个签名为<code>fn (argc: isize, argv: *const *const u8) -&gt; isize</code>的函数为程序的入口点.如下所示:</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#268bd2;">feature</span><span>(start)]
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">start</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">rustmain</span><span>(</span><span style="color:#268bd2;">argc</span><span>: </span><span style="color:#268bd2;">isize</span><span>, </span><span style="color:#268bd2;">argv</span><span>: </span><span style="color:#586e75;">*const *const </span><span style="color:#268bd2;">u8</span><span>) -&gt; </span><span style="color:#268bd2;">isize </span><span>{
+</span><span>    </span><span style="color:#859900;">println!</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Hello, world!</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    </span><span style="color:#6c71c4;">3
+</span><span>}
+</span></code></pre>
+<p>注意到这个函数的函数名可以是任意的, 并且不需要使用<code>extern &quot;C&quot; fn</code>,但是签名目前必须为<code>fn (argc: isize, argv: *const *const u8) -&gt; isize</code>(之所以是&quot;目前是&quot;, 因为有人认为该签名不应为C语言的main函数签名).生成的代码反汇编如下:</p>
+<pre data-lang="asm" style="background-color:#fdf6e3;color:#657b83;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#cb4b16;">0000000000001170 </span><span style="color:#b58900;">&lt;_ZN5hello8rustmain17hffba4a0cd1d51340E&gt;:
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1170</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">48 83 </span><span style="color:#b58900;">ec </span><span style="color:#cb4b16;">48          	</span><span style="color:#859900;">sub    $</span><span style="color:#cb4b16;">0x48</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsp
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1174</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">48 </span><span style="color:#b58900;">8d </span><span style="color:#cb4b16;">05 </span><span style="color:#b58900;">6d 2c </span><span style="color:#cb4b16;">00 00 	</span><span style="color:#859900;">lea    </span><span style="color:#cb4b16;">0x2c6d</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rip</span><span style="color:#b58900;">)</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rax        </span><span style="color:#b58900;"># 3de8 &lt;__do_global_dtors_aux_fini_array_entry</span><span>+</span><span style="color:#cb4b16;">0x8</span><span style="color:#b58900;">&gt;
+</span><span style="color:#b58900;">    117b:	</span><span style="color:#cb4b16;">48 </span><span style="color:#b58900;">8d 0d 8e 0e </span><span style="color:#cb4b16;">00 00 	</span><span style="color:#859900;">lea    </span><span style="color:#cb4b16;">0xe8e</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rip</span><span style="color:#b58900;">)</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rcx        </span><span style="color:#b58900;"># </span><span style="color:#cb4b16;">2010 </span><span style="color:#b58900;">&lt;__rustc_debug_gdb_scripts_section__&gt;
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1182</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">31 </span><span style="color:#b58900;">d2                	</span><span style="color:#859900;">xor    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">edx</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">edx
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1184</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">41 89 </span><span style="color:#b58900;">d0             	</span><span style="color:#859900;">mov    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">edx</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">r8d
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1187</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">48 89 </span><span style="color:#b58900;">7c </span><span style="color:#cb4b16;">24 38       	</span><span style="color:#859900;">mov    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rdi</span><span>,</span><span style="color:#cb4b16;">0x38</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    118c:	</span><span style="color:#cb4b16;">48 89 74 24 40       	</span><span style="color:#859900;">mov    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsi</span><span>,</span><span style="color:#cb4b16;">0x40</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1191</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">48 </span><span style="color:#b58900;">8d 7c </span><span style="color:#cb4b16;">24 08       	</span><span style="color:#859900;">lea    </span><span style="color:#cb4b16;">0x8</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rdi
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1196</span><span style="color:#b58900;">:	</span><span style="color:#cb4b16;">48 89 </span><span style="color:#b58900;">c6             	</span><span style="color:#859900;">mov    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rax</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsi
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1199</span><span style="color:#b58900;">:	ba </span><span style="color:#cb4b16;">01 00 00 00       	</span><span style="color:#859900;">mov    $</span><span style="color:#cb4b16;">0x1</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">edx
+</span><span style="color:#b58900;">    119e:	e8 7d ff ff ff       	callq  </span><span style="color:#cb4b16;">1120 </span><span style="color:#b58900;">&lt;_ZN4core3fmt9Arguments6new_v117ha823aa65b8f1952aE&gt;
+</span><span style="color:#b58900;">    11a3:	</span><span style="color:#cb4b16;">48 </span><span style="color:#b58900;">8d 7c </span><span style="color:#cb4b16;">24 08       	</span><span style="color:#859900;">lea    </span><span style="color:#cb4b16;">0x8</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rdi
+</span><span style="color:#b58900;">    11a8:	ff </span><span style="color:#cb4b16;">15 </span><span style="color:#b58900;">3a 2e </span><span style="color:#cb4b16;">00 00    	</span><span style="color:#b58900;">callq  </span><span>*</span><span style="color:#cb4b16;">0x2e3a</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rip</span><span style="color:#b58900;">)        # 3fe8 &lt;_ZN3std2io5stdio6_print17hcf65f36aa62c14c4E&gt;
+</span><span style="color:#b58900;">    11ae:	b8 </span><span style="color:#cb4b16;">03 00 00 00       	</span><span style="color:#859900;">mov    $</span><span style="color:#cb4b16;">0x3</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">eax
+</span><span style="color:#b58900;">    11b3:	</span><span style="color:#cb4b16;">48 83 </span><span style="color:#b58900;">c4 </span><span style="color:#cb4b16;">48          	</span><span style="color:#859900;">add    $</span><span style="color:#cb4b16;">0x48</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsp
+</span><span style="color:#b58900;">    11b7:	c3                   	retq
+</span><span style="color:#b58900;">    11b8:	0f 1f </span><span style="color:#cb4b16;">84 00 00 00 00 	</span><span style="color:#b58900;">nopl   </span><span style="color:#cb4b16;">0x0</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rax</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rax</span><span>,</span><span style="color:#cb4b16;">1</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    11bf:	</span><span style="color:#cb4b16;">00
+</span><span>
+</span><span style="color:#b58900;">00000000000011c0 &lt;main&gt;:
+</span><span style="color:#b58900;">    11c0:	</span><span style="color:#cb4b16;">50                   	</span><span style="color:#859900;">push   </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rax
+</span><span style="color:#b58900;">    11c1:	8a </span><span style="color:#cb4b16;">05 49 </span><span style="color:#b58900;">0e </span><span style="color:#cb4b16;">00 00    	</span><span style="color:#859900;">mov    </span><span style="color:#cb4b16;">0xe49</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rip</span><span style="color:#b58900;">)</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">al        </span><span style="color:#b58900;"># </span><span style="color:#cb4b16;">2010 </span><span style="color:#b58900;">&lt;__rustc_debug_gdb_scripts_section__&gt;
+</span><span style="color:#b58900;">    11c7:	</span><span style="color:#cb4b16;">48 63 </span><span style="color:#b58900;">ff             	movslq %</span><span style="color:#268bd2;">edi</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rdi
+</span><span style="color:#b58900;">    11ca:	</span><span style="color:#cb4b16;">88 44 24 07          	</span><span style="color:#859900;">mov    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">al</span><span>,</span><span style="color:#cb4b16;">0x7</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    11ce:	e8 9d ff ff ff       	callq  </span><span style="color:#cb4b16;">1170 </span><span style="color:#b58900;">&lt;_ZN5hello8rustmain17hffba4a0cd1d51340E&gt;
+</span><span style="color:#b58900;">    11d3:	</span><span style="color:#cb4b16;">59                   	</span><span style="color:#859900;">pop    </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rcx
+</span><span style="color:#b58900;">    11d4:	c3                   	retq
+</span><span style="color:#b58900;">    11d5:	</span><span style="color:#cb4b16;">66 </span><span style="color:#b58900;">2e 0f 1f </span><span style="color:#cb4b16;">84 00 00 	</span><span style="color:#b58900;">nopw   %</span><span style="color:#268bd2;">cs</span><span style="color:#b58900;">:</span><span style="color:#cb4b16;">0x0</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rax</span><span>,</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rax</span><span>,</span><span style="color:#cb4b16;">1</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    11dc:	</span><span style="color:#cb4b16;">00 00 00
+</span><span style="color:#b58900;">    11df:	</span><span style="color:#cb4b16;">90                   	</span><span style="color:#859900;">nop
+</span></code></pre>
+<p>可以看到<code>#[start]</code>仍然会生成main wrapper, 其中直接调用了<code>#[start]</code>指定的函数, rustc没有报错<code>main function not found in crate</code>, 也没有使用<code>libstd</code>中的<code>std::rt::lang_start</code>的逻辑, 因此<code>#[start]</code>的优先级高于通常的main函数查找.</p>
+<p>需要注意的是, 使用<code>#[start]</code>启动的程序将无法使用<code>std::env::args</code>获得程序的命令行参数,而是需要手动处理<code>argc</code>和<code>argv</code>, 读取<code>argv</code>指向的的C风格字符串数组, 就像C语言一样.</p>
+<h2 id="no-std">no_std</h2>
+<p><a href="https://doc.rust-lang.org/reference/crates-and-source-files.html#preludes-and-no_std"><code>#![no_std]</code></a>使得crate默认不链接到<a href="https://doc.rust-lang.org/std/index.html"><code>libstd</code></a>, 不插入libstd的<a href="https://doc.rust-lang.org/std/prelude/index.html"><code>prelude</code></a>, 而是使用<a href="https://doc.rust-lang.org/core/index.html"><code>libcore</code></a>的<a href="https://doc.rust-lang.org/core/prelude/v1/index.html"><code>prelude</code></a>. 由于<code>libcore</code>只定义了语言无关的项目, 因此main函数这类<code>libstd</code>提供的功能就不存在了,
+这样就可以在<code>std</code>没有提供支持的非标准环境编写rust程序, 例如嵌入式和wasm开发.</p>
+<p>通常只使用<code>#![no_std]</code>会得到一些编译错误:</p>
+<h3 id="error-language-item-required-but-not-found-eh-personality">error: language item required, but not found: <code>eh_personality</code></h3>
+<p>这需要在Cargo.toml中设置, 关闭panic后的栈回溯:</p>
+<pre data-lang="toml" style="background-color:#fdf6e3;color:#657b83;" class="language-toml "><code class="language-toml" data-lang="toml"><span>[</span><span style="color:#b58900;">profile</span><span>.</span><span style="color:#b58900;">dev</span><span>]
+</span><span style="color:#268bd2;">panic </span><span>= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">abort</span><span style="color:#839496;">&quot;
+</span><span>
+</span><span>[</span><span style="color:#b58900;">profile</span><span>.</span><span style="color:#b58900;">release</span><span>]
+</span><span style="color:#268bd2;">panic </span><span>= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">abort</span><span style="color:#839496;">&quot;
+</span></code></pre>
+<p>当然, 指定一个空的函数也可以</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#268bd2;">lang </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">eh_personality</span><span style="color:#839496;">&quot;</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">my_eh_personality</span><span>() {}
+</span></code></pre>
+<h3 id="error-panic-handler-function-required-but-not-found">error: <code>#[panic_handler]</code> function required, but not found</h3>
+<p>这需要添加一个函数, picnic时会指向该函数. 在这里我们使程序死循环:</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#268bd2;">panic_handler</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">my_panic_handler</span><span>(</span><span style="color:#859900;">_</span><span>: </span><span style="color:#859900;">&amp;</span><span>core::panic::PanicInfo) -&gt; </span><span style="color:#859900;">! </span><span>{
+</span><span>    </span><span style="color:#859900;">loop </span><span>{}
+</span><span>}
+</span></code></pre>
+<p>也可以使进程终止:</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#268bd2;">feature</span><span>(core_intrinsics)]
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">panic_handler</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">my_panic_handler</span><span>(</span><span style="color:#859900;">_</span><span>: </span><span style="color:#859900;">&amp;</span><span>core::panic::PanicInfo) -&gt; </span><span style="color:#859900;">! </span><span>{
+</span><span>    core::intrinsics::abort()
+</span><span>}
+</span></code></pre>
+<p>这样panic时程序就会直接退出: <code>illegal hardware instruction (core dumped)</code>, 实际上<code>core::intrinsics::abort()</code>会被编译为不存在的<code>ud2</code>指令.</p>
+<p>如果该程序不在操作系统中执行, 而是在裸机上执行, 这个不存在的指令通常会导致CPU重置, 如果设置了中断处理程序, 则会执行该程序.</p>
+<h3 id="error-requires-start-lang-item">error: requires <code>start</code> lang_item</h3>
+<p>这里要求提供一个<code>#[lang = &quot;start&quot;]</code>函数, 根据前面的知识, <code>#[start]</code>标注的函数优先级高于通常的main函数查找裸机, 因此可以使用<code>#[start]</code>标注main函数来屏蔽这个错误.</p>
+<p>在Linux上运行<code>no_std</code>的程序, 和操作系统交互最方便的方式就是<code>libc</code> crate了, <code>libc</code>具有<code>no_std</code>模式, 可以在这里使用.将<code>libc = { version = &quot;0.2&quot;, default-features = false }</code>加入<code>Cargo.toml</code>中.一个简单的<code>no_std</code>+<code>libc</code>的&quot;hello world&quot;长这个样子:</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#268bd2;">no_std</span><span>]
+</span><span>#![</span><span style="color:#268bd2;">feature</span><span>(lang_items)]
+</span><span>#![</span><span style="color:#268bd2;">feature</span><span>(start)]
+</span><span>#![</span><span style="color:#268bd2;">feature</span><span>(core_intrinsics)]
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">link</span><span>(name </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">c</span><span style="color:#839496;">&quot;</span><span>)]
+</span><span style="color:#859900;">extern </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">C</span><span style="color:#839496;">&quot; </span><span>{}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">start</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">rustmain</span><span>(</span><span style="color:#268bd2;">argc</span><span>: </span><span style="color:#268bd2;">isize</span><span>, </span><span style="color:#268bd2;">argv</span><span>: </span><span style="color:#586e75;">*const *const </span><span style="color:#268bd2;">u8</span><span>) -&gt; </span><span style="color:#268bd2;">isize </span><span>{
+</span><span>    </span><span style="color:#586e75;">unsafe </span><span>{
+</span><span>        libc::puts(</span><span style="color:#268bd2;">b</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Hello World!</span><span style="color:#dc322f;">\0</span><span style="color:#839496;">&quot; </span><span style="color:#859900;">as </span><span style="color:#268bd2;">*const u8 </span><span style="color:#859900;">as </span><span style="color:#268bd2;">*const i8</span><span>);
+</span><span>    }
+</span><span>    </span><span style="color:#93a1a1;">//panic!();
+</span><span>    </span><span style="color:#6c71c4;">42
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">lang </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">eh_personality</span><span style="color:#839496;">&quot;</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">my_eh_personality</span><span>() {}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">panic_handler</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">my_panic_handler</span><span>(</span><span style="color:#859900;">_</span><span>: </span><span style="color:#859900;">&amp;</span><span>core::panic::PanicInfo) -&gt; </span><span style="color:#859900;">! </span><span>{
+</span><span>    core::intrinsics::abort()
+</span><span>}
+</span></code></pre>
+<p>注意, 有些时候(例如在musl系统上)rustc会找不到<code>libc</code>的库, 我们使用<code>#[link(name = &quot;c&quot;)] extern &quot;C&quot; {}</code>强制链接libc.</p>
+<h2 id="shi-yao-shi-start-lang-item-he-start-you-shi-yao-qu-bie">什么是<code>start</code> lang_item, 和<code>#[start]</code>有什么区别</h2>
+<p><code>#[lang = &quot;start&quot;]</code> 指定另一个函数作为<code>std::rt::lang_start</code>的替代.</p>
+<p>其签名为</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#268bd2;">lang </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">start</span><span style="color:#839496;">&quot;</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">lang_start</span><span>(
+</span><span>    </span><span style="color:#268bd2;">main</span><span>: </span><span style="color:#268bd2;">fn</span><span>() -&gt; T,
+</span><span>    </span><span style="color:#268bd2;">argc</span><span>: </span><span style="color:#268bd2;">isize</span><span>,
+</span><span>    </span><span style="color:#268bd2;">argv</span><span>: </span><span style="color:#586e75;">*const *const </span><span style="color:#268bd2;">u8</span><span>,
+</span><span>) -&gt; </span><span style="color:#268bd2;">isize</span><span>;
+</span></code></pre>
+<p>其第一个参数为<code>main</code>函数的返回值, 在过去必须为<code>()</code>, 但rust现在的main函数支持一些其他的返回值类型.在文章开头说过, 在<code>std</code>中这些类型需要实现<code>std::process::Termination</code>.注意我们在<code>no_std</code>下并不能访问到<code>std::process::Termination</code>, 但是这其实是<code>rustc</code>提供的另一个lang_item, <code>#[lang = &quot;termination&quot;]</code> .用其标记一个Trait, 那么实现这个Trait的类型就可以作为<code>main</code>函数的返回值.</p>
+<p>由于lang item只能指定一次, 因此必须使用no_std.</p>
+<p>一个使用了<code>#[lang = &quot;start&quot;]</code>的hello world如下, 这里我们定义一个叫<code>Return</code>的trait, 并用<code>#[lang = &quot;termination&quot;]</code>标记, 这样在这个程序中, main函数的签名就必须是实现了<code>Return</code>的类型. 我们为isize实现该trait.</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#268bd2;">no_std</span><span>]
+</span><span>#![</span><span style="color:#268bd2;">feature</span><span>(lang_items)]
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">lang </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">termination</span><span style="color:#839496;">&quot;</span><span>]
+</span><span style="color:#268bd2;">trait </span><span style="color:#b58900;">Return</span><span>{}
+</span><span>
+</span><span style="color:#268bd2;">impl </span><span>Return </span><span style="color:#859900;">for </span><span style="color:#b58900;">isize</span><span>{}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">lang </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">start</span><span style="color:#839496;">&quot;</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">start</span><span>(
+</span><span>    </span><span style="color:#268bd2;">main</span><span>: </span><span style="color:#268bd2;">fn</span><span>() -&gt; </span><span style="color:#268bd2;">isize</span><span>,
+</span><span>    </span><span style="color:#268bd2;">argc</span><span>: </span><span style="color:#268bd2;">isize</span><span>,
+</span><span>    </span><span style="color:#268bd2;">argv</span><span>: </span><span style="color:#586e75;">*const *const </span><span style="color:#268bd2;">u8</span><span>,
+</span><span>) -&gt; </span><span style="color:#268bd2;">isize </span><span>{
+</span><span>    </span><span style="color:#859900;">main</span><span>()
+</span><span>}
+</span><span>
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">main</span><span>() -&gt; </span><span style="color:#268bd2;">isize</span><span>{
+</span><span>    </span><span style="color:#586e75;">unsafe </span><span>{
+</span><span>        libc::puts(</span><span style="color:#268bd2;">b</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Hello World!</span><span style="color:#dc322f;">\0</span><span style="color:#839496;">&quot; </span><span style="color:#859900;">as </span><span style="color:#268bd2;">*const u8 </span><span style="color:#859900;">as </span><span style="color:#268bd2;">*const i8</span><span>);
+</span><span>    }
+</span><span>    </span><span style="color:#6c71c4;">1
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">panic_handler</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">my_panic_handler</span><span>(</span><span style="color:#859900;">_</span><span>: </span><span style="color:#859900;">&amp;</span><span>core::panic::PanicInfo) -&gt; </span><span style="color:#859900;">! </span><span>{
+</span><span>    </span><span style="color:#859900;">loop </span><span>{}
+</span><span>}
+</span></code></pre>
+<p>可以看到<code>start</code> lang_item, 和<code>#[start]</code>的区别在于, 生成main wrapper时会优先使用<code>#[start]</code>标注的函数, 如果存在<code>#[start]</code>, 则不再使用<code>start</code> lang_item标注的函数.<code>start</code> lang_item标注的函数具有固定的签名, 其目的在于执行用户crate中的<code>main</code>函数, 并为其初始化<code>std::env::args</code>等功能.<code>start</code> lang_item起作用时, rustc会按照正常的逻辑寻找用户crate里的<code>main</code>函数, 或者是<code>#[main]</code>标注的函数.</p>
+<h2 id="zui-zhong-fang-an-no-main">最终方案: no_main</h2>
+<p><code>#![no_main]</code> 实际上是广大<code>no_std</code>用户用的最广的解决方案, 因为该方案并不像lang_item一样高度不稳定, 这是一个稳定的功能(虽然许多no_std的库还是需要nightly编译器开feature).</p>
+<p>no_main会完全跳过main wrapper的生成, 用户需要自行提供<code>main</code>的符号, 否则链接器会链接失败. 与<code>cdylib</code>不同的是, 使用<code>no_main</code>会使链接器生成二进制程序而不是库.在一些目标, 例如uefi下, 我们并不使用<code>main</code>作为入口点, 而是使用</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#268bd2;">no_mangle</span><span>]
+</span><span style="color:#859900;">extern </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">efiapi</span><span style="color:#839496;">&quot;</span><span> efi_main </span><span style="color:#268bd2;">fn</span><span>(
+</span><span>    handle: uefi::Handle, 
+</span><span>    st: uefi::table::SystemTable&lt;uefi::table::Boot&gt;
+</span><span>) -&gt; uefi::Status
+</span></code></pre>
+<p>这时我们就需要自行提供了符号<code>efi_main</code>供链接器使用.</p>
+<p>将前面的例子稍作修改,就可以得到链接libc的<code>no_main</code>程序.</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#268bd2;">no_std</span><span>]
+</span><span>#![</span><span style="color:#268bd2;">no_main</span><span>]
+</span><span>#![</span><span style="color:#268bd2;">feature</span><span>(lang_items)]
+</span><span>#![</span><span style="color:#268bd2;">feature</span><span>(core_intrinsics)]
+</span><span style="color:#859900;">extern crate</span><span> libc;
+</span><span>#[</span><span style="color:#268bd2;">link</span><span>(name </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">c</span><span style="color:#839496;">&quot;</span><span>)]
+</span><span style="color:#859900;">extern </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">C</span><span style="color:#839496;">&quot; </span><span>{}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">no_mangle</span><span>]
+</span><span style="color:#859900;">extern </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">C</span><span style="color:#839496;">&quot; </span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">main</span><span>(</span><span style="color:#268bd2;">argc</span><span>: </span><span style="color:#268bd2;">isize</span><span>, </span><span style="color:#268bd2;">argv</span><span>: </span><span style="color:#586e75;">*const *const </span><span style="color:#268bd2;">u8</span><span>) -&gt; </span><span style="color:#268bd2;">isize </span><span>{
+</span><span>    </span><span style="color:#586e75;">unsafe </span><span>{
+</span><span>        libc::puts(</span><span style="color:#268bd2;">b</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Hello World!</span><span style="color:#dc322f;">\0</span><span style="color:#839496;">&quot; </span><span style="color:#859900;">as </span><span style="color:#268bd2;">*const u8 </span><span style="color:#859900;">as </span><span style="color:#268bd2;">*const i8</span><span>);
+</span><span>    }
+</span><span>    </span><span style="color:#93a1a1;">//panic!();
+</span><span>    </span><span style="color:#6c71c4;">42
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">lang </span><span style="color:#859900;">= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">eh_personality</span><span style="color:#839496;">&quot;</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">my_eh_personality</span><span>() {}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">panic_handler</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">my_panic_handler</span><span>(</span><span style="color:#859900;">_</span><span>: </span><span style="color:#859900;">&amp;</span><span>core::panic::PanicInfo) -&gt; </span><span style="color:#859900;">! </span><span>{
+</span><span>    core::intrinsics::abort()
+</span><span>}
+</span></code></pre>
+<p>再进行反汇编, 这里的main就是我们提供提供的main函数, 而不是rustc生成的wrapper了.</p>
+<pre data-lang="asm" style="background-color:#fdf6e3;color:#657b83;" class="language-asm "><code class="language-asm" data-lang="asm"><span style="color:#cb4b16;">0000000000001720 </span><span style="color:#b58900;">&lt;main&gt;:
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1720</span><span style="color:#b58900;">: </span><span style="color:#cb4b16;">48 83 </span><span style="color:#b58900;">ec </span><span style="color:#cb4b16;">18                  	</span><span style="color:#b58900;">subq	</span><span style="color:#859900;">$</span><span style="color:#cb4b16;">24</span><span>, </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsp
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1724</span><span style="color:#b58900;">: </span><span style="color:#cb4b16;">48 89 </span><span style="color:#b58900;">7c </span><span style="color:#cb4b16;">24 08               	</span><span style="color:#859900;">movq	</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rdi</span><span>, </span><span style="color:#cb4b16;">8</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1729</span><span style="color:#b58900;">: </span><span style="color:#cb4b16;">48 89 74 24 10               	</span><span style="color:#859900;">movq	</span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsi</span><span>, </span><span style="color:#cb4b16;">16</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rsp</span><span style="color:#b58900;">)
+</span><span style="color:#b58900;">    172e: </span><span style="color:#cb4b16;">48 </span><span style="color:#b58900;">8d 3d </span><span style="color:#cb4b16;">43 </span><span style="color:#b58900;">ee ff ff         	leaq	</span><span>-</span><span style="color:#cb4b16;">4541</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rip</span><span style="color:#b58900;">)</span><span>, </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rdi  </span><span style="color:#b58900;"># </span><span style="color:#cb4b16;">578 </span><span style="color:#b58900;">&lt;puts</span><span>+</span><span style="color:#cb4b16;">0x578</span><span style="color:#b58900;">&gt;
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1735</span><span style="color:#b58900;">: ff </span><span style="color:#cb4b16;">15 35 12 00 00            	</span><span style="color:#b58900;">callq	</span><span>*</span><span style="color:#cb4b16;">4661</span><span style="color:#b58900;">(%</span><span style="color:#268bd2;">rip</span><span style="color:#b58900;">)  # </span><span style="color:#cb4b16;">2970 </span><span style="color:#b58900;">&lt;puts</span><span>+</span><span style="color:#cb4b16;">0x2970</span><span style="color:#b58900;">&gt;
+</span><span style="color:#b58900;">    173b: b8 2a </span><span style="color:#cb4b16;">00 00 00               	</span><span style="color:#b58900;">movl	</span><span style="color:#859900;">$</span><span style="color:#cb4b16;">42</span><span>, </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">eax
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1740</span><span style="color:#b58900;">: </span><span style="color:#cb4b16;">48 83 </span><span style="color:#b58900;">c4 </span><span style="color:#cb4b16;">18                  	</span><span style="color:#b58900;">addq	</span><span style="color:#859900;">$</span><span style="color:#cb4b16;">24</span><span>, </span><span style="color:#b58900;">%</span><span style="color:#268bd2;">rsp
+</span><span style="color:#b58900;">    </span><span style="color:#cb4b16;">1744</span><span style="color:#b58900;">: c3                           	retq
+</span></code></pre>
+<p>当然, 这种方式对main的签名和ABI完全不做限制, 因此这种程序也可以编译,但是不能运行</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#![</span><span style="color:#268bd2;">no_main</span><span>]
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">no_mangle</span><span>]
+</span><span style="color:#586e75;">pub </span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">main</span><span>(</span><span style="color:#268bd2;">args</span><span>: </span><span style="color:#859900;">Vec</span><span>&lt;</span><span style="color:#859900;">String</span><span>&gt;) {
+</span><span>    </span><span style="color:#859900;">for</span><span> arg </span><span style="color:#859900;">in</span><span> args {
+</span><span>        </span><span style="color:#859900;">println!</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#cb4b16;">{}</span><span style="color:#839496;">&quot;</span><span>, arg);
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>因此一些no_std库提供了宏用于阻止不正确的签名编译成功.例如<code>cortex-m-rt</code>使用<code>#[entry]</code>标记入口点</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[</span><span style="color:#268bd2;">entry</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">main</span><span>() -&gt; </span><span style="color:#859900;">! </span><span>{
+</span><span>    </span><span style="color:#859900;">loop </span><span>{
+</span><span>        </span><span style="color:#93a1a1;">/* .. */
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>正因为<code>#[start]</code>无法为最大的<code>no_std</code>用户: 嵌入式和wasm开发提供合适的支持,因此该功能仍然需要讨论和开发才会稳定.而<code>start</code> lang_item只会被std开发者用到, 不可能稳定.</p>
+<h3 id="wo-ye-bu-xiang-yao-cyu-yan-de-main-aka-mainfu-hao">我也不想要C语言的main(aka. main符号)</h3>
+<p>由于libc和crt是绑定的, 因此main符号是必须存在于链接了crt1.o的程序的, 否则连接器会直接报错.而不使用crt, 则也用不了libc.</p>
+<p>在嵌入式开发上, <a href="https://github.com/rust-embedded/awesome-embedded-rust">基于embedded-hal的各种库</a>发展出了一套完整的<code>no_std</code>生态, 包括运行时(rt), CPU指令, 使用svd2rust自动生成的寄存器访问库(Peripheral access API), 各种板级支持包和驱动库.而这一切, 只需要少量的汇编和连接器脚本, 剩下的99%都是rust, 没有C语言的踪影.</p>
+<p>然而在桌面领域, 情况则有所不同.</p>
+<h4 id="windows">Windows</h4>
+<p>在Windows诞生时, C语言第一个标准ISO C90还不存在, Windows SDK也并不使用C标准库来实现其功能.以至于直到现在, 在Windows上开发程序并不需要用到一行c标准库的内容, 而是需要使用Windows API(win32)或者更高层的封装(例如COM或者.NET), 甚至可以使用不稳定但更加底层的NT native API做一些~~奇怪的~~事情(比如开发驱动程序). 虽然Windows本身是使用C++和C编写的, 但是整个win32 api使用微软自造的C ABI(stdcall), 因此其他语言也可以直接使用win32 api.<a href="https://github.com/retep998/winapi-rs">winapi-rs</a>就几乎完整的提供了Windows 10SDK中定义的各个win32 api, 而且支持no_std模式. <a href="https://github.com/janiorca/tinywin">tinywin</a>就是一个使用winapi-rs的rust项目, 且开启了no_std, 不链接到msvcrt, 并且调用win32 api创建了一个窗口.</p>
+<h4 id="macos">macOS</h4>
+<p>macOS是一个闭源操作系统, 虽然其基础Darwin系统和XNU内核是开源的, 但是整个用户态几乎都是闭源的.而且, 不像Linux, XNU并没有一个稳定的syscall接口, 也不像win32, macOS的API经常变动(每一年的macOS都会产生许多breaking change).而且, macOS的基础库, 闭源的libSystem.dylib(包括了c标准库和POSIX的实现)只能动态链接, 因此所有的macOS程序都必须使用libc.</p>
+<h4 id="linux">Linux</h4>
+<p>为什么最后提Linux呢, 因为Linux是开源软件, 而且Linux内核开发者承诺对用户态的ABI保持不变.因此通过直接调用syscall的方式可以使用Linux内核提供的各种功能, 甚至实现一个<a href="https://github.com/rust-lang/rfcs/issues/2610">不需要libc的std</a>.实际上, go语言也是这么做的, go的标准库并不依赖libc.但是目前rust并没有一个这样的库.</p>
+<p>如何从汇编编写Linux userspace的初始化代码是一件复杂的事情, @fasterthanlime的<a href="https://fasterthanli.me/series/making-our-own-executable-packer">制作Linux的elf自解压程序系列文章</a>介绍了其中的知识.</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/rust/">#Rust</a>
+                    
+                        <a href="https://12101111.github.io/tags/linux/">#Linux</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;linux-bsd-comparison&#x2F;">‹ 庆祝OpenBSD 25周年与OpenBSD 6.8, NetBSD 9.1, FreeBSD 12.2发布, 有关Unix,BSD与Linux的看法</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rust-dynamic-link&#x2F;">Rust动态链接 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

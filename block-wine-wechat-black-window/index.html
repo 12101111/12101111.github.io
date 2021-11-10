@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 屏蔽微信在Wine中运行时产生的水印&#x2F;黑块（Linux Edition）</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/block-wine-wechat-black-window/#xiu-gai-wine" class="toc-link">修改Wine</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/block-wine-wechat-black-window/#win32-api" class="toc-link">Win32 API</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/block-wine-wechat-black-window/#x-api" class="toc-link">X api</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/block-wine-wechat-black-window/#web" class="toc-link">Web</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;block-wine-wechat-black-window&#x2F;">屏蔽微信在Wine中运行时产生的水印&#x2F;黑块（Linux Edition）</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-04-06</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>众所周知，微信并没有官方开发的Linux客户端，要想在Linux上使用微信，就产生了很多种变通方法：</p>
+<ul>
+<li>网页版</li>
+<li>Wine+微信 PC版</li>
+<li>虚拟机+微信 PC版</li>
+<li>Android虚拟机/容器+微信平板模式</li>
+<li>在其他设备上使用，并使用RDP/scrcpy等软件远程控制</li>
+</ul>
+<p>在这些解决方案中，微信 PC版在操作逻辑和功能上较其他方案更强，但是由于微信 win32程序会创建一个独立的半透明的窗口作为其窗口边框和UI控件的阴影特效，而在Linux下，Wine会将这个透明的窗口错误的绘制，产生一些奇怪的bug， 例如这个透明边框总是悬浮在所有窗口的最上面，即使已经切换到其他的工作区，或者由于Xwayland的背景是黑色的，这个半透明的窗口会继承黑色的背景，导致其效果不再是一个阴影框，而是一个覆盖整个窗口的黑色块。</p>
+<span id="continue-reading"></span>
+<p>解决这个问题有3种方法</p>
+<ul>
+<li>使用X api隐藏半透明窗口</li>
+<li>使用Win32 api隐藏半透明窗口</li>
+<li>在Wine的源码里动手脚，不创建该窗口</li>
+</ul>
+<h2 id="xiu-gai-wine">修改Wine</h2>
+<p>第3种方法最直接，该方案的补丁如下：</p>
+<pre data-lang="patch" style="background-color:#fdf6e3;color:#657b83;" class="language-patch "><code class="language-patch" data-lang="patch"><span style="color:#93a1a1;">--- a/dlls/user32/win.c  2020-04-09 22:20:30.459968806 +0800
+</span><span style="color:#93a1a1;">+++ b/dlls/user32/win.c  2020-04-09 21:54:09.588643751 +0800
+</span><span style="color:#268bd2;">@@ -1795,6 +1795,17 @@
+</span><span>     cs.lpszClass      = className;
+</span><span>     cs.dwExStyle      = exStyle;
+</span><span> 
+</span><span style="color:#859900;">+    if (exStyle == 0x080800a0) // WeChat/WxWork shadow hwnd
+</span><span style="color:#859900;">+    {
+</span><span style="color:#859900;">+        FIXME(&quot;hack %x\n&quot;, cs.dwExStyle);
+</span><span style="color:#859900;">+        return NULL;
+</span><span style="color:#859900;">+    }
+</span><span style="color:#859900;">+    if (exStyle == 0x000800a0) // Netease Cloudmusic shadow wnd
+</span><span style="color:#859900;">+    {
+</span><span style="color:#859900;">+        FIXME(&quot;hack %x\n&quot;, cs.dwExStyle);
+</span><span style="color:#859900;">+        return NULL;
+</span><span style="color:#859900;">+    }
+</span><span style="color:#859900;">+
+</span><span>     return wow_handlers.creat[e_window( &amp;cs, className, instance, TRUE );
+</span><span> }
+</span></code></pre>
+<p>exStyle是win32 api中每一个窗口都具有的一个属性:<a href="https://docs.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles">扩展窗口样式</a>，这个有bug的窗口打开了工具栏窗口<code>WS_EX_TOOLWINDOW</code>,透明窗口<code>WS_EX_TRANSPARENT</code>,层叠式窗口<code>WS_EX_LAYERED</code>这3个标志位. 因此在创建窗口的函数处检测是否使用这个标志位即可避免该窗口的创建.</p>
+<p>该方案目前收录于<code>archlinuxcn</code>仓库, 但是我并不使用archlinux. 由于需要编译Wine，而我并没有一个可用的glibc multilib编译环境，因此我放弃了该方案。</p>
+<h2 id="win32-api">Win32 API</h2>
+<p>第二种方案,使用Win32 api来隐藏窗口, 这也是我最早见到的方案, 来源于https://blog.kangkang.org/index.php/archives/397</p>
+<pre data-lang="c++" style="background-color:#fdf6e3;color:#657b83;" class="language-c++ "><code class="language-c++" data-lang="c++"><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">windows.h</span><span style="color:#839496;">&quot;
+</span><span style="color:#859900;">LPCTSTR</span><span> windowClassName = </span><span style="color:#268bd2;">L</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">popupshadow</span><span style="color:#839496;">&quot;</span><span>;
+</span><span>
+</span><span style="color:#268bd2;">int </span><span style="color:#859900;">WINAPI </span><span style="color:#b58900;">wWinMain</span><span>(</span><span style="color:#859900;">HINSTANCE </span><span style="color:#268bd2;">hInstance</span><span>, </span><span style="color:#859900;">HINSTANCE </span><span style="color:#268bd2;">hPrevInstance</span><span>, </span><span style="color:#859900;">PWSTR </span><span style="color:#268bd2;">pCmdLine</span><span>, </span><span style="color:#268bd2;">int nCmdShow</span><span>) {
+</span><span>  </span><span style="color:#859900;">for </span><span>(;;) {
+</span><span>    </span><span style="color:#859900;">for </span><span>(</span><span style="color:#859900;">HWND</span><span> h = </span><span style="color:#b58900;">FindWindowEx</span><span>(</span><span style="color:#b58900;">NULL</span><span>, </span><span style="color:#b58900;">NULL</span><span>, windowClassName, </span><span style="color:#b58900;">NULL</span><span>);
+</span><span>        h = </span><span style="color:#b58900;">FindWindowEx</span><span>(</span><span style="color:#b58900;">NULL</span><span>, h, windowClassName, </span><span style="color:#b58900;">NULL</span><span>);
+</span><span>        h != </span><span style="color:#b58900;">NULL</span><span>) {
+</span><span>      </span><span style="color:#b58900;">ShowWindow</span><span>(h, SW_HIDE);
+</span><span>    }
+</span><span>    </span><span style="color:#b58900;">Sleep</span><span>(</span><span style="color:#6c71c4;">3000</span><span>);
+</span><span>  }
+</span><span>  </span><span style="color:#859900;">return </span><span style="color:#6c71c4;">0</span><span>;
+</span><span>}
+</span></code></pre>
+<p>编译方法:</p>
+<pre data-lang="cmd" style="background-color:#fdf6e3;color:#657b83;" class="language-cmd "><code class="language-cmd" data-lang="cmd"><span>i686-w64-mingw32-g++ -municode -m32 -static-libgcc -o wechatkill wechatkill.cpp
+</span></code></pre>
+<p>该方案使用<code>FindWindowEx</code>找到class name为<code>popupshadow</code>的窗体,然后hide掉这个窗体. 不过不知道是不是微信更新了,我编译该程序并运行后没有什么效果.</p>
+<h2 id="x-api">X api</h2>
+<p>第一种同样是隐藏窗体,但是在X的层面进行的操作. 然而网上使用的方法大多是错误的, 要么是漏杀, 要么是错杀. 我写了一个正确的程序, 可以正确的隐藏阴影框, 同时不影响各个菜单.</p>
+<pre data-lang="C" style="background-color:#fdf6e3;color:#657b83;" class="language-C "><code class="language-C" data-lang="C"><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">stdbool.h</span><span style="color:#839496;">&gt;
+</span><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">stdio.h</span><span style="color:#839496;">&gt;
+</span><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">stdlib.h</span><span style="color:#839496;">&gt;
+</span><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">string.h</span><span style="color:#839496;">&gt;
+</span><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">xcb/xcb.h</span><span style="color:#839496;">&gt;
+</span><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">xcb/xcb_aux.h</span><span style="color:#839496;">&gt;
+</span><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">xcb/xcb_event.h</span><span style="color:#839496;">&gt;
+</span><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">xcb/xcb_icccm.h</span><span style="color:#839496;">&gt;
+</span><span style="color:#cb4b16;">#include </span><span style="color:#839496;">&lt;</span><span style="color:#2aa198;">xcb/xproto.h</span><span style="color:#839496;">&gt;
+</span><span>
+</span><span style="color:#859900;">static</span><span> xcb_connection_t </span><span style="color:#859900;">*</span><span>conn;
+</span><span style="color:#859900;">static</span><span> xcb_screen_t </span><span style="color:#859900;">*</span><span>scr;
+</span><span style="color:#859900;">static</span><span> xcb_atom_t atom;
+</span><span>
+</span><span style="color:#268bd2;">void </span><span style="color:#b58900;">init_atom</span><span>() {
+</span><span>  </span><span style="color:#93a1a1;">// Get `_NET_WM_NAME` atom
+</span><span>  </span><span style="color:#859900;">const </span><span style="color:#268bd2;">char </span><span style="color:#859900;">*</span><span>atom_name = </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">_NET_WM_NAME</span><span style="color:#839496;">&quot;</span><span>;
+</span><span>  xcb_intern_atom_cookie_t atom_cookie =
+</span><span>      </span><span style="color:#b58900;">xcb_intern_atom</span><span>(conn, </span><span style="color:#b58900;">true</span><span>, </span><span style="color:#859900;">strlen</span><span>(atom_name), atom_name);
+</span><span>  xcb_intern_atom_reply_t </span><span style="color:#859900;">*</span><span>atom_reply =
+</span><span>      </span><span style="color:#b58900;">xcb_intern_atom_reply</span><span>(conn, atom_cookie, </span><span style="color:#b58900;">NULL</span><span>);
+</span><span>  </span><span style="color:#859900;">if </span><span>(!atom_reply) {
+</span><span>    </span><span style="color:#859900;">fprintf</span><span>(stderr, </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">_NET_WM_NAME atom not found, WTF?</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    </span><span style="color:#859900;">return</span><span>;
+</span><span>  }
+</span><span>  atom = atom_reply-&gt;</span><span style="color:#268bd2;">atom</span><span>;
+</span><span>  </span><span style="color:#859900;">free</span><span>(atom_reply);
+</span><span>}
+</span><span>
+</span><span style="color:#268bd2;">void </span><span style="color:#b58900;">handle_wechat</span><span>(xcb_window_t </span><span style="color:#268bd2;">window</span><span>) {
+</span><span>  </span><span style="color:#93a1a1;">// Get value of `_NET_WM_NAME`
+</span><span>  xcb_icccm_get_text_property_reply_t prop;
+</span><span>  </span><span style="color:#859900;">if </span><span>(!</span><span style="color:#b58900;">xcb_icccm_get_text_property_reply</span><span>(
+</span><span>          conn, </span><span style="color:#b58900;">xcb_icccm_get_text_property</span><span>(conn, window, atom), </span><span style="color:#859900;">&amp;</span><span>prop, </span><span style="color:#b58900;">NULL</span><span>)) {
+</span><span>    </span><span style="color:#859900;">fprintf</span><span>(stderr, </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Can&#39;t get _NET_WM_NAME property</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    </span><span style="color:#859900;">return</span><span>;
+</span><span>  }
+</span><span>  </span><span style="color:#859900;">if </span><span>(prop.</span><span style="color:#268bd2;">name_len</span><span>) {
+</span><span>    </span><span style="color:#859900;">printf</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Normal window with name: </span><span style="color:#cb4b16;">%.*s</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>, prop.</span><span style="color:#268bd2;">name_len</span><span>, prop.</span><span style="color:#268bd2;">name</span><span>);
+</span><span>    </span><span style="color:#859900;">return</span><span>;
+</span><span>  }
+</span><span>  </span><span style="color:#93a1a1;">// If `_NET_WM_NAME` is empty, check if this windows accept input
+</span><span>  xcb_icccm_wm_hints_t hints;
+</span><span>  </span><span style="color:#859900;">if </span><span>(!</span><span style="color:#b58900;">xcb_icccm_get_wm_hints_reply</span><span>(conn, </span><span style="color:#b58900;">xcb_icccm_get_wm_hints</span><span>(conn, window),
+</span><span>                                    </span><span style="color:#859900;">&amp;</span><span>hints, </span><span style="color:#b58900;">NULL</span><span>)) {
+</span><span>    </span><span style="color:#859900;">fprintf</span><span>(stderr, </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Can&#39;t get WM_HINTS property</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    </span><span style="color:#859900;">return</span><span>;
+</span><span>  }
+</span><span>  </span><span style="color:#859900;">if </span><span>((hints.</span><span style="color:#268bd2;">flags </span><span style="color:#859900;">&amp;</span><span> XCB_ICCCM_WM_HINT_INPUT) &amp;&amp; hints.</span><span style="color:#268bd2;">input</span><span>) {
+</span><span>    </span><span style="color:#859900;">printf</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Normal dialog without name</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    </span><span style="color:#859900;">return</span><span>;
+</span><span>  }
+</span><span>  </span><span style="color:#859900;">printf</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Black shadow window, unmap it!</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>  </span><span style="color:#b58900;">xcb_unmap_window</span><span>(conn, window);
+</span><span>  </span><span style="color:#859900;">return</span><span>;
+</span><span>}
+</span><span>
+</span><span style="color:#268bd2;">bool </span><span style="color:#b58900;">is_wechat</span><span>(xcb_window_t </span><span style="color:#268bd2;">window</span><span>) {
+</span><span>  xcb_get_property_cookie_t cookie = </span><span style="color:#b58900;">xcb_get_property</span><span>(
+</span><span>      conn, </span><span style="color:#6c71c4;">0</span><span>, window, XCB_ATOM_WM_CLASS, XCB_ATOM_STRING, </span><span style="color:#6c71c4;">0</span><span>, </span><span style="color:#6c71c4;">32</span><span>);
+</span><span>  xcb_get_property_reply_t </span><span style="color:#859900;">*</span><span>reply = </span><span style="color:#b58900;">xcb_get_property_reply</span><span>(conn, cookie, </span><span style="color:#b58900;">NULL</span><span>);
+</span><span>  </span><span style="color:#859900;">if </span><span>(!reply) {
+</span><span>    </span><span style="color:#859900;">return </span><span style="color:#b58900;">false</span><span>;
+</span><span>  }
+</span><span>  </span><span style="color:#268bd2;">int</span><span> len = </span><span style="color:#b58900;">xcb_get_property_value_length</span><span>(reply);
+</span><span>  </span><span style="color:#859900;">if </span><span>(!len) {
+</span><span>    </span><span style="color:#859900;">free</span><span>(reply);
+</span><span>    </span><span style="color:#859900;">return </span><span style="color:#b58900;">false</span><span>;
+</span><span>  }
+</span><span>  </span><span style="color:#268bd2;">char </span><span style="color:#859900;">*</span><span>property = (</span><span style="color:#268bd2;">char </span><span style="color:#859900;">*</span><span>)</span><span style="color:#b58900;">xcb_get_property_value</span><span>(reply);
+</span><span>  </span><span style="color:#859900;">printf</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">0x</span><span style="color:#cb4b16;">%0x</span><span style="color:#2aa198;">8: WM_CLASS= </span><span style="color:#cb4b16;">%.*s</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>, window, len, property);
+</span><span>  </span><span style="color:#268bd2;">bool</span><span> result = </span><span style="color:#b58900;">false</span><span>;
+</span><span>  </span><span style="color:#859900;">if </span><span>(!</span><span style="color:#859900;">strcmp</span><span>(property, </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">wechat.exe</span><span style="color:#839496;">&quot;</span><span>)) {
+</span><span>    </span><span style="color:#859900;">printf</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Wechat found!</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    result = </span><span style="color:#b58900;">true</span><span>;
+</span><span>  }
+</span><span>  </span><span style="color:#859900;">free</span><span>(reply);
+</span><span>  </span><span style="color:#859900;">return</span><span> result;
+</span><span>}
+</span><span>
+</span><span style="color:#268bd2;">int </span><span style="color:#b58900;">main</span><span>(</span><span style="color:#268bd2;">int argc</span><span>, </span><span style="color:#268bd2;">char </span><span style="color:#859900;">**</span><span style="color:#268bd2;">argv</span><span>) {
+</span><span>  conn = </span><span style="color:#b58900;">xcb_connect</span><span>(</span><span style="color:#b58900;">NULL</span><span>, </span><span style="color:#b58900;">NULL</span><span>);
+</span><span>  </span><span style="color:#859900;">if </span><span>(</span><span style="color:#b58900;">xcb_connection_has_error</span><span>(conn)) {
+</span><span>    </span><span style="color:#859900;">fprintf</span><span>(stderr, </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Failed to connect to the X server</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    </span><span style="color:#859900;">exit</span><span>(</span><span style="color:#6c71c4;">1</span><span>);
+</span><span>  }
+</span><span>  scr = </span><span style="color:#b58900;">xcb_setup_roots_iterator</span><span>(</span><span style="color:#b58900;">xcb_get_setup</span><span>(conn)).</span><span style="color:#268bd2;">data</span><span>;
+</span><span>  </span><span style="color:#859900;">if </span><span>(!scr) {
+</span><span>    </span><span style="color:#859900;">fprintf</span><span>(stderr, </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Failed to get X screen</span><span style="color:#dc322f;">\n</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    </span><span style="color:#859900;">exit</span><span>(</span><span style="color:#6c71c4;">2</span><span>);
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#859900;">uint32_t</span><span> val</span><span style="color:#268bd2;">[] </span><span>= {XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY};
+</span><span>  </span><span style="color:#b58900;">xcb_change_window_attributes</span><span>(conn, scr-&gt;</span><span style="color:#268bd2;">root</span><span>, XCB_CW_EVENT_MASK, val);
+</span><span>
+</span><span>  </span><span style="color:#b58900;">init_atom</span><span>();
+</span><span>
+</span><span>  </span><span style="color:#859900;">while </span><span>(</span><span style="color:#6c71c4;">1</span><span>) {
+</span><span>    </span><span style="color:#b58900;">xcb_aux_sync</span><span>(conn);
+</span><span>    xcb_generic_event_t </span><span style="color:#859900;">*</span><span>e = </span><span style="color:#b58900;">xcb_wait_for_event</span><span>(conn);
+</span><span>    </span><span style="color:#859900;">if </span><span>(</span><span style="color:#b58900;">XCB_EVENT_RESPONSE_TYPE</span><span>(e) == XCB_MAP_NOTIFY) {
+</span><span>      xcb_map_notify_event_t </span><span style="color:#859900;">*</span><span>map = (xcb_map_notify_event_t </span><span style="color:#859900;">*</span><span>)e;
+</span><span>      </span><span style="color:#859900;">if </span><span>(</span><span style="color:#b58900;">is_wechat</span><span>(map-&gt;</span><span style="color:#268bd2;">window</span><span>)) {
+</span><span>        </span><span style="color:#b58900;">handle_wechat</span><span>(map-&gt;</span><span style="color:#268bd2;">window</span><span>);
+</span><span>      }
+</span><span>    }
+</span><span>    </span><span style="color:#859900;">free</span><span>(e);
+</span><span>  }
+</span><span>
+</span><span>  </span><span style="color:#859900;">if </span><span>(conn) {
+</span><span>    </span><span style="color:#b58900;">xcb_disconnect</span><span>(conn);
+</span><span>  }
+</span><span>  </span><span style="color:#859900;">return </span><span style="color:#6c71c4;">0</span><span>;
+</span><span>}
+</span></code></pre>
+<p>编译方法:</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">gcc</span><span> xwechathide.c</span><span style="color:#268bd2;"> -lxcb -lxcb-util -lxcb-icccm -o</span><span> xwechathide
+</span></code></pre>
+<p>该程序的原理: 在根窗口上监听子窗口的事件, 当收到<code>XCB_MAP_NOTIFY</code>事件时, 即一个X窗口已经map(显示)到桌面上了, 这时检查其<code>WM_CLASS</code>属性是否为<code>wechat.exe</code>. 如果是则检查<code>_NET_WM_NAME</code>(即窗口标题)是否为空, 那些阴影窗口的标题为空, 而具有功能的窗口不为空.如果标题为空, 再检查<code>WM_HINTS</code>属性中输入字段是否为允许输入, 菜单、小程序列表等对话框没有窗口标题，但允许输入，因此不应隐藏，而阴影窗口不允许输入,因此应该隐藏.</p>
+<p>该程序正确的保留了菜单、小程序列表等对话框, 且实时响应, 无需sleep式的轮询, 仅当新的X事件时会运行, 因此效率更高, 几乎不占用CPU (微信的wechat.exe运行一个CPU小时而该程序仅运行不到1个CPU秒), 没有闪烁的情况.</p>
+<p>( 测试环境: Flatpak FreeDesktop 20.08 runtime, wine-tkg 6.4, 禁用dxvk, 模拟Windows7, 32位prefix, 使用MS的riched20.dll和ole32.dll, 官网下载的微信, fakechinese安装的思源cjk字体 )</p>
+<h2 id="web">Web</h2>
+<p>此部分与主题无关.</p>
+<p>其实我的帐号并不能直接登陆进微信Web版, 但之前UOS发布了一个使用古董electron打包的<strong>MIT</strong>授权的微信客户端, 一眼就能看出来和网页版一模一样, 但是却可以让我的账户登陆上本来不能登陆的Web版. 不管统信他们是不是写错授权了, 但既然这唯一发布的一版是MIT授权的, 我就拆包看了看Javascript代码, 并得出了其中的原理.</p>
+<p>首选, 必须使用该链接登陆:</p>
+<pre data-lang="url" style="background-color:#fdf6e3;color:#657b83;" class="language-url "><code class="language-url" data-lang="url"><span>https://wx.qq.com/?&amp;lang=zh_CN&amp;target=t
+</span></code></pre>
+<p>其次, 使用chromium系列的浏览器, 安装<a href="https://he.firefoxcn.net/zh-CN/guide.html">Header Editor</a>扩展.(由于Firefox的bug, 只能使用chromium浏览器).</p>
+<p>然后设置以下3个Header头修改</p>
+<pre data-lang="txt" style="background-color:#fdf6e3;color:#657b83;" class="language-txt "><code class="language-txt" data-lang="txt"><span>匹配类型: 网址前缀
+</span><span>匹配规则: https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage
+</span><span>执行类型: 常规
+</span><span>头名称: extspam
+</span><span>头内容: Gv8GCPkGEvkGCggwMDAwMDAwMRAGGuAGomtlq/mOhQXWue473LKvUjEhatKQ338GLRNavgAhb2ET3z+3ejCXaYlrG7AfJ+QBphMSYvPhxQVyhwVvQarv9muy8HSoAAuQtV1DjpOIjQwcoa/wOCicjtUV8yp2W6vTrgea200WY7+vg95AT43/qDQ0WVSupawUWCKWuXNdvxsIPp/Y4d+YHkCvOV21/uea4WqILbfOZhd4OZsX6MEHcB322DXZZ0m89mSf0drCb+8mKEMLCGbXBCy5ZFD/YR0NTsaYFQTIDkF9eBCsi56MVNWYcp0+a51Tg2Cg2fNPFPtRZ7D5TlKftMTmKy1DAVVKWeXJqXjUyATQA+ZXRW3vrdP1pc6OMWxdhgR+71VDa++pfLO/kRJ5hUgpwR8/JzfOXEqGsi866CGy/J+wOXQUtXKew+RYXYFLpspq1Tbi61yYowsBUnSl8c8JIekAdqHTSQPX5qHij58QakUblQhm2czTcHI2+j3avjsRV9aqFHmJfSRcgwYBEEVxxyzK3/cJtTzWsBpW6N6VDdby0YExETdIRM5zaElXjg/AZqHxZCuhYJS3inR5aG5ypURZVqGWYIc9AJHJCu7PKrajIX1j4KlXgROyCxAov9uPLkd/fgjoIrg5rP2pIdyM+2nNbzcnsJj+DFxwa8JiURu08ez+sX43hC7WSSQ5205k2DrEb2Tp0iHLZ9QbbzLpnZsqaufMngKzvXPwq8GrFkJ+JIUkjfe9MQaNW/CONdkqRyAZDasJO9kHpYIFcP++A+9ErWsaUXm9WsCpkiTGJBeiS3u0gqBFXAS0oa128becqhFpK5LBOSxnk2YhUP2c7AJt1sv1Ysqo+6/Vh+AI09kDjontg/P6xqKEQGLdArlppJqeaUOOhs0270am/7YWhNqS69mpcslRkvFSyCAbI26g4lppzYp4U28rmFifSplR8NI6IO0dAWr4pS5mmov4pNA6WvvBpm078JaVlXOLOZj20T8JB08yNTZcFblD54Sn78ro4ooKsaA0ynUZjvFKvlKno64dqLlnFJudmR0Qx8yFcHQy/7Qqj+/AnjdLOJ0e7rAGMvoMIlnJnn6okhOeEKfCaZpG+v54ZWFeZs7f8SitfVlfEEhCQEHLTgRiu18PVwi7gHILzlQQoiFwUhBiKrA9Tnv6IIvtsP8FKAUwAA==
+</span><span>
+</span><span>匹配类型: 网址前缀
+</span><span>匹配规则: https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxnewloginpage
+</span><span>执行类型: 常规
+</span><span>头名称: client-version
+</span><span>头内容: 2.0.0
+</span><span>
+</span><span>匹配类型: 网址前缀
+</span><span>匹配规则: https://wx.qq.com/
+</span><span>执行类型: 常规
+</span><span>头名称: user-agent
+</span><span>头内容: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) ??/2.0.0 Chrome/59.0.3071.115 Electron/1.8.8 Safari/537.36
+</span><span>
+</span><span>(此处的??实为&quot;微信&quot;两个汉字, 但根据规范, HTTP头应为ASCII可见字符, 因此不能存储汉字)
+</span></code></pre>
+<p>然后就能正常的登陆了.</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/wine/">#Wine</a>
+                    
+                        <a href="https://12101111.github.io/tags/linux/">#Linux</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rust-dynamic-link&#x2F;">‹ Rust动态链接</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;using-sccache-on-gentoo&#x2F;">Using sccache on gentoo ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

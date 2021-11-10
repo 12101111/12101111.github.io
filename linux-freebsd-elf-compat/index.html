@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 为什么Linux不能运行FreeBSD的elf</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/linux-freebsd-elf-compat/#linuxhe-freebsddu-shi-yong-elf-dan-shi-zhu-duo-chai-yi-dao-zhi-er-zhe-er-jin-zhi-bing-bu-jian-rong" class="toc-link">Linux和FreeBSD都使用ELF,但是诸多差异导致二者二进制并不兼容</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/linux-freebsd-elf-compat/#cyu-yan-ku-bu-tong-dao-zhi-de-jia-zai-qi-he-abichai-yi" class="toc-link">C语言库不同导致的加载器和ABI差异</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/linux-freebsd-elf-compat/#sao-cao-zuo" class="toc-link">骚操作</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/linux-freebsd-elf-compat/#elfde-abizi-duan" class="toc-link">ELF的ABI字段</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/linux-freebsd-elf-compat/#syscall-abibu-jian-rong" class="toc-link">syscall ABI不兼容</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;linux-freebsd-elf-compat&#x2F;">为什么Linux不能运行FreeBSD的elf</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-02-12</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h1 id="linuxhe-freebsddu-shi-yong-elf-dan-shi-zhu-duo-chai-yi-dao-zhi-er-zhe-er-jin-zhi-bing-bu-jian-rong">Linux和FreeBSD都使用ELF,但是诸多差异导致二者二进制并不兼容</h1>
+<p>查看ELF信息可以使用两个程序,<code>file</code>和<code>readelf</code>
+file 这个程序可以快速识别ELF文件的不同之处(也可以识别其他文件).readelf则可以读取大部分ELF文件的信息.</p>
+<h2 id="cyu-yan-ku-bu-tong-dao-zhi-de-jia-zai-qi-he-abichai-yi">C语言库不同导致的加载器和ABI差异</h2>
+<p>除了少数如busybox的程序,绝大多数程序都动态链接到C语言库.
+不同的C语言库使用不同的加载器（interpreter），这是阻碍绝大多数elf文件在各个系统之间兼容的主要因素，甚至同为Linux,glibc和musl也互不兼容。</p>
+<p>这是静态链接的Linux下的busybox (ARM64)
+bin/busybox: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statically linked, stripped
+这是动态链接到GNU libc的Linux下的bash
+/bin/bash: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, stripped
+这是动态链接到musl libc的Linux下的zfs
+zfs: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-musl-x86_64.so.1, stripped
+这是FreeBSD的zfs
+sbin/zfs: ELF 64-bit LSB executable, x86-64, version 1 (FreeBSD), dynamically linked, interpreter /libexec/ld-elf.so.1, for FreeBSD 12.1 (1201511), FreeBSD-style, stripped
+首先最明显的就是interpreter不同,当然根本原因还是C语言库不同.</p>
+<p>使用<code>readelf -l</code>可以查看程序头表(Program header table),interpreter的位置就在这里.</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>$ readelf -l sbin/zfs
+</span><span>
+</span><span>Elf 文件类型为 EXEC (可执行文件)
+</span><span>Entry point 0x20c000
+</span><span>There are 11 program headers, starting at offset 64
+</span><span>
+</span><span>程序头：
+</span><span>  Type           Offset             VirtAddr           PhysAddr
+</span><span>                 FileSiz            MemSiz              Flags  Align
+</span><span>  PHDR           0x0000000000000040 0x0000000000200040 0x0000000000200040
+</span><span>                 0x0000000000000268 0x0000000000000268  R      0x8
+</span><span>  INTERP         0x00000000000002a8 0x00000000002002a8 0x00000000002002a8
+</span><span>                 0x0000000000000015 0x0000000000000015  R      0x1
+</span><span>      [Requesting program interpreter: /libexec/ld-elf.so.1]
+</span><span>  LOAD           0x0000000000000000 0x0000000000200000 0x0000000000200000
+</span><span>                 0x000000000000be84 0x000000000000be84  R      0x1000
+</span><span>  LOAD           0x000000000000c000 0x000000000020c000 0x000000000020c000
+</span><span>                 0x000000000000cb50 0x000000000000cb50  R E    0x1000
+</span><span>  LOAD           0x0000000000019000 0x0000000000219000 0x0000000000219000
+</span><span>                 0x00000000000001e0 0x00000000000001e0  RW     0x1000
+</span><span>  LOAD           0x000000000001a000 0x000000000021a000 0x000000000021a000
+</span><span>                 0x0000000000000c80 0x00000000000015b8  RW     0x1000
+</span><span>  DYNAMIC        0x0000000000019028 0x0000000000219028 0x0000000000219028
+</span><span>                 0x00000000000001b0 0x00000000000001b0  RW     0x8
+</span><span>  GNU_RELRO      0x0000000000019000 0x0000000000219000 0x0000000000219000
+</span><span>                 0x00000000000001e0 0x00000000000001e0  R      0x1
+</span><span>  GNU_EH_FRAME   0x000000000000ad48 0x000000000020ad48 0x000000000020ad48
+</span><span>                 0x00000000000002b4 0x00000000000002b4  R      0x4
+</span><span>  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+</span><span>                 0x0000000000000000 0x0000000000000000  RW     0x0
+</span><span>  NOTE           0x00000000000002c0 0x00000000002002c0 0x00000000002002c0
+</span><span>                 0x0000000000000030 0x0000000000000030  R      0x4
+</span><span>
+</span><span> Section to Segment mapping:
+</span><span>  段节...
+</span><span>   00
+</span><span>   01     .interp
+</span><span>   02     .interp .note.tag .dynsym .gnu.version .gnu.version_r .gnu.hash .hash .dynstr .rela.dyn .rela.plt .rodata .eh_frame_hdr .eh_frame
+</span><span>   03     .text .init .fini .plt
+</span><span>   04     .ctors .dtors .jcr .dynamic .got
+</span><span>   05     .data .got.plt .bss
+</span><span>   06     .dynamic
+</span><span>   07     .ctors .dtors .jcr .dynamic .got
+</span><span>   08     .eh_frame_hdr
+</span><span>   09
+</span><span>   10     .note.tag
+</span></code></pre>
+<p>在Linux下运行FreeBSD的程序就会提示<code>zsh: 没有那个文件或目录: sbin/zfs</code>,实际上是interpreter找不到的通用提示.(当然也很具有迷惑性,因为文件明明就在那里),</p>
+<p>当然把interpreter放过去也没有用,直接显示<code>[1]    18145 segmentation fault  sbin/zfs</code>, 可见Linux并不检查其他的东西就直接运行这个elf可执行文件,结果就是直接段错误. dmesg有如下日志:</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>[ 9734.919582] ld-elf.so.1[12587]: segfault at 0 ip 00007f28598cda3f sp 00007fffce706b38 error 4 in ld-elf.so.1[7f28598cd000+1a000]
+</span><span>[ 9734.919594] Code: 57 08 48 89 c7 5d e9 c0 58 00 00 55 48 89 e5 41 57 41 56 41 55 41 54 53 48 81 ec b8 0a 00 00 49 89 d4 48 8d 47 08 48 89 45 b8 &lt;48&gt; 8b 1f 48 89 d8 48 c1 e0 20 48 b9 00 00 00 00 01 00 00 00 48 01
+</span></code></pre>
+<h2 id="sao-cao-zuo">骚操作</h2>
+<p>通常不同的interpreter下的库不能相互加载,但是实际上是可以通过一些兼容层(shim)使他们共存.
+<a href="https://github.com/AdelieLinux/gcompat">AdelieLinux/gcompat</a> 这个项目实现了一个musl下的glibc的加载器,使得musl可以执行部分glibc的程序(通过补全符号的方式),但是实际使用上,由于不同libc之间不只是符号不同,ABI也不同,比如一些结构体的大小不一样,这样直接兼容是不太可能的.我实际测试来看,gcompat能在musl系统上执行nvidia驱动的<code>nvidia-smi</code>命令,但是启动Xorg会直接段错误.</p>
+<p>FreeBSD这边也有类似的骚操作: https://github.com/shkhln/nvshim 用Linux兼容层下的Nvidia驱动使得FreeBSD的程序用上Nvidia的Vulkan
+这里插播一句fxxk nvidia.总之这种操作实用价值不高.</p>
+<h2 id="elfde-abizi-duan">ELF的ABI字段</h2>
+<p>BSD更加接近Unix©,因此比Linux要严谨一些,至少会检查ABI的类型.这个信息位于ELF头的0x7位置,可以用<code>readelf -h</code>查看:</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>readelf -h zfs
+</span><span>ELF 头：
+</span><span>  Magic：  7f 45 4c 46 02 01 01 09 00 00 00 00 00 00 00 00
+</span><span>  类别:                              ELF64
+</span><span>  数据:                              2 补码，小端序 (little endian)
+</span><span>  Version:                           1 (current)
+</span><span>  OS/ABI:                            UNIX - FreeBSD
+</span><span>  ABI 版本:                          0
+</span><span>  类型:                              EXEC (可执行文件)
+</span><span>  系统架构:                          Advanced Micro Devices X86-64
+</span><span>  版本:                              0x1
+</span><span>  入口点地址：              0x20c000
+</span><span>  程序头起点：              64 (bytes into file)
+</span><span>  Start of section headers:          110648 (bytes into file)
+</span><span>  标志：             0x0
+</span><span>  Size of this header:               64 (bytes)
+</span><span>  Size of program headers:           56 (bytes)
+</span><span>  Number of program headers:         11
+</span><span>  Size of section headers:           64 (bytes)
+</span><span>  Number of section headers:         30
+</span><span>  Section header string table index: 29
+</span><span>$ readelf -h /sbin/zfs
+</span><span>ELF 头：
+</span><span>  Magic：  7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+</span><span>  类别:                              ELF64
+</span><span>  数据:                              2 补码，小端序 (little endian)
+</span><span>  Version:                           1 (current)
+</span><span>  OS/ABI:                            UNIX - System V
+</span><span>  ABI 版本:                          0
+</span><span>  类型:                              EXEC (可执行文件)
+</span><span>  系统架构:                          Advanced Micro Devices X86-64
+</span><span>  版本:                              0x1
+</span><span>  入口点地址：              0x20e000
+</span><span>  程序头起点：              64 (bytes into file)
+</span><span>  Start of section headers:          126648 (bytes into file)
+</span><span>  标志：             0x0
+</span><span>  Size of this header:               64 (bytes)
+</span><span>  Size of program headers:           56 (bytes)
+</span><span>  Number of program headers:         11
+</span><span>  Size of section headers:           64 (bytes)
+</span><span>  Number of section headers:         28
+</span><span>  Section header string table index: 27
+</span></code></pre>
+<p>Linux的ABI是默认的0号(System V), FreeBSD使用0x9,OpenBSD使用0xC,NetBSD使用0x2.但实际上0x3是分给Linux的,由于GNU的<a href="https://sourceware.org/bugzilla/show_bug.cgi?id=12913">一些混乱的操作</a>而没有用上.</p>
+<p>FreeBSD则靠这个来检查是否应该用linux兼容层来执行elf文件,还有一个程序<a href="https://www.freebsd.org/cgi/man.cgi?query=brandelf&amp;sektion=1&amp;manpath=freebsd-release-ports">brandelf</a>来修改ABI信息.</p>
+<h2 id="syscall-abibu-jian-rong">syscall ABI不兼容</h2>
+<p>更深层次的讲,Linux和FreeBSD内核的系统调用也互不兼容.Linux提供稳定的syscall ABI, FreeBSD在每一个大版本中保证内核和用户库的ABI都不变,但是不在版本间做出保证.FreeBSD的Linux兼容层内核模块就需要把Linux的系统调用翻译到FreeBSD上(非常类似windows10的WSL1).</p>
+<p>FreeBSD是开源的,Linux兼容层代码并不复杂,就是大量的转换代码:</p>
+<p>https://github.com/freebsd/freebsd/tree/master/sys/compat/linux</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/linux/">#Linux</a>
+                    
+                        <a href="https://12101111.github.io/tags/freebsd/">#FreeBSD</a>
+                    
+                        <a href="https://12101111.github.io/tags/elf/">#ELF</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;speedtest-net&#x2F;">‹ 逆向Speedtest.net 的API和协议</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-compile-zfs-on-root&#x2F;">LLVM cross-compiled Linux From Scratch: ZFS on root (Optional) ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 逆向Speedtest.net 的API和协议</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/speedtest-net/#dui-guan-wang-de-zhua-bao" class="toc-link">对官网的抓包</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/speedtest-net/#https-www-speedtest-net-api-js-servers-engine-js" class="toc-link">https:&#x2F;&#x2F;www.speedtest.net&#x2F;api&#x2F;js&#x2F;servers?engine=js</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/speedtest-net/#wss-ce-su-fu-wu-qi-host-ws" class="toc-link">wss:&#x2F;&#x2F;测速服务器host&#x2F;ws</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/speedtest-net/#https-ipv6-api-speedtest-net-getip" class="toc-link">https:&#x2F;&#x2F;ipv6-api.speedtest.net&#x2F;getip</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/speedtest-net/#https-ce-su-fu-wu-qi-host-hello" class="toc-link">https:&#x2F;&#x2F;测速服务器host&#x2F;hello</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/speedtest-net/#https-ce-su-fu-wu-qi-host-download" class="toc-link">https:&#x2F;&#x2F;测速服务器host&#x2F;download</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/speedtest-net/#https-ce-su-fu-wu-qi-host-upload" class="toc-link">https:&#x2F;&#x2F;测速服务器host&#x2F;upload</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/speedtest-net/#https-www-speedtest-net-api-results-php" class="toc-link">https:&#x2F;&#x2F;www.speedtest.net&#x2F;api&#x2F;results.php</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/speedtest-net/#tcp-websocket-xie-yi" class="toc-link">TCP &amp;&amp; Websocket 协议</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/speedtest-net/#xmlshu-ju" class="toc-link">XML数据</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/speedtest-net/#ke-hu-duan" class="toc-link">客户端</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;speedtest-net&#x2F;">逆向Speedtest.net 的API和协议</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-09-26</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>目前在国内乃至全球范围内能跑满5G移动网络全速下载的服务器也没有几个,然而Speedtest.net是一个例外.</p>
+<p>处于营销等目的,全国各地移动联通电信架设了多个(63个)Speedtest的测速服务器,其中命名包含5G的有15个(而且全球仅中国的服务器如此),可见运营商大概率在宣传5G网速时也会使用自己架设的Speedtest服务器,以接近理论上的峰值速度.</p>
+<p>处于自动化测速的考虑,需要研究Speedtest的测速机制并且命令行脚本化.</p>
+<span id="continue-reading"></span><h2 id="dui-guan-wang-de-zhua-bao">对官网的抓包</h2>
+<p>打开Speedtest.net,打开Chrome的开发人员工具,切换到<code>Network</code>标签页,点击筛选图标,发现如下API:</p>
+<h3 id="https-www-speedtest-net-api-js-servers-engine-js"><code>https://www.speedtest.net/api/js/servers?engine=js</code></h3>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>可选参数: `https_functional=1` 加和不加返回的值似乎不太一样
+</span><span>方法: `GET`
+</span><span>返回格式: JSON
+</span><span>内容: 距客户端最近的20个测速服务器的参数的数组
+</span></code></pre>
+<p>格式:</p>
+<pre data-lang="JSON" style="background-color:#fdf6e3;color:#657b83;" class="language-JSON "><code class="language-JSON" data-lang="JSON"><span>[{
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">url</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">http:</span><span style="color:#dc322f;">\/\/</span><span style="color:#2aa198;">5gtest.hl.chinamobile.com</span><span style="color:#dc322f;">\/</span><span style="color:#2aa198;">speedtest</span><span style="color:#dc322f;">\/</span><span style="color:#2aa198;">upload.php</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">lat</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">45.7500</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">lon</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">126.6333</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">distance</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#6c71c4;">11</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">name</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Harbin</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">country</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">China</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">cc</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">CN</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">sponsor</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">ChinaMobile-HeiLongjiang</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">id</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">26656</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">preferred</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#6c71c4;">0</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">host</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">5gtest.hl.chinamobile.com:8080</span><span style="color:#839496;">&quot;
+</span><span>}, {
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">url</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">http:</span><span style="color:#dc322f;">\/\/</span><span style="color:#2aa198;">speedtest2.jl.chinamobile.com:8080</span><span style="color:#dc322f;">\/</span><span style="color:#2aa198;">speedtest</span><span style="color:#dc322f;">\/</span><span style="color:#2aa198;">upload.php</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">lat</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">43.8800</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">lon</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">125.3228</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">distance</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#6c71c4;">134</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">name</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Changchun</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">country</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">China</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">cc</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">CN</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">sponsor</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">China Mobile,Jilin</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">id</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">16375</span><span style="color:#839496;">&quot;</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">preferred</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#6c71c4;">0</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">https_functional</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#6c71c4;">1</span><span>,
+</span><span>    </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">host</span><span style="color:#839496;">&quot;</span><span>: </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">speedtest2.jl.chinamobile.com:8080</span><span style="color:#839496;">&quot;
+</span><span>},</span><span style="background-color:#ec9489;color:#657b83;">...</span><span>]
+</span></code></pre>
+<h3 id="wss-ce-su-fu-wu-qi-host-ws">wss://测速服务器host/ws</h3>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>例如: wss://speedtest2.jl.chinamobile.com:8080/ws
+</span></code></pre>
+<p>消息内容:</p>
+<table><thead><tr><th>客户端</th><th>服务器</th><th>解释</th></tr></thead><tbody>
+<tr><td>HI</td><td>HELLO 2.7 (2.7.4) 2019-09-17.2311.4b191db</td><td>服务器软件版本号</td></tr>
+<tr><td>GETIP</td><td>YOURIP 111.40.48.197</td><td>获得客户端IP</td></tr>
+<tr><td>CAPABILITIES</td><td>CAPABILITIES SERVER_HOST_AUTH UPLOAD_STATS</td><td>获取服务器能力?</td></tr>
+<tr><td>PING</td><td>PONG 1569507473389</td><td>(注意PING后有一个空格)服务器返回UNIX时间戳</td></tr>
+<tr><td>PING 1569507472890</td><td>PONG 1569507473389</td><td></td></tr>
+<tr><td>PING 1569507472912</td><td>PONG 1569507473411</td><td></td></tr>
+<tr><td>PING 1569507472935</td><td>PONG 1569507473434</td><td>客户端会发起3次PING,最终被选中的服务器还会发起多次PING</td></tr>
+</tbody></table>
+<h3 id="https-ipv6-api-speedtest-net-getip">https://ipv6-api.speedtest.net/getip</h3>
+<p>方法: <code>GET</code></p>
+<p>返回了客户端的IPv6地址</p>
+<h3 id="https-ce-su-fu-wu-qi-host-hello">https://测速服务器host/hello</h3>
+<p>方法: <code>GET</code></p>
+<p>参数:</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>nocache=随机UUID
+</span><span>guid=SessionGUID
+</span></code></pre>
+<p>实际测试服务器不检查nocache=UUID(正如其名,防止运营商缓存内容)</p>
+<p>guid用于提交结果,应在一次测试中不变.</p>
+<p>响应:<code>hello 2.7 (2.7.4) 2019-09-17.2311.4b191db</code>即服务器版本号</p>
+<h3 id="https-ce-su-fu-wu-qi-host-download">https://测速服务器host/download</h3>
+<p>方法: <code>GET</code></p>
+<p>参数:</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>nocache=随机UUID
+</span><span>guid=SessionGUID
+</span><span>size=25000000
+</span></code></pre>
+<p>size会出现在响应头的Content-Length上,建议保持默认25MB.</p>
+<p>下载的内容为随机的字符串</p>
+<p>当使用多线程时,网页会以4-6线程发起GET请求,当23.8MiB下载完成时再次请求内容,但当15s固定时间到时会停止所有的下载.</p>
+<h3 id="https-ce-su-fu-wu-qi-host-upload">https://测速服务器host/upload</h3>
+<p>方法: <code>POST</code></p>
+<p>参数</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>nocache=随机UUID
+</span><span>guid=SessionGUID
+</span></code></pre>
+<p>建议Header:</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>Content-type: application/octet-stream
+</span><span>Content-Length: 目标上传大小
+</span></code></pre>
+<p>POST body中可以是任意随机字符串</p>
+<p>响应为:</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>size=收到的字节数
+</span></code></pre>
+<h3 id="https-www-speedtest-net-api-results-php">https://www.speedtest.net/api/results.php</h3>
+<p>方法: <code>POST</code></p>
+<p>表格数据: </p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>serverid: 16167
+</span><span>testmethod: wss,xhrs,xhrs
+</span><span>hash: c6de8e4d1142ae6368c474247913822f
+</span><span>source: st4-js
+</span><span>configs[latencyProtocol]: ws
+</span><span>configs[downloadProtocol]: xhr
+</span><span>configs[uploadProtocol]: xhr
+</span><span>configs[host]: speedtest1.ln.chinamobile.com.prod.hosts.ooklaserver.net
+</span><span>configs[port]: 8080
+</span><span>configs[serverVersion]: 2.7.4
+</span><span>configs[serverBuild]: 2019-09-17.2311.4b191db
+</span><span>ping: 18
+</span><span>jitter: 0.6666666666666666
+</span><span>upload: 760127
+</span><span>uploadSpeeds[remote][combined]: 95464417
+</span><span>uploadSpeeds[remote][average]: 91299851.36765888
+</span><span>uploadSpeeds[remote][mst_66_20]: 95125068
+</span><span>uploadSpeeds[remote][mst_66_30]: 95487869.89473684
+</span><span>uploadSpeeds[remote][mst_75_30]: 94791001.52380952
+</span><span>uploadSpeeds[remote][superspeed]: 96913920
+</span><span>uploadSpeeds[local][combined]: 95015855
+</span><span>uploadSpeeds[local][average]: 88915587.36009651
+</span><span>uploadSpeeds[local][mst_66_20]: 95222898.44444445
+</span><span>uploadSpeeds[local][mst_66_30]: 95015855.26315789
+</span><span>uploadSpeeds[local][mst_75_30]: 94903589.14285715
+</span><span>uploadSpeeds[local][superspeed]: 96372459.86666666
+</span><span>download: 186022
+</span><span>downloadSpeeds[local][combined]: 23252766
+</span><span>downloadSpeeds[local][average]: 22400172.935841
+</span><span>downloadSpeeds[local][mst_66_20]: 23357582.111111112
+</span><span>downloadSpeeds[local][mst_66_30]: 23252766.10526316
+</span><span>downloadSpeeds[local][mst_75_30]: 23397916
+</span><span>downloadSpeeds[local][superspeed]: 23957890.133333333
+</span><span>guid: 153842d5-114b-4004-a282-3de942a6b66f
+</span><span>closestPingDetails: [{&quot;server&quot;:9484,&quot;jitter&quot;:2,&quot;latency&quot;:27},{&quot;server&quot;:16375,&quot;jitter&quot;:1,&quot;latency&quot;:24},{&quot;server&quot;:16167,&quot;jitter&quot;:1,&quot;latency&quot;:16},{&quot;server&quot;:25204,&quot;jitter&quot;:2,&quot;latency&quot;:154},{&quot;server&quot;:6316,&quot;jitter&quot;:3,&quot;latency&quot;:244},{&quot;server&quot;:10177,&quot;jitter&quot;:0,&quot;latency&quot;:371},{&quot;server&quot;:7403,&quot;jitter&quot;:0,&quot;latency&quot;:413},{&quot;server&quot;:6375,&quot;jitter&quot;:1011.5,&quot;latency&quot;:475},{&quot;server&quot;:3805,&quot;error&quot;:{&quot;message&quot;:&quot;Error: failed latency test&quot;}},{&quot;server&quot;:20951,&quot;jitter&quot;:2.5,&quot;latency&quot;:494}]
+</span><span>clientip: 111.40.48.197
+</span><span>ip6Address: 2001::....
+</span><span>connections[isVpn]: false
+</span><span>connections[selectionMethod]: auto
+</span><span>connections[mode]: multi
+</span></code></pre>
+<h2 id="tcp-websocket-xie-yi">TCP &amp;&amp; Websocket 协议</h2>
+<p>根据一篇<a href="https://gist.github.com/sdstrowes/411fca9d900a846a704f68547941eb97">文章</a>,Speedtest除了具有HTTP XHR接口还存在TCP协议.</p>
+<p>TCP协议和Websocket协议经测试基本相同,因此一同介绍.</p>
+<p>此协议为文字协议(就像HTTP 1一样),因此可以使用命令行访问,TCP应使用netcat <code>nc</code> 程序,Websocket应使用<code>wscat</code>程序.</p>
+<p><code>wscat</code>可以使用<code>npm install -g wscat</code>安装.</p>
+<p>连接到测速服务器:</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">nc</span><span> 5gtest.hl.chinamobile.com 8080
+</span><span style="color:#93a1a1;"># 或者
+</span><span style="color:#b58900;">wscat</span><span style="color:#268bd2;"> -c</span><span> wss://speedtest2.jl.chinamobile.com:8080/ws
+</span></code></pre>
+<table><thead><tr><th>客户端</th><th>服务器</th><th>解释</th></tr></thead><tbody>
+<tr><td>HI</td><td>HELLO 2.7 (2.7.4) 2019-09-17.2311.4b191db</td><td>服务器软件版本号</td></tr>
+<tr><td>GETIP</td><td>YOURIP 111.40.48.197</td><td>获得客户端IP</td></tr>
+<tr><td>CAPABILITIES</td><td>CAPABILITIES SERVER_HOST_AUTH UPLOAD_STATS</td><td>获取服务器能力?</td></tr>
+<tr><td>PING+空格+任意字符串或为空</td><td>PONG 1569507473389</td><td>服务器返回UNIX时间戳</td></tr>
+<tr><td>DOWNLOAD 字节数</td><td>DOWNLOAD 随机字符串</td><td>下载内容,服务器会返回要求的字节数(包括DOWNLOAD本身)</td></tr>
+<tr><td>DOWNLOAD 5</td><td>DOWN\n</td><td>因此不足8字节时会返回不完整的单词</td></tr>
+<tr><td>UPLOAD 随机字符串</td><td>OK 字节数 时间戳</td><td>字节数包括UPLOAD以及换行符</td></tr>
+<tr><td>QUIT</td><td>仅用于TCP下,用于断开TCP链接</td><td></td></tr>
+</tbody></table>
+<h2 id="xmlshu-ju">XML数据</h2>
+<p>Speedtest还具有两个XML接口的API</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>https://www.speedtest.net/speedtest-config.php 客户端配置
+</span><span>http://www.speedtest.net/speedtest-servers-static.php 所有的服务器参数列表
+</span></code></pre>
+<h2 id="ke-hu-duan">客户端</h2>
+<p>根据TCP协议,目前编写/改造了一个命令行客户端:https://github.com/12101111/speedtestr</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/5g/">#5G</a>
+                    
+                        <a href="https://12101111.github.io/tags/rust/">#Rust</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;5g-wifi6&#x2F;">‹ 5G芯片及终端和WIFI6芯片及设备</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;linux-freebsd-elf-compat&#x2F;">为什么Linux不能运行FreeBSD的elf ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

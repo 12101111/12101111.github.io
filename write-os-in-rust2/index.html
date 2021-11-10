@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 使用Rust编写操作系统(二)</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/write-os-in-rust2/#biosshi-shi-yao-uefiyou-shi-shi-yao" class="toc-link">BIOS是什么，UEFI又是什么</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/write-os-in-rust2/#yi-ge-jian-dan-de-rust-uefixiang-mu" class="toc-link">一个简单的 Rust UEFI项目</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/write-os-in-rust2/#tui-chu-qi-dong-shi-huan-jing" class="toc-link">退出启动时环境</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust2&#x2F;">使用Rust编写操作系统(二)</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-09-01</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>众所周期,BIOS作为IBM PC工程师40年前随手写下的一段汇编代码,根本不会想到能用到现在.BIOS中充满了各种各样的hack和历史糟粕.BIOS只支持从MBR分区表的第一个扇区启动,很难安装到硬盘或U盘.甚至Intel即将于2020年在新的芯片上放弃对UEFI CSM的支持,这使得未来很难直接运行只支持BIOS的系统.可惜的是,直到今日,大多数自制x86平台操作系统的资料仍旧只支持BIOS。</p>
+<p>本文试图基于Rust操作系统开发中读者广泛的blog os系列文章提供一个能够在UEFI上运行的教学用OS.</p>
+<span id="continue-reading"></span><h2 id="biosshi-shi-yao-uefiyou-shi-shi-yao"><a href="https://12101111.github.io/diannao110/firmware/%E4%B8%BB%E6%9D%BF%E5%9B%BA%E4%BB%B6.html">BIOS是什么，UEFI又是什么</a></h2>
+<p>老狼的文章也写的很好: <a href="https://zhuanlan.zhihu.com/p/25941340">UEFI与硬件初始化</a> 和 <a href="https://zhuanlan.zhihu.com/p/25941528">UEFI架构</a></p>
+<p>这个表列举了一些概念的演进关系:</p>
+<table><thead><tr><th align="center">BIOS</th><th align="center">UEFI</th></tr></thead><tbody>
+<tr><td align="center">实模式</td><td align="center">保护模式</td></tr>
+<tr><td align="center">主引导记录(MBR)</td><td align="center">ESP系统分区+GPT</td></tr>
+<tr><td align="center">引导扇区</td><td align="center">UEFI应用</td></tr>
+<tr><td align="center">16位的BIOS中断</td><td align="center">UEFI服务调用</td></tr>
+<tr><td align="center">DOS COMMAND.COM</td><td align="center">UEFI shell</td></tr>
+</tbody></table>
+<p>对于操作系统开发的初期来说,UEFI大大简化了开发流程:</p>
+<ol>
+<li>直接编译成EFI应用程序,几乎就是Windows PE文件,不需要研究复杂的链接脚本.(Rust编译器以原生支持x86_64_uefi的编译目标)</li>
+<li>不需要使用16位汇编编写古怪的MBR汇编代码,也不需要修改磁盘的MBR/PBR</li>
+<li>如果要上机测试，不需要进固件设置打开UEFI CSM</li>
+</ol>
+<p>UEFi的服务调用使用Windows的C ABI,风格上是面向对象的,字符串使用UTF-16编码(到处充满了MS的气息).虽然Rust可用直接使用C ABI,但是满屏的<code>unsafe</code>总是很辣眼睛.Rust库<a href="https://github.com/rust-osdev/uefi-rs">rust-osdev/uefi-rs</a>对UEFI的常见调用提供了一个安全的抽象。</p>
+<h2 id="yi-ge-jian-dan-de-rust-uefixiang-mu">一个简单的 Rust UEFI项目</h2>
+<p>首先假设你使用的是Nightly版本的编译器,如果不是,在项目根目录加入内容为<code>nightly</code>,文件名为<code>rust-toolchain</code>的文件,Cargo会在此项目中默认使用Nightly版本的编译器.</p>
+<p>为了在Rust官方不提供预编译<code>stdlib</code>支持的平台上编译上编译Rust项目,需要安装<a href="https://github.com/rust-osdev/cargo-xbuild">cargo-xbuild</a>:<code>cargo install cargo-xbuild</code></p>
+<p>为了方便在qemu虚拟机中测试,我编写了一个工具: <a href="https://github.com/12101111/bootuefi">bootuefi</a>, 运行<code>cargo install bootuefi</code>即可安装.</p>
+<p>首先新建一个binary项目,在依赖中加入</p>
+<pre data-lang="TOML" style="background-color:#fdf6e3;color:#657b83;" class="language-TOML "><code class="language-TOML" data-lang="TOML"><span style="color:#268bd2;">uefi </span><span>= { </span><span style="color:#268bd2;">git </span><span>=  </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">https://github.com/rust-osdev/uefi-rs.git</span><span style="color:#839496;">&quot; </span><span>}
+</span></code></pre>
+<p>main.rs修改为：</p>
+<pre data-lang="rust" style="background-color:#fdf6e3;color:#657b83;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#93a1a1;">// 此平台没有std库
+</span><span>#![</span><span style="color:#268bd2;">no_std</span><span>]
+</span><span style="color:#93a1a1;">// 这个可执行程序不使用main作为入口点
+</span><span>#![</span><span style="color:#268bd2;">no_main</span><span>]
+</span><span style="color:#859900;">use </span><span>uefi::prelude::*;
+</span><span style="color:#859900;">use </span><span>core::fmt::Write;
+</span><span>
+</span><span style="color:#93a1a1;">// bug of compiler_builtins
+</span><span>#[</span><span style="color:#268bd2;">no_mangle</span><span>]
+</span><span style="color:#586e75;">pub </span><span style="color:#268bd2;">static</span><span> _fltused: </span><span style="color:#268bd2;">u32 </span><span>= </span><span style="color:#6c71c4;">0</span><span>;
+</span><span>
+</span><span style="color:#93a1a1;">// no_mangle表示不进行符号重整，而是直接使用此符号。
+</span><span style="color:#93a1a1;">// extern &quot;C&quot; 表示函数为C ABI的函数。
+</span><span style="color:#93a1a1;">// 返回值为！表示永远不会返回
+</span><span style="color:#93a1a1;">// efi_main是UEFI程序的标准入口点，参数image是UEFI程序的内存映像handle
+</span><span style="color:#93a1a1;">// 参数st是UEFI系统表，是所有启动时(boottime)服务的入口.
+</span><span>#[</span><span style="color:#268bd2;">no_mangle</span><span>]
+</span><span style="color:#586e75;">pub </span><span style="color:#859900;">extern </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">C</span><span style="color:#839496;">&quot; </span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">efi_main</span><span>(</span><span style="color:#268bd2;">image</span><span>: uefi::Handle, </span><span style="color:#268bd2;">st</span><span>: SystemTable&lt;Boot&gt;) -&gt; </span><span style="color:#859900;">! </span><span>{
+</span><span>    </span><span style="color:#268bd2;">let</span><span> stdout = st.</span><span style="color:#859900;">stdout</span><span>();
+</span><span>    stdout.</span><span style="color:#859900;">clear</span><span>();
+</span><span>    </span><span style="color:#859900;">write!</span><span>(stdout,</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Hello, world!</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>    </span><span style="color:#859900;">loop</span><span>{}
+</span><span>}
+</span><span>
+</span><span>#[</span><span style="color:#268bd2;">panic_handler</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">panic</span><span>(</span><span style="color:#268bd2;">info</span><span>: </span><span style="color:#859900;">&amp;</span><span>core::panic::PanicInfo) -&gt; </span><span style="color:#859900;">! </span><span>{
+</span><span>    </span><span style="color:#859900;">loop</span><span>{}
+</span><span>}
+</span></code></pre>
+<p>项目根目录下新建<code>.cargo/config</code>文件:</p>
+<pre data-lang="TOML" style="background-color:#fdf6e3;color:#657b83;" class="language-TOML "><code class="language-TOML" data-lang="TOML"><span>[</span><span style="color:#b58900;">build</span><span>]
+</span><span style="color:#268bd2;">target </span><span>= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">x86_64-unknown-uefi</span><span style="color:#839496;">&quot;
+</span><span>
+</span><span>[</span><span style="color:#b58900;">target</span><span>.</span><span style="color:#b58900;">x86_64-unknown-uefi</span><span>]
+</span><span style="color:#268bd2;">runner </span><span>= </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">bootuefi</span><span style="color:#839496;">&quot;
+</span></code></pre>
+<p>这样运行<code>cargo xbuild</code>会自动选择uefi作为目标平台，<code>cargo xrun</code>会自动使用<code>bootuefi</code>作为启动程序.</p>
+<p>由于QEMU不自带UEFI的固件,因此需要下载<code>OVMF</code>开源固件.部分Linux软件源含有此软件,如果没有,可以从<a href="https://www.kraxel.org/repos/jenkins/edk2/">Gerd Hoffmann's OVMF builds</a> 下载edk2.git-ovmf-x64*.noarch.rpm并解压得到<code>OVMF_CODE.fd</code>.默认的固件位置是项目根目录的<code>OVMF.fd</code>,可以参考<code>bootuefi</code>的<a href="https://github.com/12101111/bootuefi/blob/master/README.md">README</a>修改设置.</p>
+<p>运行<code>cargo xrun</code>,就可以在QEMU中运行这个项目了。</p>
+<p>屏幕上应该显示出&quot;Hello, World!&quot;.如果在符合UEFI规范的电脑上运行(关闭安全启动),应该会显示出相同的内容.</p>
+<h2 id="tui-chu-qi-dong-shi-huan-jing">退出启动时环境</h2>
+<p>UEFI应用程序是为了引导系统,更新固件,硬件检测等功能的,虽然借助UEFI Shell也可以当作DOS使用,但是这个环境存在大量的限制,不是真正的操作系统:</p>
+<p>1.不能运行驱动程序,不能修改中断描述符表,必须使用UEFI的驱动框架开发轮询式驱动.
+2.不能控制内存,内存分配由UEFI固件完成
+3.默认是单核单线程</p>
+<p>而真正的操作系统,必须要退出这个环境,也就是执行<code>EFI_BOOT_SERVICES.ExitBootServices()</code>.这时候, UEFI固件停止控制硬件,UEFI系统表会从启动时表变为运行时表,大多数功能失效.UEFI运行时服务只提供:</p>
+<ol>
+<li>硬件时钟:读取/修改</li>
+<li>修改页表映射后重映射UEFI的运行时代码和数据</li>
+<li>修改UEFI变量</li>
+<li>重启电脑</li>
+<li>下次启动时更新UEFI固件</li>
+</ol>
+<p>我们拥有了对整个电脑的控制权,同时也失去了大多数启动时便捷的服务,比如从键盘获得输入,在屏幕上显示输出,从硬盘加载文件,这意味着我们需要自己编写这些驱动.</p>
+<p>更加可怕的是,UEFI默认使用ACPI(高级配置和电源管理接口)用于枚举设备,乃至管理多CPU核的启动,使用APIC(高级可编程中断控制器)控制CPU和南桥的中断.大多数易读的资料都基于过时的8259PIC芯片编写键盘驱动,而现代的键盘都是USB的.这意味着我们可能要在数千页的UEFI/ACPI/USB/Intel的手册中翻查我们需要的资料。</p>
+<p>不过至少，我找到了一种在屏幕上显示的方法。</p>
+<p>参考链接: <a href="https://uefi.org/specifications">UEFI及ACPI标准</a></p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/rust/">#Rust</a>
+                    
+                        <a href="https://12101111.github.io/tags/os/">#OS</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;oldthing&#x2F;">‹ 计算机的旧事</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust3&#x2F;">使用Rust编写操作系统(三) ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

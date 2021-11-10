@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - Rust语言介绍</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/rustyu-yan-jie-shao/#te-xing" class="toc-link">特性</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/rustyu-yan-jie-shao/#wu-gc-wu-vm-ji-xiao-yun-xing-shi-wan-shan-de-bao-guan-li-gao-xiao-c-bang-ding" class="toc-link">无 GC &amp; 无 VM &amp; 极小运行时 &amp; 完善的包管理 &amp; 高效 C 绑定</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/rustyu-yan-jie-shao/#trait-fan-xing-mo-shi-pi-pei-bi-bao-ji-yu-yu-fa-de-hong-ling-kai-xiao-chou-xiang" class="toc-link">trait &amp; 泛型 &amp; 模式匹配 &amp; 闭包 &amp; 基于语法的宏 &amp; 零开销抽象</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/rustyu-yan-jie-shao/#bi-mian-duan-cuo-wu-xuan-chui-yin-yong-xian-cheng-shu-ju-jing-zheng-bao-zheng-nei-cun-an-quan" class="toc-link">避免段错误、悬垂引用、线程数据竞争，保证内存安全</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/rustyu-yan-jie-shao/#da-shi-jian" class="toc-link">大事件</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/rustyu-yan-jie-shao/#zhu-ming-xiang-mu" class="toc-link">著名项目</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rustyu-yan-jie-shao&#x2F;">Rust语言介绍</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2018-03-20</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>From Wikipedia：Rust是一个由Mozilla主导开发的通用、编译型编程语言。它的设计准则为“安全，并发，实用”，支持函数式，并发式，过程式以及面向对象的编程风格。Rust的语法与C++相似（我不这么认为），但它在维持高性能的情况下能保证内存安全。</p>
+<p>Rust语言官网：Rust 是一种系统编程语言。 它有着惊人的运行速度，能够防止段错误，并保证线程安全。</p>
+<p>Rust连续3年在stackoverflow <a href="https://insights.stackoverflow.com/survey/2018/#most-loved-dreaded-and-wanted">年度调查</a>中被评为最受喜爱的编程语言(the most loved programming language。)</p>
+<p>扩展阅读：<a href="https://blog.csdn.net/liigo/article/details/45757123">为什么我说Rust是靠谱的编程语言 by Liigo</a></p>
+<span id="continue-reading"></span><h1 id="te-xing">特性</h1>
+<h2 id="wu-gc-wu-vm-ji-xiao-yun-xing-shi-wan-shan-de-bao-guan-li-gao-xiao-c-bang-ding">无 GC &amp; 无 VM &amp; 极小运行时 &amp; 完善的包管理 &amp; 高效 C 绑定</h2>
+<p>Rust是编译型强类型语言,不是JavaScript、Python这种动态类型语言，也不是Java、C#这种需要虚拟机的语言，也不是Golang这种需要GC的语言。Rust的运行效率与C++相同甚至更好，而Rust的设计目标就是替代C、C++。</p>
+<p>在过去，如果向要写高性能，高实时性，或者接近底层的大型程序，我们几乎只能选择C、C++。出于开发效率的考虑，应用软件很少用汇编开发，使用纯C的也很少，而操作系统等底层软件更多的使用C语言，并伴随少量的汇编，几乎不会使用C++（似乎只有Google的Fuchsia使用阉割后的C++）。C++从1983年诞生以来，从C with classes，到C with template，再到C++11，编程范式几经改动，存在许多奇技淫巧，却始终摆脱不了C的影子，就像一辆50年前的跑车经过多次改装，从里到外都改成了21世纪的超跑，虽然开着炫酷，但很容易出故障。而Rust没有历史包袱，其设计上比c++科学的多，没有C++满身补丁的痕迹。</p>
+<p>Rust的运行时很小，为了底层开发甚至操作系统开发，减小平台移植难度，Rust在开发阶段砍掉标准库std中的许多重型功能，并建设了Rust包管理软件cargo，包托管网站crates.io，包文档的托管网站docs.rs，其中的许多包的质量和std一样高，使用也很方便。但Rust的std又不像C的库一样缺少基础设施，hashmap、统一api的多线程、网络功能都有。Rust还允许程序不使用std库，只使用平台无关的core库，以进行嵌入式和操作系统开发，也允许手动选择内存分配器（molloc）。</p>
+<p>Rust设计上无GC、VM让其很容易调用C代码，但Rust更近一步，实现了Rust与C、C++的高效双向调用。许多语言只能自己调用C库，并且有效率上的问题，但Rust可以和C无缝交流，既可以在Rust项目中使用C库，也能在C项目中使用Rust库。此外Rust也能和python，JavaScript,Ruby进行模块调用。</p>
+<h2 id="trait-fan-xing-mo-shi-pi-pei-bi-bao-ji-yu-yu-fa-de-hong-ling-kai-xiao-chou-xiang">trait &amp; 泛型 &amp; 模式匹配 &amp; 闭包 &amp; 基于语法的宏 &amp; 零开销抽象</h2>
+<p>Rust具有泛型，像C++一样，泛型函数会编译成不同类型的版本，而不是像Java一样抹去类型信息。Rust不像Java那样宣传everything is class，没有继承，有结构体并能为其实现方法。Rust 有像Java中的interface一样作用的trait，指定一个结构体需要实现哪些方法，并可以用在泛型中。Rust使用属性来自动实现一些trait，例如，</p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span>#[</span><span style="color:#268bd2;">derive</span><span>(PartialEq, Clone)]
+</span><span style="color:#268bd2;">struct </span><span style="color:#b58900;">Foo</span><span>&lt;T&gt; {
+</span><span>    </span><span style="color:#268bd2;">a</span><span>: </span><span style="color:#268bd2;">i32</span><span>,
+</span><span>    </span><span style="color:#268bd2;">b</span><span>: T,
+</span><span>}
+</span></code></pre>
+<p>编译器会为这个struct自动实现PartialEq, Clone。</p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span style="color:#268bd2;">impl</span><span>&lt;T: </span><span style="color:#859900;">PartialEq</span><span>&gt; PartialEq </span><span style="color:#859900;">for </span><span style="color:#b58900;">Foo</span><span>&lt;T&gt; {
+</span><span>    </span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">eq</span><span>(</span><span style="color:#859900;">&amp;</span><span style="color:#268bd2;">self</span><span>, </span><span style="color:#268bd2;">other</span><span>: </span><span style="color:#859900;">&amp;</span><span>Foo&lt;T&gt;) -&gt; </span><span style="color:#268bd2;">bool </span><span>{
+</span><span>        </span><span style="color:#d33682;">self</span><span>.a == other.a </span><span style="color:#859900;">&amp;&amp; </span><span style="color:#d33682;">self</span><span>.b == other.b
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">ne</span><span>(</span><span style="color:#859900;">&amp;</span><span style="color:#268bd2;">self</span><span>, </span><span style="color:#268bd2;">other</span><span>: </span><span style="color:#859900;">&amp;</span><span>Foo&lt;T&gt;) -&gt; </span><span style="color:#268bd2;">bool </span><span>{
+</span><span>        </span><span style="color:#d33682;">self</span><span>.a != other.a </span><span style="color:#859900;">|| </span><span style="color:#d33682;">self</span><span>.b != other.b
+</span><span>    }
+</span><span>}
+</span><span>
+</span><span style="color:#268bd2;">impl</span><span>&lt;T: </span><span style="color:#859900;">Clone</span><span>&gt; Clone </span><span style="color:#859900;">for </span><span style="color:#b58900;">Foo</span><span>&lt;T&gt; {
+</span><span>    </span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">clone</span><span>(</span><span style="color:#859900;">&amp;</span><span style="color:#268bd2;">self</span><span>) -&gt; Foo&lt;T&gt; {
+</span><span>        Foo {
+</span><span>            a: </span><span style="color:#d33682;">self</span><span>.a.</span><span style="color:#859900;">clone</span><span>(),
+</span><span>            b: </span><span style="color:#d33682;">self</span><span>.b.</span><span style="color:#859900;">clone</span><span>(),
+</span><span>        }
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Rust广泛的使用了枚举类型，Rust的枚举与C不同，更像是来自函数式编程语言的代数数据类型。最常见的两个枚举就是<code>Option</code>和<code>Result</code></p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span style="color:#268bd2;">enum </span><span style="color:#b58900;">Option</span><span>&lt;T&gt; {
+</span><span>    </span><span style="color:#859900;">Some</span><span>(T),
+</span><span>    </span><span style="color:#859900;">None</span><span>,
+</span><span>}
+</span></code></pre>
+<p><code>Option</code>代表了一种非常常见的场景：一个值要么是一个值，要么什么都不是。许多语言都含有空值<code>null</code>，但程序并不能像对待非空值那样对待空值。快速排序算法的作者，图灵奖得主，同时也是<code>NULL</code>的作者Tony Hoare认为他发明的<a href="http://jimhuang.cn/2015/09/12/%E8%93%A6%E7%84%B6%E5%9B%9E%E9%A6%96%E4%B8%87%E4%BA%8B%E7%A9%BA%20%E2%80%94%E2%80%94%E2%80%94%E2%80%94%E7%A9%BA%E6%8C%87%E9%92%88%E6%BC%AB%E8%B0%88/">空指针是一个十亿美元的错误</a>。我们要么到处使用<code>xxx!=null</code>，要么放弃治疗，自以为null不会出现，并放任程序可能某一天不知为什么的崩溃。Rust的Option就能解决这一表达问题。我们可以使用Option的方法提取到Some中的数据T，并根据需要在遇到None时崩溃<code>unwrap()</code>、返回默认值<code>unwrap_or(T)</code>、或执行闭包中的回调函数<code>let x = some_u8_option.unwrap_or_else(|| 2 * y)</code>,<code>|| 2 * y</code>是一个闭包，代表没有传入的参数，返回2*y，其中y的值应该出现在上文中，或者使用模式匹配：</p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span style="color:#859900;">match</span><span> some_option {
+</span><span>  </span><span style="color:#859900;">Some</span><span>(val) </span><span style="color:#859900;">=&gt; println!</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#cb4b16;">{}</span><span style="color:#839496;">&quot;</span><span>,val),
+</span><span>  </span><span style="color:#859900;">None =&gt; println!</span><span>(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">nothing find:(</span><span style="color:#839496;">&quot;</span><span>),
+</span><span>}
+</span></code></pre>
+<p>这样，编译器与程序员都可以清楚的知道何时会出现这种情况，并选择一种解决方案。</p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span style="color:#268bd2;">enum </span><span style="color:#b58900;">Result</span><span>&lt;T&gt; {
+</span><span>    </span><span style="color:#859900;">Ok</span><span>(T),
+</span><span>    </span><span style="color:#859900;">Err</span><span>(Error),
+</span><span>}
+</span></code></pre>
+<p><code>Result</code>则代表了另外一种常见情况：异常处理。Rust不使用try，catch这种处理方式，而是选择使用返回Result枚举，如果返回的是Ok，那么就Ok，如果是Error，那就需要处理错误，或者将错误再次返回——效果和try相同。</p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span style="color:#268bd2;">fn </span><span style="color:#b58900;">read_username_from_file</span><span>() -&gt; </span><span style="color:#859900;">Result</span><span>&lt;</span><span style="color:#859900;">String</span><span>, io::Error&gt; {
+</span><span>    </span><span style="color:#268bd2;">let</span><span> f = File::open(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">hello.txt</span><span style="color:#839496;">&quot;</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#268bd2;">let </span><span style="color:#586e75;">mut</span><span> f = </span><span style="color:#859900;">match</span><span> f {
+</span><span>        </span><span style="color:#859900;">Ok</span><span>(file) </span><span style="color:#859900;">=&gt;</span><span> file,
+</span><span>        </span><span style="color:#859900;">Err</span><span>(e) </span><span style="color:#859900;">=&gt; return Err</span><span>(e),
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#268bd2;">let </span><span style="color:#586e75;">mut</span><span> s = </span><span style="color:#859900;">String</span><span>::new();
+</span><span>
+</span><span>    </span><span style="color:#859900;">match</span><span> f.</span><span style="color:#859900;">read_to_string</span><span>(</span><span style="color:#859900;">&amp;</span><span style="color:#586e75;">mut</span><span> s) {
+</span><span>        </span><span style="color:#859900;">Ok</span><span>(</span><span style="color:#859900;">_</span><span>) </span><span style="color:#859900;">=&gt; Ok</span><span>(s),
+</span><span>        </span><span style="color:#859900;">Err</span><span>(e) </span><span style="color:#859900;">=&gt; Err</span><span>(e),
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>这么写很繁琐，Rust有专门的操作符来简化返回Err的语法</p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span style="color:#268bd2;">fn </span><span style="color:#b58900;">read_username_from_file</span><span>() -&gt; </span><span style="color:#859900;">Result</span><span>&lt;</span><span style="color:#859900;">String</span><span>, io::Error&gt; {
+</span><span>    </span><span style="color:#268bd2;">let </span><span style="color:#586e75;">mut</span><span> f = File::open(</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">hello.txt</span><span style="color:#839496;">&quot;</span><span>)</span><span style="color:#859900;">?</span><span>;
+</span><span>    </span><span style="color:#268bd2;">let </span><span style="color:#586e75;">mut</span><span> s = </span><span style="color:#859900;">String</span><span>::new();
+</span><span>    f.</span><span style="color:#859900;">read_to_string</span><span>(</span><span style="color:#859900;">&amp;</span><span style="color:#586e75;">mut</span><span> s)</span><span style="color:#859900;">?</span><span>;
+</span><span>    </span><span style="color:#859900;">Ok</span><span>(s)
+</span><span>}
+</span></code></pre>
+<p>以上两个函数的功能相同。你可能注意到函数最后没有使用return，因为Rust的语句是具有返回值的，我们无需在最后一行写return。<code>_</code>代表我们对这个表示符的名字不感兴趣。</p>
+<p>Rust也可以使用let进行匹配，例如<code>let (x,y)=(1,2)</code>，或者<code>if let Some(3) = some_u8_value { println!(&quot;three&quot;); } else { println!(&quot;not three&quot;); }</code></p>
+<p>Rust具有强大的宏系统。C语言的宏是基于文本替换的，很容易出现替换问题，而Rust的宏是基于语法单元进行展开的。宏可以自动生成代码。例如</p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span style="color:#859900;">macro_rules! </span><span style="color:#b58900;">find_min </span><span>{
+</span><span>    (</span><span style="color:#268bd2;">$x</span><span>:</span><span style="color:#268bd2;">expr</span><span>) </span><span style="color:#859900;">=&gt; </span><span>(</span><span style="color:#268bd2;">$x</span><span>);
+</span><span>    (</span><span style="color:#268bd2;">$x</span><span>:</span><span style="color:#268bd2;">expr</span><span>, </span><span style="color:#859900;">$</span><span>(</span><span style="color:#268bd2;">$y</span><span>:</span><span style="color:#268bd2;">expr</span><span>),</span><span style="color:#859900;">+</span><span>) </span><span style="color:#859900;">=&gt; </span><span>(
+</span><span>        std::cmp::min(</span><span style="color:#268bd2;">$x</span><span>, </span><span style="color:#859900;">find_min!</span><span>(</span><span style="color:#859900;">$</span><span>(</span><span style="color:#268bd2;">$y</span><span>),+))
+</span><span>    )
+</span><span>}
+</span></code></pre>
+<p>这个宏通过递归实现了寻找参数中最小值，普通的函数并不能接受任意个参数，而println!,pacnic!这样的宏就能接受任意多的参数。Rust的宏系统还没有完成，相关信息：<a href="https://github.com/rust-lang/rfcs/blob/master/text/1584-macros.md">RFC</a>,<a href="https://github.com/rust-lang/rust/issues/39412">Issue</a></p>
+<h2 id="bi-mian-duan-cuo-wu-xuan-chui-yin-yong-xian-cheng-shu-ju-jing-zheng-bao-zheng-nei-cun-an-quan">避免段错误、悬垂引用、线程数据竞争，保证内存安全</h2>
+<p>上面的特性听起来像Rust是重新造C++的轮子，只是语法不同，但这个特性成为超越C++的关键。写过C或C++的一定遇到过内存安全问题，这些各种各样奇怪的指针问题，常常要调试数个小时甚至数天，有时程序莫名其妙的崩溃，有时程序运行正常但含有安全漏洞，许多漏洞都是缓冲区溢出等等内存不安全问题。C发明时，计算机处理能力有限，内存也很有限（比现在几块钱的单片机还差），当时的共识是程序员有能力管理好内存。然而几十年过去了，内存从比尔盖茨口中的“640k的内存能做任何事情”到了几个GB，程序员在面对几十万行的代码时还能管理好内存吗？</p>
+<p>指针的存在就是为了访问指针指向的数据，由于C将内存数据的生命周期管理交给了程序员，因此C程序员必须手动使用指针、molloc和free维护数据的生命周期，然而人总会写出use after free的错误，因此Java、.NET、JavaScript、Python、Golang都使用垃圾回收算法来自动管理内存，然而，运行时也是人写的，Java runtime、IE、Flash这些平台运行时本身就是BUG大户，占据0day安全漏洞数量排行前3的地位。C++11之后,智能指针等特性让内存安全问题更不容易出现,但由于兼容性等原因,C++始终不能放弃裸指针的使用,也就不能保证安全,只能减少问题。</p>
+<p>Rustc禁止在unsafe外使用裸指针,也禁止产生空指针。Rust使用一套简单的概念，让Rustc编译器维护了类型的生命周期的问题。首先，Rust中的变量只有标识符的作用，不包含值，只有将资源<strong>绑定</strong>到标识符上变量才可以直接使用。例如<code>let x:i32=100</code>,就是将100这个i32的值绑定到x这个标识符上，如果我们只声明<code>let x:i32</code>，再试着打印x，编译器就会报错，而许多语言会使用默认值甚至是内存里的随机值。Rust的作用域为大括号级别的，如果局部变量离开作用域，会导致其绑定的资源销毁（<strong>drop</strong>），这是编译器自动插入并执行的，类似C++的析构，但我们不需要手动编写drop函数，这是通过所有权系统实现的。一个资源，无论是栈上的还是堆中的，都只能绑定到<em>一个</em>变量，即这个变量拥有了这个资源的<strong>所有权</strong>。只有拥有资源所有权的变量离开作用域了,资源才会被销毁。一个资源对应一个变量,Rustc在编译时就可以确定所有资源的<strong>生命周期</strong>,即从其创建到最后一个拥有它的变量离开作用域，这套系统也被称为RAII（Resource Acquisition Is Initialization，资源获取就是初始化），如果我们在生命周期外使用资源就会在编译时报错，而C++则是运行时。</p>
+<p>Rust中的绑定默认是immutable的，如果需要修改值，需要在声明时使用<code>mut</code>关键字，例如<code>let mut x:i32=100</code>。Rustc会追踪声明为<code>mut</code>但没有修改过的变量，并给出warning。</p>
+<p>有时候我们会把一个值赋给另一个变量，例如<code>let y=x</code>（Rust会自动判断类型），这时x的所有权会转移（<strong>move</strong>）给y，我们再试图访问x就会报错。不过，对一个类型实现了<strong>clone</strong>这个trait后，这个类型的数据在move时会clone自己再赋值到新变量上，原变量仍然可以访问，大多数栈上的原始类型都实现的clone。</p>
+<p>如何在不获得所有权的情况下访问一个不能clone的资源呢，Rust提供了<strong>借用</strong>。借用（borrowing）也叫引用（reference），但与其他语言不同，在同一个作用域中，只能出现一个可变引用，如 <code>let y = &amp;mut x</code>(x必须是可变的)，或多个不可变的引用，如<code>let y = &amp;x； let z = &amp;x</code>。借用不会转移所有权，因此函数如果不想转移所有权，就必须将参数声明为引用。借用的生命周期必须处在所有者的生命周期内，否则会出现编译错误。存在借用时，所有者不能更改资源，也不能转移所有权。整个借用系统的检查是在编译时完成的。</p>
+<p>有些时候，Rustc不能推断出函数的参数与返回值之间的生命周期关系，例如<code>fn foo(x: &amp;str，y: &amp;str) -&gt; &amp;str</code>，Rustc不知道返回值来源于x还是y，会指出：</p>
+<pre data-lang="Rust" style="background-color:#fdf6e3;color:#657b83;" class="language-Rust "><code class="language-Rust" data-lang="Rust"><span>error: missing lifetime specifier [</span><span style="color:#cb4b16;">E0106</span><span>]
+</span><span style="color:#268bd2;">fn </span><span style="color:#b58900;">foo</span><span>(</span><span style="color:#268bd2;">x</span><span>: </span><span style="color:#859900;">&amp;</span><span style="color:#268bd2;">str</span><span>, </span><span style="color:#268bd2;">y</span><span>: </span><span style="color:#859900;">&amp;</span><span style="color:#268bd2;">str</span><span>) -&gt; </span><span style="color:#859900;">&amp;</span><span style="color:#268bd2;">str </span><span>{
+</span><span>                            </span><span style="color:#859900;">^~~~
+</span></code></pre>
+<p>我们可以修改为<code>fn foo&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str</code>，<code>'a</code>代表生命周期，表示如果x，y都在a这个生命周期下，返回值就一直有效，或者指明<code>fn foo&lt;'a, 'b: 'a&gt;(x: &amp;'a str, y: &amp;'b str) -&gt; &amp;'a str</code>y的生命周期更长，因此返回值的生命周期至多为x的生命周期。</p>
+<p>生命周期语法在新手看来非常复杂，相比起C++手动管理生命周期，写几个标记并不是难事。Rust开发人员正在努力的减少无法推断的生命周期类型。</p>
+<p>有时候，Rust的安全检查阻止我们实现一些功能，例如编写操作系统的内存管理模块，我们需要指针这样的功能。Rust含有<code>unsafe</code>关键字，在unsafe的代码块下，Rust额外可以：</p>
+<p>解引用裸指针
+调用不安全的函数或方法
+访问或修改可变静态变量
+实现不安全 trait</p>
+<p>裸指针忽略借用规则，且允许为空，unsafe需要我们自行判断裸指针是否指向合法内存，需要手动free裸指针的内存。我们可以通过放弃Rust提供的安全保证换来对其他语言或硬件的访问。注意，unsafe不代表不安全，只是说内存安全需要由程序员维护。</p>
+<p>C语言/C++发明时CPU还都是单核心，而现在CPU核心数越来越多，再加上超线程技术，应用程序势必要走向多线程，然而<a href="https://hacks.mozilla.org/2017/06/avoiding-race-conditions-in-sharedarraybuffers-with-atomics/#data-race">竞争</a>的存在使得使用C++编写程序很容易出现bug。Servo是Mozilla开发的多线程并行浏览器引擎，也是唯一一个并行浏览器引擎，为什么是唯一一个呢，因为使用C++根本没用办法写出没有bug的并行浏览器来。(这里的并行指的是每一个网页的解析、渲染、运行是并行的，大多数浏览器是每个网页一个进程，但这个进程的并行度不高) Servo的CSS渲染引擎成为Firefox57的默认引擎后，其CSS渲染性能提升100%以上（<a href="https://hacks.mozilla.org/2017/08/inside-a-super-fast-css-engine-quantum-css-aka-stylo/">技术细节</a>）。</p>
+<p>Rust通过<code>Send+Sync</code>这两个trait处理多线程问题。这两个trait没有定义任何方法，<code>Send</code>表示为如果<code>T：Send</code>，将T move到另一个线程，能保证所有权能安全的转移到新的线程并与原线程解耦，不会使原线程use after free或可以同时访问同一块内存等内存安全问题。<code>Sync</code>表示为如果<code>T：Sync</code>，将&amp;T send到另一个线程，不会出现竞争问题。显然，<code>T:Sync</code>等于<code>&amp;T：Send</code>，<code>Sync+Copy=Send</code>，<code>send</code>和<code>sync</code>不能手动实现，基本上所有的原始类型都是<code>Send+Sync</code>的，由原始类型与结构体、枚举组合成的类型也是<code>Send+Sync</code>的，而且是自动实现的，无需写任何代码。但标准库中有一些类型不是<code>Sync</code>或<code>Send</code>的，它们的底层使用了unsafe的Rust（按照Rust的内存安全措施写不出这些类型）。裸指针既不是<code>Send</code>也不是<code>Sync</code>,手动实现Send和Sync需要unsafe块，但我们可以指定一个类型为<code>！Send</code>或<code>！Sync</code>，无需unsafe。尽管Rust标准库和第三方包中使用了许多多线程API，但其中的安全性都是基于这套系统的。</p>
+<h1 id="da-shi-jian">大事件</h1>
+<ul>
+<li>2006年Mozilla员工Graydon Hoare基于OCaml发起了Rust项目.</li>
+<li>2009年，Mozilla开始赞助这个项目。</li>
+<li>2010年，Rust编译器源码从OCaml转到Rust，次年完成自举，编译器被命名为Rustc，后端为LLVM。</li>
+<li>2012年，Rust首个大型项目，由mozilla和三星发起的Servo浏览器引擎开始编写，其目标是创造一个安全的并行浏览器引擎。Rust与Servo项目相互发展，共享一部分开发者。</li>
+<li>2012年，Rust 0.1<a href="https://github.com/rust-lang/rust/blob/master/RELEASES.md">发布</a>,基本语言功能完善。</li>
+<li>2014年，分离core库与std库，以面向嵌入式与操作系统开发。</li>
+<li>2015年，Rust放弃绿色线程与垃圾回收库，删除运行时库。</li>
+<li>2015年，经过12个0.x，2个alpha版本，Rust1.0.0发布，这3年内每个版本改动均在一千以上。Rust承诺在2.0之前不破坏API兼容性。</li>
+<li>2016年，Servo发布预览版0.0.1。</li>
+<li>2017年，Servo部分代码进入Firefox正式版，如CSS渲染引擎Stylo</li>
+</ul>
+<h1 id="zhu-ming-xiang-mu">著名项目</h1>
+<ul>
+<li><a href="https://github.com/rust-lang/rust">Rustc,编译器</a></li>
+<li><a href="https://github.com/servo/servo">servo,并行浏览器内核</a></li>
+<li><a href="https://redox-os.org/">redox,纯Rust编写的GUI类unix微内核操作系统</a></li>
+<li><a href="https://tokio.rs/">tokio,事件驱动的非阻塞网络IO库</a></li>
+<li><a href="https://github.com/actix/actix-web">hyper,Web框架</a></li>
+<li><a href="https://github.com/Keats/gutenberg">gutenberg,类似hexo的静态博客</a></li>
+<li><a href="https://github.com/ctz/rustls">rustls,安全的TLS库</a></li>
+<li><a href="https://github.com/way-cooler/way-cooler">way-cooler,wayland窗口合成器</a></li>
+<li><a href="https://github.com/BurntSushi/ripgrep">ripgrep,最快的文本搜索命令行程序</a></li>
+<li><a href="https://github.com/koute/stdweb">stdweb,客户端JavaScript/WebAssembly框架</a></li>
+<li><a href="https://github.com/atom/xray">xray，下一代atom编辑器</a></li>
+<li><a href="https://github.com/google/xi-editor">xi-editor，Google员工发起的前后端分离的编辑器</a></li>
+<li><a href="https://github.com/jwilm/alacritty">alacritty,GPU加速的终端模拟器</a></li>
+<li><a href="https://github.com/pingcap/tikv">tikv,数据库(TiDB的一部分，国产)</a></li>
+<li><a href="https://github.com/PistonDevelopers/piston">piston,游戏引擎</a></li>
+<li><a href="https://github.com/helena-project/tock">tockos,嵌入式操作系统</a></li>
+</ul>
+<p>使用Rust的商业项目见<a href="https://www.rust-lang.org/zh-CN/friends.html">Rust官网的页面</a></p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/rust/">#Rust</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;bluescreen&#x2F;">‹ 遇到Windows蓝屏的解决思路</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;gitcang-ku-sun-pi&#x2F;">记一次git仓库损坏的经历 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

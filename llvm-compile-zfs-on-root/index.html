@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - LLVM cross-compiled Linux From Scratch: ZFS on root (Optional)</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#mian-xiang-du-zhe" class="toc-link">面向读者</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#zfs-on-linuxnei-he-mo-kuai" class="toc-link">ZFS on linux内核模块</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#zfs-guan-li-gong-ju" class="toc-link">ZFS 管理工具</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#libtirpc" class="toc-link">libtirpc</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#zlib" class="toc-link">zlib</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#libressl" class="toc-link">libressl</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#util-linux" class="toc-link">util-linux</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#zfs-on-linux-gong-ju" class="toc-link">zfs on linux 工具</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#xiu-gai-initramfs" class="toc-link">修改initramfs</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-zfs-on-root/#pei-zhi-zfswen-jian-xi-tong" class="toc-link">配置ZFS文件系统</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-compile-zfs-on-root&#x2F;">LLVM cross-compiled Linux From Scratch: ZFS on root (Optional)</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-08-26</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>本文章是LLVM编译Linux系统的第三篇文章,以一个实际场景介绍如何使用LLVM/Clang/musl工具链编译出适合于启动根分区在ZFS文件系统的Linux系统.</p>
+<p>ZFS原是Solaris操作系统的文件系统,由Open Solaris项目以CDDL协议开源,随后Oracle收购Sun,将Solaris转为闭源系统,原开发者以illumos为名继续开发开源的Solaris系统,并创建OpenZFS项目继续ZFS的开发.ZFS先后被移植到FreeBSD,Linux,macOS和Windows.</p>
+<p>然而在Linux平台,由于CDDL开源协议和GPLv2协议都要求衍生代码不得更改许可证,因而互不兼容,
+这导致分发包含ZFS on Linux的Linux内核存在法律风险.
+同样的,由于有可能被Oracle起诉,Torvalds linus拒绝合并ZFS到Linux,除非Oracle以GPLv2重新发布ZFS的代码.
+ZFS一直以树外代码的形式开发,正如nvidia这样的闭源驱动一样在用户计算机上通过DKMS编译成为内核模块.
+但实际上用户可以将Linux和ZFS的代码混合,并将ZFS编译进内核而不是模块(注意,这样的内核不能分发给他人).</p>
+<p>但即使将ZFS编译为内置模块,Linux也不能不使用initramfs直接从ZFS分区上启动(比如通过启动参数指定启动分区),<a href="https://github.com/zfsonlinux/zfs/issues/4300">此问题有待日后解决</a>,目前需要一个initramfs在用户空间挂载根分区.</p>
+<p>本文将使用之前编译的LLVM工具链编译内核与initramfs工具.</p>
+<span id="continue-reading"></span><h2 id="mian-xiang-du-zhe">面向读者</h2>
+<p>本文主要面向ZFS用户或潜在用户,希望从ZFS分区启动,希望自己编译Linux并制作initramfs.</p>
+<p>本文应该只适合于x86_64架构,aarch64平台由于内联汇编的编译错误无法进行.</p>
+<h2 id="zfs-on-linuxnei-he-mo-kuai">ZFS on linux内核模块</h2>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://github.com/openzfs/zfs/releases/download/zfs-2.0.0-rc1/zfs-2.0.0-rc1.tar.gz | tar xvz &amp;&amp; cd zfs-2.0.0-rc1
+</span></code></pre>
+<p>如果在Alpine中, 打1个补丁：</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>sed -i &#39;s/KERNEL_DIR=&quot;$(readlink --canonicalize-existing &quot;$1&quot;)&quot;/KERNEL_DIR=&quot;$1&quot;/g&#39; copy-builtin
+</span></code></pre>
+<p>另一个补丁:</p>
+<pre data-lang="diff" style="background-color:#fdf6e3;color:#657b83;" class="language-diff "><code class="language-diff" data-lang="diff"><span>diff --git a/config/kernel.m4 b/config/kernel.m4
+</span><span>index ec52f014a..4b2f31cc3 100644
+</span><span style="color:#93a1a1;">--- a/config/kernel.m4
+</span><span style="color:#93a1a1;">+++ b/config/kernel.m4
+</span><span style="color:#268bd2;">@@ -571,7 +571,7 @@ </span><span style="color:#cb4b16;">dnl #
+</span><span> AC_DEFUN([ZFS_LINUX_COMPILE], [
+</span><span>        AC_TRY_COMMAND([
+</span><span>            KBUILD_MODPOST_NOFINAL=&quot;$5&quot; KBUILD_MODPOST_WARN=&quot;$6&quot;
+</span><span style="color:#dc322f;">-           make modules -k -j$TEST_JOBS -C $LINUX_OBJ $ARCH_UM
+</span><span style="color:#859900;">+           make CC=$CC modules -k -j$TEST_JOBS -C $LINUX_OBJ $ARCH_UM
+</span><span>            M=$PWD/$1 &gt;$1/build.log 2&gt;&amp;1])
+</span><span>        AS_IF([AC_TRY_COMMAND([$2])], [$3], [$4])
+</span><span> ])
+</span></code></pre>
+<p>配置zfs以生成配置文件,使用zfs提供的脚本将内核源码复制到Linux根目录,然后重新编译Linux.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>./configure --host $TARGET --enable-linux-builtin --with-config=kernel --with-linux=$DISTDIR/linux
+</span><span>./copy-builtin $DISTDIR/linux
+</span><span>cd $DISTDIR/linux
+</span><span>echo &#39;CONFIG_ZFS=y&#39; &gt;&gt; .config
+</span><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j4
+</span></code></pre>
+<h2 id="zfs-guan-li-gong-ju">ZFS 管理工具</h2>
+<p>zfs需要4个依赖库,将这些库编译为动态库.</p>
+<h3 id="libtirpc">libtirpc</h3>
+<p>tirpc是SUN rpc(远程过程调用)的开源实现.tirpc需要一个纯C语言头文件实现的队列操作库,集成于glibc,
+但是由于不属于任何C 标准,没有在musl中集成.NetBSD有一个便携的实现,需要下载到sysroot.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://jaist.dl.sourceforge.net/project/libtirpc/libtirpc/1.2.6/libtirpc-1.2.6.tar.bz2 | tar xvj &amp;&amp; cd libtirpc-1.2.6
+</span><span>./configure --host=x86_64-linux-musl --prefix= --disable-gssapi --disable-ipv6 --disable-static
+</span><span>wget https://raw.githubusercontent.com/NetBSD/src/trunk/sys/sys/queue.h -qO $SYSROOT/include/sys/queue.h
+</span><span>make -j7
+</span><span>DESTDIR=$SYSROOT make install
+</span></code></pre>
+<h3 id="zlib">zlib</h3>
+<p>zlib是一个广泛使用的压缩库.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://nchc.dl.sourceforge.net/project/libpng/zlib/1.2.11/zlib-1.2.11.tar.xz | tar xvJ &amp;&amp; cd zlib-1.2.11
+</span><span>CC=x86_64-linux-musl-clang ./configure --prefix= --shared
+</span><span>make
+</span><span>DESTDIR=$SYSROOT make install
+</span></code></pre>
+<h3 id="libressl">libressl</h3>
+<p>libressl是OpenBSD维护的OpenSSL的fork.我们需要其中的libcrypto和libssl用于加密解密操作.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-3.2.1.tar.gz | tar xvz &amp;&amp; cd libressl-3.2.1
+</span><span>mkdir build &amp;&amp; cd build &amp;&amp; cmake ../ -G Ninja -DCMAKE_C_COMPILER=clang -DCMAKE_EXE_LINKER_FLAGS=&quot;$LDFLAGS&quot; -DCMAKE_C_COMPILER_TARGET=$TARGET -DCMAKE_SYSROOT=$SYSROOT -DCMAKE_INSTALL_PREFIX=$SYSROOT -DCMAKE_INSTALL_LIBDIR=&quot;lib&quot; -DLIBRESSL_APPS=OFF -DLIBRESSL_TESTS=OFF -DBUILD_SHARED_LIBS=ON
+</span><span>ninja
+</span><span>ninja install
+</span></code></pre>
+<h3 id="util-linux">util-linux</h3>
+<p>util-linux是包含很多linux专有的(而非是POSIX或其他Unxi-like也有的)工具.我们不需要这些工具(很多包含于busybox中),而是其中的两个库:<code>libblkid</code>,用于获取磁盘的信息,<code>libuuid</code>,用于生成UUID.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.36/util-linux-2.36.tar.xz | tar xvJ &amp;&amp; cd util-linux-2.36
+</span><span>./configure --host=x86_64-linux-musl --prefix= --disable-static --disable-all-programs --enable-libblkid --enable-libuuid
+</span><span>make -j7
+</span><span>DESTDIR=$SYSROOT make install
+</span></code></pre>
+<h3 id="zfs-on-linux-gong-ju">zfs on linux 工具</h3>
+<p>最终编译zfs的工具,我们主要需要其中的<code>zpool</code>和<code>zfs</code>命令.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR/zfs-2.0.0-rc1
+</span><span>export PKG_CONFIG_LIBDIR=$SYSROOT/lib/pkgconfig
+</span><span>export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
+</span><span>./configure --prefix= --with-config=user --host=x86_64-linux-musl --disable-systemd --disable-sysvinit  --without-udevdir --without-udevruledir --disable-nls --disable-static --disable-pyzfs --disable-rpath
+</span><span>make -j7
+</span><span>DESTDIR=$SYSROOT make install
+</span></code></pre>
+<h2 id="xiu-gai-initramfs">修改initramfs</h2>
+<p>将编译好的zfs可执行程序复制到对应目录,并移除其<code>rpath</code>。</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>for i in zfs zdb zpool mount.zfs;do
+</span><span>  cp $SYSROOT/sbin/$i $INITRAMFS/sbin/
+</span><span>  patchelf --remove-rpath $INITRAMFS/sbin/$i
+</span><span>done
+</span></code></pre>
+<p>查看这些程序的依赖</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>$ readelf -d $INITRAMFS/sbin/* | grep &quot;Shared library&quot; | sort | uniq
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libblkid.so.1]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libc.so]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libcrypto.so.46]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libnvpair.so.1]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libtirpc.so.3]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libuuid.so.1]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libuutil.so.1]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libz.so.1]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libzfs.so.2]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libzfs_core.so.1]
+</span><span>  0x0000000000000001 (NEEDED)             Shared library: [libzpool.so.2]
+</span></code></pre>
+<p>使用命令复制这些依赖：</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>for i in $(readelf -d $INITRAMFS/sbin/* | grep &quot;Shared library&quot; | sort | uniq | sed &#39;s/^[ ]*0x[01]* (NEEDED)[ ]*Shared library: \[\(lib[a-z_]*.so\.\?[0-9]*\)\].*/\1/g&#39;); do
+</span><span>    cp $SYSROOT/lib/$i $INITRAMFS/lib
+</span><span>done
+</span></code></pre>
+<h2 id="pei-zhi-zfswen-jian-xi-tong">配置ZFS文件系统</h2>
+<p>在大多数情况下,系统的<code>/{etc,bin,sbin,lib}</code>必须在initramfs中挂载,这样真正的init(OpenRC,SysV RC或systemd)才能继续执行启动过程.init也应该启用ZFS提供的挂载服务来挂载所有的挂载点.
+如果<code>/sbin/zfs</code>依赖<code>/usr/lib</code>中的库,则<code>/usr/lib</code>也应该在initramfs中挂载,
+否则会出现<code>zfs</code>无法执行的问题.下面是我的配置,仅供参考.
+在initramfs中挂载的dataset的<code>mountpoint</code>属性应设置为<code>legacy</code>,
+否则只能使用<code>zfs mount</code>命令挂载到真正的挂载点而不是相对于<code>newroot</code>的挂载点.</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>$ zfs list
+</span><span>NAME             USED  AVAIL     REFER  MOUNTPOINT
+</span><span>data             228G  97.9G      104K  /data
+</span><span>data/binpkgs    2.46G  97.9G     2.46G  /var/cache/binpkgs
+</span><span>data/ccache     23.8G  97.9G     23.8G  /var/cache/ccache
+</span><span>data/distfiles  9.36G  97.9G     9.36G  /var/cache/distfiles
+</span><span>data/gentoo     7.10G  97.9G     7.10G  legacy
+</span><span>data/home        167G  97.9G      167G  /home
+</span><span>data/musl       13.2G  97.9G     12.4G  legacy
+</span><span>data/portage    1.42G  97.9G     1.32G  /usr/portage
+</span><span>data/src        3.63G  97.9G     3.63G  /usr/src
+</span><span>data/tmp         104K  97.9G      104K  /usr/tmp
+</span></code></pre>
+<p>修改init.请根据实际情况调整挂载dataset的命令.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>#!/bin/busybox sh
+</span><span>
+</span><span>export BOX=&quot;/bin/busybox&quot;
+</span><span>export PATH=&quot;/bin:/sbin&quot;
+</span><span>
+</span><span>rescue_shell() {
+</span><span>    echo &quot;Something went wrong: fail to $1. Dropping to a shell.&quot;
+</span><span>    [ -e /proc/cmdline ] || $BOX mount -t proc none /proc || echo &quot;Fatal error: unable to mount procfs&quot;
+</span><span>    [ -d /sys/class ] || $BOX mount -t sysfs none /sys || echo &quot;Fatal error: unable to mount sysfs&quot;
+</span><span>    $BOX mkdir -p /usr/bin
+</span><span>    $BOX mkdir -p /usr/sbin
+</span><span>    export PATH=&quot;/bin:/sbin:/usr/bin:/usr/sbin&quot;
+</span><span>    $BOX --install -s
+</span><span>    setsid cttyhack ash
+</span><span>    echo &quot;Now poweroff.&quot;
+</span><span>    sleep 10
+</span><span>    poweroff -f
+</span><span>}
+</span><span>
+</span><span>cmdline() {
+</span><span>    local value
+</span><span>    value=&quot; $(cat /proc/cmdline) &quot;
+</span><span>    value=&quot;${value##* ${1}=}&quot;
+</span><span>    value=&quot;${value%% *}&quot;
+</span><span>    [ -n &quot;${value}&quot; ] &amp;&amp; echo &quot;${value}&quot;
+</span><span>}
+</span><span>
+</span><span>echo &quot;==&gt; Setup initramfs&quot;
+</span><span>
+</span><span>$BOX mount -t proc none /proc || rescue_shell &quot;mount procfs&quot;
+</span><span>$BOX mount -t sysfs none /sys || rescue_shell &quot;mount sysfs&quot;
+</span><span>$BOX mount -t devtmpfs devtmpfs /dev || rescue_shell &quot;mount devtmpfs&quot;
+</span><span>$BOX mkdir /dev/pts || rescue_shell &quot;mkdir /dev/pts&quot;
+</span><span>$BOX mount -t devpts /dev/pts /dev/pts || rescue_shell &quot;mount devpts&quot;
+</span><span>
+</span><span>echo 0 &gt; /proc/sys/kernel/printk
+</span><span>
+</span><span>if [ -n &quot;$(cmdline failsafe)&quot; ]; then
+</span><span>    rescue_shell &quot;boot&quot;
+</span><span>fi
+</span><span>
+</span><span>echo &quot;==&gt; Import ZFS pool&quot;
+</span><span>export ZPOOL_IMPORT_UDEV_TIMEOUT_MS=0
+</span><span>zpool import -Naf || rescue_shell &quot;import zpool&quot;
+</span><span>
+</span><span>echo &quot;zpool list:&quot;
+</span><span>zpool list || rescue_shell &quot;list zpool&quot;
+</span><span>
+</span><span>echo &quot;==&gt; Mount root dataset&quot;
+</span><span>
+</span><span>export ROOT=&quot;$(cmdline ROOT)&quot;
+</span><span>
+</span><span>echo &quot;kernel cmdline: ROOT=${ROOT}&quot;
+</span><span>
+</span><span>[ -z &quot;${ROOT}&quot; ] &amp;&amp; export ROOT=&quot;gentoo&quot;
+</span><span>
+</span><span>echo &quot;use dataset: /data/$ROOT&quot;
+</span><span>
+</span><span>$BOX mkdir /newroot || rescue_shell &quot;mkdir /newroot&quot;
+</span><span>mount.zfs data/$ROOT /newroot || rescue_shell &quot;mount /&quot;
+</span><span>mount.zfs data/$ROOT/usr /newroot/usr || rescue_shell &quot;mount /usr&quot;
+</span><span>mount.zfs data/$ROOT/var /newroot/var || rescue_shell &quot;mount /var&quot;
+</span><span>
+</span><span>echo &quot;==&gt; Clean up&quot;
+</span><span>$BOX umount /sys || rescue_shell &quot;umount /sys&quot;
+</span><span>$BOX umount /proc || rescue_shell &quot;umount /proc&quot;
+</span><span>
+</span><span>echo &quot;==&gt; Switch root and execute init&quot;
+</span><span>exec $BOX switch_root /newroot /sbin/init || rescue_shell &quot;switch_root&quot;
+</span><span>
+</span><span>rescue_shell &quot;Failed to run /sbin/init&quot;
+</span></code></pre>
+<p>最终的文件列表为:</p>
+<pre data-lang="txt" style="background-color:#fdf6e3;color:#657b83;" class="language-txt "><code class="language-txt" data-lang="txt"><span>.
+</span><span>├── bin
+</span><span>│  └── busybox
+</span><span>├── dev
+</span><span>│  ├── console
+</span><span>│  ├── null
+</span><span>│  ├── random
+</span><span>│  ├── tty
+</span><span>│  ├── urandom
+</span><span>│  └── zero
+</span><span>├── etc
+</span><span>│  └── mtab -&gt; /proc/self/mounts
+</span><span>├── init
+</span><span>├── lib
+</span><span>│  ├── ld-musl-x86_64.so.1 -&gt; libc.so
+</span><span>│  ├── libblkid.so.1
+</span><span>│  ├── libc.so
+</span><span>│  ├── libcrypto.so.46
+</span><span>│  ├── libnvpair.so.1
+</span><span>│  ├── libssl.so.1.1
+</span><span>│  ├── libtirpc.so.3
+</span><span>│  ├── libudev.so.1
+</span><span>│  ├── libuuid.so.1
+</span><span>│  ├── libuutil.so.1
+</span><span>│  ├── libz.so.1
+</span><span>│  ├── libzfs.so.2
+</span><span>│  ├── libzfs_core.so.1
+</span><span>│  └── libzpool.so.2
+</span><span>├── proc
+</span><span>├── sbin
+</span><span>│  ├── mount.zfs
+</span><span>│  ├── zdb
+</span><span>│  ├── zfs
+</span><span>│  └── zpool
+</span><span>└── sys
+</span></code></pre>
+<p>重新编译Linux内核.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR/linux
+</span><span>rm usr/initramfs_data.cpio* built-in.a
+</span><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j13
+</span></code></pre>
+<p>这样,编译完的Linux内核就可以直接从UEFI Shell中启动,并启动ZFS中的系统.
+如果启动失败,就会进入busybox的shell界面,可以使用<code>zfs</code>命令手动挂载根文件系统到<code>/newroot</code>,
+然后手动执行<code>exec switch_root /newroot /sbin/init</code></p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/linux/">#Linux</a>
+                    
+                        <a href="https://12101111.github.io/tags/llvm/">#LLVM</a>
+                    
+                        <a href="https://12101111.github.io/tags/zfs/">#ZFS</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;linux-freebsd-elf-compat&#x2F;">‹ 为什么Linux不能运行FreeBSD的elf</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;linux-bsd-comparison&#x2F;">庆祝OpenBSD 25周年与OpenBSD 6.8, NetBSD 9.1, FreeBSD 12.2发布, 有关Unix,BSD与Linux的看法 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 记一次git仓库损坏的经历</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/gitcang-ku-sun-pi/#bei-jing" class="toc-link">背景</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/gitcang-ku-sun-pi/#wen-ti-de-chan-sheng" class="toc-link">问题的产生</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/gitcang-ku-sun-pi/#ti-xing" class="toc-link">提醒</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;gitcang-ku-sun-pi&#x2F;">记一次git仓库损坏的经历</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2018-03-30</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <span id="continue-reading"></span><h1 id="bei-jing">背景</h1>
+<p>我的manjaro Linux滚动更新后nVidia显卡HDMI输出出现了问题,暂时无法解决,因此开发环境切换到Windows.环境搭建的很顺利.</p>
+<h1 id="wen-ti-de-chan-sheng">问题的产生</h1>
+<p>今日在执行git commit时提交的信息中包含了大量垃圾信息(换行符从LF换掉CRLF)又没有注意到,提交后发现commit message与我预想的不对,随后又发现所有行后面都加上了Windows的换行符,因此打算撤回这次commit,更改换行符到LF再重新commit.于是终端中执行.</p>
+<pre data-lang="sh" style="background-color:#fdf6e3;color:#657b83;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b58900;">git</span><span> log
+</span><span style="color:#b58900;">git</span><span> reset</span><span style="color:#268bd2;"> --mixed </span><span>&lt;commit-hash&gt;
+</span></code></pre>
+<p>理论上执行很快就能完成,但不巧的是Windows卡住然后蓝屏了,经调查蓝屏原因是nvme SSD接口故障.硬盘错误可能会导致数据损坏,果然,再打开仓库时,git说这不是一个有效的git仓库</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>$ git status
+</span><span>fatal: 不是一个 git 仓库（或者向上递归至挂载点 /mnt 的任何祖先目录）
+</span><span>停止在文件系统边界（未设置 GIT_DISCOVERY_ACROSS_FILESYSTEM）
+</span></code></pre>
+<p>然而<code>.git</code>文件夹还在那里,推测git仓库的部分文件损坏.由于最近两次的commit都没有提交,因此需要从这些文件中找回写过的代码,要不然就要重写.</p>
+<!--more-->
+<p>查看损坏的repo中workspace中的文件,全部变成了乱码的二进制文件.找到Linux中的历史版本,使用diff工具比较<code>.git</code>,<code>objects</code>文件夹即为数据文件, 不要更改, 查找其他乱码的文件, 发现以下文件损坏, 使用旧仓库的覆盖.</p>
+<ul>
+<li>.git/index</li>
+<li>.git/config</li>
+<li>.git/HEAD</li>
+</ul>
+<p><code>.git/HEAD</code>的内容为<code>ref: refs/heads/master</code>, 打开正常仓库的<code>.git/refs/heads/master</code>, 里面为commit-hash, 打开损坏仓库的<code>.git/logs/refs/heads/master</code>, 发现内容正常, 为commit的历史, 将最后一次的hash复制到<code>.git/refs/heads/master</code>, 再执行<code>git reset --hard &lt;commit-hash&gt;</code>, 文件成功恢复.</p>
+<h1 id="ti-xing">提醒</h1>
+<p><code>.git</code>中的文件在正常情况下不要手动修改, 除非出现这种事故.</p>
+<p>本地仓库commit后就应该push到远程仓库, 防止文件损坏.</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/git/">#Git</a>
+                    
+                        <a href="https://12101111.github.io/tags/windows/">#Windows</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rustyu-yan-jie-shao&#x2F;">‹ Rust语言介绍</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;hello-world&#x2F;">Hello World Again And use gutenberg ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - LLVM cross-compiled Linux From Scratch: C &amp; C++ libraries</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#mian-xiang-du-zhe" class="toc-link">面向读者</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#shi-yao-shi-gong-ju-lian" class="toc-link">什么是工具链</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#wei-shi-yao-shi-yong-llvm" class="toc-link">为什么使用LLVM</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#an-zhuang-llvm-clang" class="toc-link">安装LLVM&#x2F;Clang</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#example-an-zhuang-alpine-linux-chroothuan-jing" class="toc-link">Example: 安装Alpine Linux chroot环境</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#huan-jing-bian-liang-yu-gong-zuo-wen-jian-jia" class="toc-link">环境变量与工作文件夹</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#an-zhuang-linuxtou-wen-jian" class="toc-link">安装Linux头文件</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#an-zhuang-musl-libcde-tou-wen-jian" class="toc-link">安装musl libc的头文件</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#jiao-cha-bian-yi-compiler-rt-builtins" class="toc-link">交叉编译Compiler-RT builtins</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#bian-yi-musl-libc" class="toc-link">编译musl libc</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#bian-yi-llvm-libunwind" class="toc-link">编译LLVM libunwind</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#bian-yi-libc-he-libc-abi" class="toc-link">编译libc++和libc++abi</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-cross-compile/#jie-shu" class="toc-link">结束</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-cross-compile&#x2F;">LLVM cross-compiled Linux From Scratch: C &amp; C++ libraries</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-11-09</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>本系列文章将介绍如何使用LLVM工具链组装一个可用的Linux发行版. 本文已经更新以适应LLVM 13发生的一些变化.</p>
+<h2 id="mian-xiang-du-zhe">面向读者</h2>
+<p>本文假定读者可以熟练的使用Unix-like系统,具有一定的C/C++编程能力,具有编译开源软件的经验.</p>
+<h2 id="shi-yao-shi-gong-ju-lian">什么是工具链</h2>
+<p>工具链,即一套具有工作顺序,可以编译出软件的工具.某些教科书上讲的&quot;编译-&gt;汇编-&gt;链接&quot;这一过程就粗略的描述了工具链的工作过程.</p>
+<p>广义上讲,工具链除了编译期,汇编器,链接器还包含一些所有程序都会使用的库.</p>
+<p>GNU工具链和LLVM工具链的对比:</p>
+<table><thead><tr><th>项目</th><th>GNU工具链</th><th>LLVM工具链</th></tr></thead><tbody>
+<tr><td>C 编译器</td><td><code>gcc</code></td><td><code>clang</code></td></tr>
+<tr><td>C++编译器</td><td><code>g++</code></td><td><code>clang++</code></td></tr>
+<tr><td>binutils</td><td>GNU binutils</td><td>LLVM binutils</td></tr>
+<tr><td>汇编器</td><td>GNU <code>as</code></td><td>集成汇编器</td></tr>
+<tr><td>链接器</td><td><code>ld.bfd</code>, <code>ld.gold</code></td><td>LLVM linker <code>ld.lld</code></td></tr>
+<tr><td>运行时(intrinsics)</td><td><code>libgcc</code></td><td><code>compiler-rt</code></td></tr>
+<tr><td>原子操作</td><td><code>libatomic</code></td><td><code>compiler-rt</code></td></tr>
+<tr><td>C 语言库</td><td>GNU libc <code>glibc</code></td><td>LLVM libc</td></tr>
+<tr><td>C++ 标准库</td><td><code>libstdc++</code></td><td><code>libc++</code></td></tr>
+<tr><td>C++ ABI</td><td><code>Libsupcxx</code></td><td><code>libc++abi</code></td></tr>
+<tr><td>栈展开(unwind)</td><td><code>libgcc_s</code></td><td>LLVM <code>libunwind</code></td></tr>
+</tbody></table>
+<span id="continue-reading"></span>
+<ol>
+<li><a href="https://llvm.org/docs/Proposals/LLVMLibC.html">LLVM libc</a>由Google发起,仍处于早期阶段,gcc和clang皆可使用glibc,musl,BSD libc等开源C语言库,或者Apple或Windows提供的闭源C语言库.</li>
+<li>LLVM项目的汇编器命令行前端集成在Clang中,使用<code>clang -c</code>命令行来使用,<code>llvm-as</code>用于编译LLVM IR,而不是各个平台的汇编.clang集成的汇编器声称与GNU as语法相互兼容,但是在x86之外的架构仍有不兼容之处.</li>
+<li>编译器运行时库提供了内建函数(intrinsics或builtins),这些函数提供复杂算数运算的实现.这些运算可能不能转换为单一汇编指令,而是翻译为一段C或汇编函数.</li>
+<li>有三种栈展开库都以<code>libunwind</code>命名,分别由LLVM,nongnu.org和PathScale开发,它们与<code>libgcc_s</code>都能提供 Itanium C++ ABI要求的<code>_Unwind_*</code>系列函数.libgcc_s.so的功能同时包含builtin和libunwind.</li>
+<li>更多详情见LLVM文档:<a href="https://clang.llvm.org/docs/Toolchain.html">工具链</a></li>
+</ol>
+<p>由于各个库的API或ABI并不相同,因此闭源软件/预编译软件很大可能不能在LLVM工具链产生的系统上工作.例如:</p>
+<p>1.Nvidia专有驱动的用户态组件.
+2.QQ Linux版等闭源软件.</p>
+<p>由于部分开源软件使用了GNU的C语言非标准扩展,因此暂时无法使用LLVM/musl编译.例如Chromium和Electron等软件需要十来个补丁才能编译通过.(本人已经成功将electron移植到musl平台下)</p>
+<h2 id="wei-shi-yao-shi-yong-llvm">为什么使用LLVM</h2>
+<p>通常一份GNU工具链只能针对一个目标进行编译,但是LLVM是天生的交叉编译器,一份LLVM工具链可以同时为不同的目标编译.</p>
+<p>要验证这一点,可以查看<code>llc --version</code>的输出,以下是我的结果:</p>
+<pre data-lang="txt" style="background-color:#fdf6e3;color:#657b83;" class="language-txt "><code class="language-txt" data-lang="txt"><span>&gt; llc --version
+</span><span>LLVM (http://llvm.org/):
+</span><span>  LLVM version 13.0.0libcxx
+</span><span>  Optimized build.
+</span><span>  Default target: x86_64-gentoo-linux-musl
+</span><span>  Host CPU: skylake
+</span><span>
+</span><span>  Registered Targets:
+</span><span>    aarch64    - AArch64 (little endian)
+</span><span>    aarch64_32 - AArch64 (little endian ILP32)
+</span><span>    aarch64_be - AArch64 (big endian)
+</span><span>    amdgcn     - AMD GCN GPUs
+</span><span>    arm        - ARM
+</span><span>    arm64      - ARM64 (little endian)
+</span><span>    arm64_32   - ARM64 (little endian ILP32)
+</span><span>    armeb      - ARM (big endian)
+</span><span>    avr        - Atmel AVR Microcontroller
+</span><span>    bpf        - BPF (host endian)
+</span><span>    bpfeb      - BPF (big endian)
+</span><span>    bpfel      - BPF (little endian)
+</span><span>    hexagon    - Hexagon
+</span><span>    lanai      - Lanai
+</span><span>    mips       - MIPS (32-bit big endian)
+</span><span>    mips64     - MIPS (64-bit big endian)
+</span><span>    mips64el   - MIPS (64-bit little endian)
+</span><span>    mipsel     - MIPS (32-bit little endian)
+</span><span>    msp430     - MSP430 [experimental]
+</span><span>    nvptx      - NVIDIA PTX 32-bit
+</span><span>    nvptx64    - NVIDIA PTX 64-bit
+</span><span>    ppc32      - PowerPC 32
+</span><span>    ppc32le    - PowerPC 32 LE
+</span><span>    ppc64      - PowerPC 64
+</span><span>    ppc64le    - PowerPC 64 LE
+</span><span>    r600       - AMD GPUs HD2XXX-HD6XXX
+</span><span>    riscv32    - 32-bit RISC-V
+</span><span>    riscv64    - 64-bit RISC-V
+</span><span>    sparc      - Sparc
+</span><span>    sparcel    - Sparc LE
+</span><span>    sparcv9    - Sparc V9
+</span><span>    systemz    - SystemZ
+</span><span>    thumb      - Thumb
+</span><span>    thumbeb    - Thumb (big endian)
+</span><span>    wasm32     - WebAssembly 32-bit
+</span><span>    wasm64     - WebAssembly 64-bit
+</span><span>    x86        - 32-bit X86: Pentium-Pro and above
+</span><span>    x86-64     - 64-bit X86: EM64T and AMD64
+</span><span>    xcore      - XCore
+</span></code></pre>
+<p>这意味着这份LLVM工具链可以为上面列出来的架构编译.</p>
+<p>而对于GCC来说,GCC的源代码虽然支持许多平台,但是编译完成的GCC却只支持一个目标.同时自举GCC交叉编译器要多次编译GCC,及其耗时.</p>
+<p>而我们只要安装一份LLVM/Clang,就可以同时为多个目标编译.</p>
+<h2 id="an-zhuang-llvm-clang">安装LLVM/Clang</h2>
+<p>本文需要主机上已经安装了一份现代的Linux发行版,以及<em>必要</em>的开发工具(如ArchLinux的<code>base-devel</code>),并且安装了Clang,LLVM,Compiler-rt和lld, 建议版本号大于10.0,本文以13.0.0为例.</p>
+<p>本文在Archlinux,Alpine Linux,Gentoo Linux和Termux下测试.</p>
+<p>本文不支持在Debian/Ubuntu/CentOS等发行版上运行,因为其打包的LLVM许多路径和程序名需要进行调整.建议使用<a href="https://wiki.alpinelinux.org/wiki/Alpine_Linux_in_a_chroot">Alpine</a>进行操作.</p>
+<h2 id="example-an-zhuang-alpine-linux-chroothuan-jing">Example: 安装Alpine Linux chroot环境</h2>
+<p>本节介绍如何使用chroot安装一个Alpine环境. 也可以使用<a href="https://wiki.archlinux.org/title/systemd-nspawn">systemd-nspawn</a>, docker, lxc等容器工具设置此类环境, 但chroot终究是最通用且传统的方法.</p>
+<p>以root用户执行以下命令</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>export CHROOT=/var/chroot/alpine
+</span><span>wget -qO- http://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main/x86_64/apk-tools-static-2.12.7-r3.apk | tar xvzC /tmp
+</span><span>mkdir -pv $CHROOT
+</span><span>/tmp/sbin/apk.static -X http://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main -U --allow-untrusted --root $CHROOT --initdb add alpine-base
+</span><span>echo &quot;http://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main&quot; &gt;&gt; $CHROOT/etc/apk/repositories
+</span><span>echo &quot;http://mirrors.tuna.tsinghua.edu.cn/alpine/edge/community/&quot; &gt;&gt; $CHROOT/etc/apk/repositories
+</span></code></pre>
+<p>你可以根据自身情况设置<code>CHROOT</code>变量,决定该chroot环境的安装地址.</p>
+<p>注意开头的<code>apk-tools-static</code>的链接可能因版本号变动而失效, 可以通过查看<a href="https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/main/x86_64/">清华大学开源软件镜像站 Alpine Linux edge 文件列表页面</a>找到该工具的最新版链接.</p>
+<p>挂载虚拟文件系统.每次重启系统后都需要运行一次.</p>
+<pre data-lang="sh" style="background-color:#fdf6e3;color:#657b83;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b58900;">mount</span><span> /dev /var/chroot/alpine/dev</span><span style="color:#268bd2;"> --bind
+</span><span style="color:#b58900;">mount</span><span style="color:#268bd2;"> -o</span><span> remount,ro,bind /var/chroot/alpine/dev
+</span><span style="color:#b58900;">mount</span><span style="color:#268bd2;"> -t</span><span> proc none /var/chroot/alpine/proc
+</span><span style="color:#b58900;">mount</span><span style="color:#268bd2;"> -o</span><span> bind /sys /var/chroot/alpine/sys
+</span><span style="color:#b58900;">cp</span><span> /etc/resolv.conf /var/chroot/alpine/etc/
+</span></code></pre>
+<p>进入chroot环境</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>chroot /var/chroot/alpine/ /bin/ash -l
+</span></code></pre>
+<p>安装需要的软件包. 请注意alpine并没有更新到llvm13, 因此下文所有的llvm13都应该被替换为llvm12.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>apk update
+</span><span>apk add make cmake ninja llvm12 llvm12-dev llvm12-static clang lld gcc musl-dev rsync python3 ncurses-dev flex bison perl linux-headers libressl-dev elfutils-dev autoconf automake libtool lz4 compiler-rt compiler-rt-static
+</span></code></pre>
+<p>这些软件分别有以下作用:</p>
+<ol>
+<li>GNU make: Linux,musl以及其他软件的构建工具</li>
+<li>cmake: LLVM使用cmake作为构建工具</li>
+<li>ninja: ninja与cmake配合可以加快构建速度.samurai是兼容ninja的工具,ninja使用C++编写,而samurai使用C编写.</li>
+<li>gcc,musl-dev: 编译主机(Host)程序.</li>
+<li>rsync: 安装Linux头文件</li>
+<li>python3: LLVM构建脚本</li>
+<li>ncurses-dev: Linux的<code>menuconfig</code>/<code>nconfig</code>配置菜单的依赖.</li>
+<li>flex,bison,perl,linux-headers,libressl-dev,elfutils-dev: Linux的编译时依赖</li>
+<li>autoconf automake libtool: autotools工具,用于重新生成configure脚本</li>
+<li>lz4: 压缩initramfs</li>
+</ol>
+<h2 id="huan-jing-bian-liang-yu-gong-zuo-wen-jian-jia">环境变量与工作文件夹</h2>
+<p>首先选择编译目标三元组(target triple),格式:CPU架构-制造商(可忽略或为unknown)-操作系统-libc库</p>
+<p>如果想编译在PC上运行的系统,使用<code>x86_64-linux-musl</code>.如果想在ARM开发板或者手机(chroot)上运行,使用<code>aarch64-linux-musl</code>.armv7的Soc应该选择<code>armv7-linux-musleabihf</code>.其他架构请自行查询合适的目标.</p>
+<p>在shell中执行以下内容</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#93a1a1;">#替换为要使用的目标
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">TARGET</span><span>=</span><span style="color:#2aa198;">aarch64-linux-musl
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">CROSS_COMPILE</span><span>=</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">TARGET</span><span>}</span><span style="color:#2aa198;">-
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">SYSROOT</span><span>=</span><span style="color:#859900;">$</span><span style="color:#268bd2;">HOME</span><span style="color:#2aa198;">/</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">TARGET</span><span>}</span><span style="color:#2aa198;">/sysroot
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">INITRAMFS</span><span>=</span><span style="color:#859900;">$</span><span style="color:#268bd2;">HOME</span><span style="color:#2aa198;">/</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">TARGET</span><span>}</span><span style="color:#2aa198;">/initramfs
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">DISTDIR</span><span>=</span><span style="color:#859900;">$</span><span style="color:#268bd2;">HOME</span><span style="color:#2aa198;">/</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">TARGET</span><span>}</span><span style="color:#2aa198;">/build
+</span></code></pre>
+<p>建立工作文件夹.<code>sysroot</code>用于存放自举需要使用的库文件和头文件.<code>initramfs</code>用于存放initramfs的根文件系统.<code>distdir</code>用于存放下载的源代码和编译的中间产物.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>mkdir -pv $SYSROOT
+</span><span>mkdir -pv $INITRAMFS
+</span><span>mkdir -pv $DISTDIR
+</span></code></pre>
+<p>根据传统习惯建立工具链的符号链接.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>export XDG_BIN=$HOME/.local/bin
+</span><span>mkdir -pv $XDG_BIN
+</span><span>ln -s `which lld` $XDG_BIN/${CROSS_COMPILE}ld
+</span><span>ln -s `which lld` $XDG_BIN/${CROSS_COMPILE}ld.lld
+</span><span>ln -s `which clang` $XDG_BIN/${CROSS_COMPILE}gcc
+</span><span>ln -s `which clang` $XDG_BIN/${CROSS_COMPILE}clang
+</span><span>ln -s `which clang++` $XDG_BIN/${CROSS_COMPILE}g++
+</span><span>ln -s `which clang++` $XDG_BIN/${CROSS_COMPILE}clang++
+</span><span>for i in ar nm objcopy objdump ranlib strip;do
+</span><span>  ln -s `which llvm-$i` $XDG_BIN/${CROSS_COMPILE}$i
+</span><span>done
+</span><span>export PATH=&quot;$XDG_BIN:$PATH&quot;
+</span></code></pre>
+<p>将以下内容保存到<code>$HOME/${TARGET}/env</code>中.</p>
+<p><code>COMMON_FLAGS</code>需要根据目标CPU进行调整, <code>-tune=cortex-a76</code>表示针对skylake微架构优化,可用的值可以运行<code>$ARCH-linux-musl-clang --print-supported-cpus</code>查看.对于arm平台,如果内存较小,可以使用<code>Os</code>而不是<code>O2</code>.</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#93a1a1;">#替换为要使用的目标
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">TARGET</span><span>=</span><span style="color:#2aa198;">aarch64-linux-musl
+</span><span style="color:#93a1a1;">#或者
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">TARGET</span><span>=</span><span style="color:#2aa198;">x86_64-linux-musl
+</span><span>
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">CROSS_COMPILE</span><span>=</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">TARGET</span><span>}</span><span style="color:#2aa198;">-
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">SYSROOT</span><span>=</span><span style="color:#859900;">$</span><span style="color:#268bd2;">HOME</span><span style="color:#2aa198;">/</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">TARGET</span><span>}</span><span style="color:#2aa198;">/sysroot
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">INITRAMFS</span><span>=</span><span style="color:#859900;">$</span><span style="color:#268bd2;">HOME</span><span style="color:#2aa198;">/</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">TARGET</span><span>}</span><span style="color:#2aa198;">/initramfs
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">DISTDIR</span><span>=</span><span style="color:#859900;">$</span><span style="color:#268bd2;">HOME</span><span style="color:#2aa198;">/</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">TARGET</span><span>}</span><span style="color:#2aa198;">/build
+</span><span>
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">COMMON_FLAGS</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">-mcpu=cortex-a76 -O2 -pipe --sysroot=</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">SYSROOT</span><span>}</span><span style="color:#839496;">&quot;
+</span><span style="color:#93a1a1;">#或者
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">COMMON_FLAGS</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">-march=skylake -mtune=skylake -O2 -pipe --sysroot=</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">SYSROOT</span><span>}</span><span style="color:#839496;">&quot;
+</span><span>
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">CFLAGS</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">COMMON_FLAGS</span><span>}</span><span style="color:#839496;">&quot;
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">CXXFLAGS</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">COMMON_FLAGS</span><span>}</span><span style="color:#2aa198;"> -stdlib=libc++</span><span style="color:#839496;">&quot;
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">LDFLAGS</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">-fuse-ld=lld -rtlib=compiler-rt -flto=thin</span><span style="color:#839496;">&quot;
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">XDG_BIN</span><span>=</span><span style="color:#859900;">$</span><span style="color:#268bd2;">HOME</span><span style="color:#2aa198;">/.local/bin
+</span><span style="color:#586e75;">export </span><span style="color:#268bd2;">PATH</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#859900;">$</span><span style="color:#268bd2;">XDG_BIN</span><span style="color:#2aa198;">:</span><span style="color:#859900;">$</span><span style="color:#268bd2;">PATH</span><span style="color:#839496;">&quot;
+</span></code></pre>
+<p>导入这些环境变量到当前的shell</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>source $HOME/aarch64-linux-musl/env
+</span></code></pre>
+<h2 id="an-zhuang-linuxtou-wen-jian">安装Linux头文件</h2>
+<p>首先下载Linux源代码.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://mirrors.tuna.tsinghua.edu.cn/kernel/v5.x/linux-5.15.1.tar.xz | tar xvJ &amp;&amp; mv linux-5.15.1 linux &amp;&amp; cd linux
+</span></code></pre>
+<p>对于树莓派,从Github获取Linux源码.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; git clone --depth=1 --branch rpi-5.15.y https://github.com/raspberrypi/linux &amp;&amp; cd linux
+</span></code></pre>
+<p>其他开发板根据情况选择主线内核或BSP内核。</p>
+<p>然后安装头文件:</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>make ARCH=arm64 INSTALL_HDR_PATH=$SYSROOT headers_install #这一步需要rsync
+</span></code></pre>
+<h2 id="an-zhuang-musl-libcde-tou-wen-jian">安装musl libc的头文件</h2>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://musl.libc.org/releases/musl-1.2.2.tar.gz | tar xvz &amp;&amp; cd musl-1.2.2
+</span><span>./configure --prefix=/
+</span><span>DESTDIR=$SYSROOT make install-headers
+</span></code></pre>
+<h2 id="jiao-cha-bian-yi-compiler-rt-builtins">交叉编译Compiler-RT builtins</h2>
+<p>如果你没有在交叉编译,则不需要这一步骤.请确认存在<code>/usr/lib/clang/13.0.0/lib/linux/libclang_rt.builtins-*.a</code>这一文件(clang版本号可能有所不同).例如<code>libclang_rt.builtins-x86_64.a</code>或<code>libclang_rt.builtins-aarch64.a</code></p>
+<p>如果没有目标平台的文件,则需要编译<code>compiler-rt</code>.下面以aarch64架构为例.</p>
+<p>首先下载并解压其源代码.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-project-13.0.0.src.tar.xz | tar xvJ &amp;&amp; cd llvm-project-13.0.0.src/compiler-rt
+</span></code></pre>
+<p>开始编译:</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span># 按照cmake的习惯,建立build文件夹
+</span><span>mkdir build &amp;&amp; cd build
+</span><span># 生成ninja编译文件
+</span><span>cmake ../ -G Ninja \
+</span><span>-DCOMPILER_RT_BUILD_BUILTINS=ON \
+</span><span>-DCOMPILER_RT_INCLUDE_TESTS=OFF \
+</span><span>-DCOMPILER_RT_BUILD_CRT=ON \
+</span><span>-DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+</span><span>-DCOMPILER_RT_BUILD_XRAY=OFF \
+</span><span>-DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
+</span><span>-DCOMPILER_RT_BUILD_PROFILE=OFF \
+</span><span>-DCOMPILER_RT_BUILD_MEMPROF=OFF \
+</span><span>-DCOMPILER_RT_BUILD_ORC=OFF \
+</span><span>-DCOMPILER_RT_DEFAULT_TARGET_ONLY=ON \
+</span><span>-DCMAKE_ASM_COMPILER=clang \
+</span><span>-DCMAKE_C_COMPILER=clang \
+</span><span>-DCMAKE_CXX_COMPILER=clang++ \
+</span><span>-DCMAKE_ASM_COMPILER_TARGET=$TARGET \
+</span><span>-DCMAKE_C_COMPILER_TARGET=$TARGET \
+</span><span>-DCMAKE_CXX_COMPILER_TARGET=$TARGET \
+</span><span>-DCMAKE_SYSROOT=$SYSROOT \
+</span><span>-DCMAKE_INSTALL_PREFIX=&quot;/usr/lib/clang/13.0.0/&quot; \
+</span><span>-DCMAKE_C_COMPILER_WORKS=1 \
+</span><span>-DCMAKE_CXX_COMPILER_WORKS=1 \
+</span><span>-DCMAKE_SIZEOF_VOID_P=8
+</span><span># 编译
+</span><span>ninja
+</span><span># 会安装3个文件libclang_rt.builtins-aarch64.a, clang_rt.crtbegin-aarch64.o, clang_rt.crtend-aarch64.o
+</span><span>sudo ninja install
+</span></code></pre>
+<h2 id="bian-yi-musl-libc">编译musl libc</h2>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR/musl-1.2.2
+</span><span>make distclean
+</span><span>./configure --prefix=/ LIBCC=/usr/lib/clang/13.0.0/lib/linux/libclang_rt.builtins-aarch64.a #手动指定上一步编译的文件
+</span><span>make -j13 # CPU线程数+1
+</span><span>DESTDIR=$SYSROOT make install
+</span></code></pre>
+<h2 id="bian-yi-llvm-libunwind">编译LLVM libunwind</h2>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR/llvm-project-13.0.0.src/runtimes &amp;&amp; mkdir libunwind-build &amp;&amp; cd libunwind-build
+</span><span>
+</span><span>cmake ../ -G Ninja \
+</span><span>-DLLVM_ENABLE_RUNTIMES=&quot;libunwind&quot; \
+</span><span>-DLIBUNWIND_USE_COMPILER_RT=ON \
+</span><span>-DLIBUNWIND_SUPPORTS_FNO_EXCEPTIONS_FLAG=1 \
+</span><span>-DCMAKE_ASM_COMPILER=clang \
+</span><span>-DCMAKE_C_COMPILER=clang \
+</span><span>-DCMAKE_CXX_COMPILER=clang++ \
+</span><span>-DCMAKE_ASM_COMPILER_TARGET=$TARGET \
+</span><span>-DCMAKE_C_COMPILER_TARGET=$TARGET \
+</span><span>-DCMAKE_CXX_COMPILER_TARGET=$TARGET \
+</span><span>-DCMAKE_C_FLAGS=&quot;$CFLAGS&quot; \
+</span><span>-DCMAKE_CXX_FLAGS=&quot;$CXXFLAGS&quot; \
+</span><span>-DCMAKE_ASM_FLAGS=&quot;$CFLAGS&quot; \
+</span><span>-DCMAKE_SHARED_LINKER_FLAGS=&quot;$LDFLAGS -unwindlib=none&quot; \
+</span><span>-DCMAKE_SYSROOT=$SYSROOT \
+</span><span>-DCMAKE_INSTALL_PREFIX=$SYSROOT \
+</span><span>-DCMAKE_C_COMPILER_WORKS=1 \
+</span><span>-DCMAKE_CXX_COMPILER_WORKS=1
+</span><span>
+</span><span>ninja
+</span><span>ninja install
+</span><span>
+</span><span>cp $DISTDIR/llvm-project-13.0.0.src/libunwind/include/*.h $SYSROOT/include
+</span></code></pre>
+<p>本来libunwind是可以和libc++以及libc++abi一同编译的(<code>LLVM_ENABLE_RUNTIMES=&quot;libcxx;libcxxabi;libunwind&quot;</code>,但是由于一些小问题, <code>libunwind.so.1</code>在链接时<code>clang</code>会自作聪明插入一个<code>--as-needed -l:libunwind.so</code>, 然而我们正在编译的就是libunwind本身,所以必须在命令行中加上<code>-unwindlib=none</code>来阻止这个行为. 具体源码见<a href="https://github.com/llvm/llvm-project/blob/d7b669b3a30345cfcdb2fde2af6f48aa4b94845d/clang/lib/Driver/ToolChains/CommonArgs.cpp#L1461">这里</a>, 只要用了<code>-rtlib=compiler-rt</code>选项, clang就会自动链接libunwind.</p>
+<h2 id="bian-yi-libc-he-libc-abi">编译libc++和libc++abi</h2>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR/llvm-project-13.0.0.src/runtimes &amp;&amp; mkdir build &amp;&amp; cd build
+</span><span>
+</span><span>cmake ../ -G Ninja \
+</span><span>-DLLVM_ENABLE_RUNTIMES=&quot;libcxx;libcxxabi&quot; \
+</span><span>-DLIBCXXABI_USE_LLVM_UNWINDER=YES \
+</span><span>-DLIBCXX_HAS_MUSL_LIBC=ON \
+</span><span>-DCMAKE_C_COMPILER=clang \
+</span><span>-DCMAKE_CXX_COMPILER=clang++ \
+</span><span>-DCMAKE_C_COMPILER_TARGET=$TARGET \
+</span><span>-DCMAKE_CXX_COMPILER_TARGET=$TARGET \
+</span><span>-DCMAKE_C_FLAGS=&quot;$CFLAGS&quot; \
+</span><span>-DCMAKE_CXX_FLAGS=&quot;$CXXFLAGS&quot; \
+</span><span>-DCMAKE_SYSROOT=$SYSROOT \
+</span><span>-DCMAKE_INSTALL_PREFIX=$SYSROOT \
+</span><span>-DCMAKE_CXX_COMPILER_WORKS=1
+</span><span>
+</span><span>ninja
+</span><span>ninja install
+</span></code></pre>
+<h2 id="jie-shu">结束</h2>
+<p>到目前为止,我们已经编译了compiler-rt, musl libc, libc++, libc++abi, libunwind, 已经可以使用此sysroot编译任何C和C++的库和程序了.</p>
+<p>接下来我们要使用LLVM工具链编译其他工具及内核,以组装出一个精简的Linux操作系统.</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/linux/">#Linux</a>
+                    
+                        <a href="https://12101111.github.io/tags/llvm/">#LLVM</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;lld-cpu-high-usage-on-spin-lock&#x2F;">‹ lld为什么在多核CPU上这么慢</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-compile-kernel-initramfs&#x2F;">LLVM cross-compiled Linux From Scratch: Bootable kernel and initramfs ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+                        <div class="posts">
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-compile-kernel-initramfs&#x2F;">LLVM cross-compiled Linux From Scratch: Bootable kernel and initramfs</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-11-10</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>本文章是LLVM编译Linux系统的第二篇文章,介绍如何使用LLVM/Clang/musl工具链编译一个可以启动的Linux内核.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-compile-kernel-initramfs&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-cross-compile&#x2F;">LLVM cross-compiled Linux From Scratch: C &amp; C++ libraries</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-11-09</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>本系列文章将介绍如何使用LLVM工具链组装一个可用的Linux发行版. 本文已经更新以适应LLVM 13发生的一些变化.</p>
+<h2 id="mian-xiang-du-zhe">面向读者</h2>
+<p>本文假定读者可以熟练的使用Unix-like系统,具有一定的C/C++编程能力,具有编译开源软件的经验.</p>
+<h2 id="shi-yao-shi-gong-ju-lian">什么是工具链</h2>
+<p>工具链,即一套具有工作顺序,可以编译出软件的工具.某些教科书上讲的&quot;编译-&gt;汇编-&gt;链接&quot;这一过程就粗略的描述了工具链的工作过程.</p>
+<p>广义上讲,工具链除了编译期,汇编器,链接器还包含一些所有程序都会使用的库.</p>
+<p>GNU工具链和LLVM工具链的对比:</p>
+<table><thead><tr><th>项目</th><th>GNU工具链</th><th>LLVM工具链</th></tr></thead><tbody>
+<tr><td>C 编译器</td><td><code>gcc</code></td><td><code>clang</code></td></tr>
+<tr><td>C++编译器</td><td><code>g++</code></td><td><code>clang++</code></td></tr>
+<tr><td>binutils</td><td>GNU binutils</td><td>LLVM binutils</td></tr>
+<tr><td>汇编器</td><td>GNU <code>as</code></td><td>集成汇编器</td></tr>
+<tr><td>链接器</td><td><code>ld.bfd</code>, <code>ld.gold</code></td><td>LLVM linker <code>ld.lld</code></td></tr>
+<tr><td>运行时(intrinsics)</td><td><code>libgcc</code></td><td><code>compiler-rt</code></td></tr>
+<tr><td>原子操作</td><td><code>libatomic</code></td><td><code>compiler-rt</code></td></tr>
+<tr><td>C 语言库</td><td>GNU libc <code>glibc</code></td><td>LLVM libc</td></tr>
+<tr><td>C++ 标准库</td><td><code>libstdc++</code></td><td><code>libc++</code></td></tr>
+<tr><td>C++ ABI</td><td><code>Libsupcxx</code></td><td><code>libc++abi</code></td></tr>
+<tr><td>栈展开(unwind)</td><td><code>libgcc_s</code></td><td>LLVM <code>libunwind</code></td></tr>
+</tbody></table>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-cross-compile&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;lld-cpu-high-usage-on-spin-lock&#x2F;">lld为什么在多核CPU上这么慢</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-08-04</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>最近在一台48核96线程的服务器上编译chromium, 使用LLVM12全家桶(Clang, lld), 开启了lto, 发现在链接最终的二进制文件chromium时, lld虽然占用了所有的CPU资源, 但是大量CPU占用是发生在内核态的(使用htop可以看到CPU占用条一半以上是红色的), 因此对lld的性能进行了一些分析, 发现了lld为何在在内核态占用大量的CPU资源.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;lld-cpu-high-usage-on-spin-lock&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;xbox-security&#x2F;">Xbox one 的安全措施</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-05-11</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>本文将翻译Xbox Live团队Xbox One安全系统架构师Tony Chen在2019年平台安全峰会(Platform Security Summit 2019, PSEC 2019)上的演讲</p>
+<p>PSEC 2019官方页面, 内附演讲视频: <a href="https://www.platformsecuritysummit.com/2019/speaker/chen/">抵御物理攻击, Xbox one的故事(Guarding Against Physical Attacks: The Xbox One Story)</a></p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;xbox-security&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;using-sccache-on-gentoo&#x2F;">Using sccache on gentoo</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-04-17</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>Firest please fellow the page of <a href="https://wiki.gentoo.org/wiki/Sccache">Sccache</a> on Gentoo wiki.</p>
+<p>After the installation and configuration of sccache, you can try to compile some rust packages.
+It may work fine for the first one, but later you may find some weird sandbox or permission error like &quot;sccache: error : Failed to create temp dir ...&quot; or &quot;sccache: caused by: Permission denied (os error 13)&quot;</p>
+<p>Let's fix this issue.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;using-sccache-on-gentoo&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;block-wine-wechat-black-window&#x2F;">屏蔽微信在Wine中运行时产生的水印&#x2F;黑块（Linux Edition）</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-04-06</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>众所周知，微信并没有官方开发的Linux客户端，要想在Linux上使用微信，就产生了很多种变通方法：</p>
+<ul>
+<li>网页版</li>
+<li>Wine+微信 PC版</li>
+<li>虚拟机+微信 PC版</li>
+<li>Android虚拟机/容器+微信平板模式</li>
+<li>在其他设备上使用，并使用RDP/scrcpy等软件远程控制</li>
+</ul>
+<p>在这些解决方案中，微信 PC版在操作逻辑和功能上较其他方案更强，但是由于微信 win32程序会创建一个独立的半透明的窗口作为其窗口边框和UI控件的阴影特效，而在Linux下，Wine会将这个透明的窗口错误的绘制，产生一些奇怪的bug， 例如这个透明边框总是悬浮在所有窗口的最上面，即使已经切换到其他的工作区，或者由于Xwayland的背景是黑色的，这个半透明的窗口会继承黑色的背景，导致其效果不再是一个阴影框，而是一个覆盖整个窗口的黑色块。</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;block-wine-wechat-black-window&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rust-dynamic-link&#x2F;">Rust动态链接</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-01-05</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>本文探讨一下Rust的crate类型的概念, 以及如何在Rust中使用动态链接编译动态库. 同时对比rust编译出的动态库和使用C语言接口动态库, 看看rust动态库是否能实现C语言接口动态库的功能.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rust-dynamic-link&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                                <article class="post">
+                                    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rust-no-main&#x2F;">什么, 你不喜欢main函数?</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-12-14</span>
+            
+        </div>
+    </header>
+
+                                    <div class="post__summary">
+                                        <p>要想编译一个rust的可执行程序, 必须在crate顶层定义<a href="https://doc.rust-lang.org/reference/crates-and-source-files.html#main-functions"><code>main</code>函数</a>. <code>main</code>函数没有参数, 没有trait或生命周期修饰, 返回值为<code>()</code>(或者不写返回值类型), <code>!</code>, <code>Result&lt;(), E&gt; where E: Error</code>或其他实现<a href="https://doc.rust-lang.org/nightly/std/process/trait.Termination.html">std::process::Termination</a> Trait的类型.</p>
+<p>虽然大多数情况下rust的用户只需要老实的写一个<code>main</code>函数就能让他们的程序跑起来了,但是总有一些奇怪的情况使得<code>bin</code>类型的crate没有rust要求的<code>main</code>函数`.</p>
+
+                                    </div>
+                                    <div class="read-more">
+                                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rust-no-main&#x2F;">Read more...</a>
+                                    </div>
+                                </article>
+                            
+                        </div>
+                        <nav class="pagination">
+                            
+                            
+                                <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;page&#x2F;2&#x2F;">Next ›</a>
+                            
+                        </nav>
+                    
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

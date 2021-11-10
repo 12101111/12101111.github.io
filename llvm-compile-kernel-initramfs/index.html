@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - LLVM cross-compiled Linux From Scratch: Bootable kernel and initramfs</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-kernel-initramfs/#bian-yi-gnu-assembler" class="toc-link">编译GNU assembler</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-kernel-initramfs/#bian-yi-linuxnei-he" class="toc-link">编译Linux内核</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-kernel-initramfs/#bian-yi-busybox" class="toc-link">编译busybox</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-kernel-initramfs/#gou-zao-initramfs" class="toc-link">构造initramfs</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-kernel-initramfs/#jiang-initramfsda-bao-jin-nei-he" class="toc-link">将initramfs打包进内核</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/llvm-compile-kernel-initramfs/#ce-shi" class="toc-link">测试</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-compile-kernel-initramfs&#x2F;">LLVM cross-compiled Linux From Scratch: Bootable kernel and initramfs</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2021-11-10</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>本文章是LLVM编译Linux系统的第二篇文章,介绍如何使用LLVM/Clang/musl工具链编译一个可以启动的Linux内核.</p>
+<span id="continue-reading"></span><h2 id="bian-yi-gnu-assembler">编译GNU assembler</h2>
+<p>大多数情况下LLVM提供的binutils已经兼容GNU binutils了,但是少数情况下, LLVM/Clang的内置汇编器的行为与GNU汇编器并不相同, 如果遇到编译Linux内核时Clang内置汇编器报错的情况,则需要使用GNU汇编器. ClangBuiltLinux项目为Clang编译Linux内核做出了大量的努力, 如果遇到此类错误, 可以去<a href="https://github.com/ClangBuiltLinux/linux/issues?q=is%3Aopen+is%3Aissue+label%3A%22%5BTOOL%5D+integrated-as%22">ClangBuiltLinux项目的issue区</a>查看问题是否已知.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://mirrors.tuna.tsinghua.edu.cn/gnu/binutils/binutils-2.37.tar.xz | tar xvJ &amp;&amp; cd binutils-2.37
+</span><span>unset CFLAGS CXXFLAGS LDFLAGS #这部分是为Host编译的
+</span><span>export acx_cv_cc_gcc_supports_ada=no # 如果你的gcc/cc是clang的链接则需要此环境变量
+</span><span>./configure --prefix= --target=$TARGET --disable-nls --disable-werror --disable-ld --disable-gold --disable-gprof --disable-binutils
+</span><span>make -j13
+</span><span>DESTDIR=$HOME/.local/ make install
+</span></code></pre>
+<h2 id="bian-yi-linuxnei-he">编译Linux内核</h2>
+<p>打开设置菜单</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>export ARCH=arm64 # 对应内核arch目录的子目录名/
+</span><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE LLVM=1 LLVM_IAS=1 menuconfig
+</span></code></pre>
+<p>请自行根据硬件调整配置,可以参考<a href="https://wiki.gentoo.org/wiki/Kernel/Gentoo_Kernel_Configuration_Guide">Gentoo的文档</a></p>
+<p>总的来说,可以通过启动livecd来判断所需要的内核组件.对于计算机启动时就会加载的模块,选择<code>[Y]</code>,对于USB设备则可以选择为<code>[M]</code>,其他用不到的选择为<code>[N]</code>.</p>
+<p>对于x86_64 UEFI启动的计算机,建议编译时打开<code>CONFIG_EFI_STUB</code>选项,这样就可以直接从UEFI shell启动了.</p>
+<p>对于树梅派3/4等arm设备,树莓派的fork的内核源码提供预先编写的配置.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>make ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE LLVM=1 LLVM_IAS=1 bcmrpi3_defconfig # Pi 2 (1.2+), Pi 3, Pi 3+, or Compute Module 3
+</span><span>make ARCH=arm64 CROSS_COMPILE=$CROSS_COMPILE LLVM=1 LLVM_IAS=1 bcm2711_defconfig # Pi 4b+
+</span></code></pre>
+<p>如果只是想在虚拟机中测试的话，可以选择：</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE LLVM=1 LLVM_IAS=1 tinyconfig
+</span><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE LLVM=1 LLVM_IAS=1 kvm_guest.config
+</span><span># 启用 General setup --&gt; Configure standard kernel features (expert users) --&gt; Multiple users, groups and capabilities support
+</span><span># 和 Enable support for printk
+</span><span># 启用 Device Drivers --&gt; Character devices --&gt; Serial drivers --&gt; ARM AMBA PL011 serial port support 
+</span><span># 和 Support for console on AMBA serial port ( 如果你使用arm架构 )
+</span><span># 启用 Kernel hacking --&gt; printk and dmesg options --&gt; Show timing information on printks
+</span><span># 启用 File systems --&gt; Pseudo filesystems --&gt; /proc file system support
+</span><span># 启用 File systems --&gt; Pseudo filesystems --&gt; sysfs file system support
+</span><span># 启用 Executable file firmats --&gt; Kernel support for scripts starting with #!
+</span><span># 启用 Device Drivers --&gt; Generic Driver Options --&gt; Maintain a devtmpfs filesystem to mount at /dev
+</span></code></pre>
+<p>然后编译内核.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE LLVM=1 LLVM_IAS=1 -j13
+</span></code></pre>
+<p>对于x86系统会有以下输出</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>  BUILD   arch/x86/boot/bzImage
+</span><span>Setup is 15916 bytes (padded to 16384 bytes).
+</span><span>System is 19892 kB
+</span><span>CRC 17bccae5
+</span><span>Kernel: arch/x86/boot/bzImage is ready  (#1)
+</span></code></pre>
+<p>可以在<code>arch/x86/boot/bzImage</code>找到编译好的内核.可以用UEFI shell或者grub引导器启动这个内核.</p>
+<p>对于arm64系统会有以下输出</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>  LD      vmlinux
+</span><span>  SORTEX  vmlinux
+</span><span>  SYSMAP  System.map
+</span><span>  OBJCOPY arch/arm64/boot/Image
+</span><span>  GZIP    arch/arm64/boot/Image.gz
+</span></code></pre>
+<p><code>Image</code>为内核文件,<code>Image.gz</code>为gzip压缩的内核,修改uboot或者其他引导器的配置文件可以启动这个内核, 也可以直接用qemu启动:</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>&gt; qemu-system-aarch64 -m 64M -M virt -cpu cortex-a53 -kernel arch/arm64/boot/Image -nographic -append &quot;console=ttyAMA0&quot;
+</span><span>[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
+</span><span>[    0.000000] Linux version 5.15.1-zen+ (han@musl) (clang version 13.0.0, LLD 13.0.0) #110 ZEN SMP Tue Nov 9 17:40:11 CST 2021
+</span><span>[    0.000000] Machine model: linux,dummy-virt
+</span><span>[    0.000000] Zone ranges:
+</span><span>[    0.000000]   Normal   [mem 0x0000000040000000-0x0000000043ffffff]
+</span><span>[    0.000000] Movable zone start for each node
+</span><span>[    0.000000] Early memory node ranges
+</span><span>[    0.000000]   node   0: [mem 0x0000000040000000-0x0000000043ffffff]
+</span><span>[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x0000000043ffffff]
+</span><span>[    0.000000] psci: probing for conduit method from DT.
+</span><span>[    0.000000] psci: PSCIv0.2 detected in firmware.
+</span><span>[    0.000000] psci: Using standard PSCI v0.2 function IDs
+</span><span>[    0.000000] psci: Trusted OS migration not required
+</span><span>[    0.000000] percpu: Embedded 16 pages/cpu s33688 r0 d31848 u65536
+</span><span>[    0.000000] Detected VIPT I-cache on CPU0
+</span><span>[    0.000000] CPU features: kernel page table isolation disabled by kernel configuration
+</span><span>[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 16160
+</span><span>[    0.000000] Kernel command line: console=ttyAMA0
+</span><span>[    0.000000] Dentry cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+</span><span>[    0.000000] Inode-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+</span><span>[    0.000000] mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+</span><span>[    0.000000] Memory: 57516K/65536K available (3072K kernel code, 610K rwdata, 340K rodata, 320K init, 255K bss, 8020K reserved, 0K cma-reserved)
+</span><span>[    0.000000] rcu: Hierarchical RCU implementation.
+</span><span>[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=256 to nr_cpu_ids=1.
+</span><span>[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+</span><span>[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=1
+</span><span>[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+</span><span>[    0.000000] Root IRQ handler: 0xffffffc010145db4
+</span><span>[    0.000000] GICv2m: range[mem 0x08020000-0x08020fff], SPI[80:143]
+</span><span>[    0.000000] arch_timer: cp15 timer(s) running at 62.50MHz (virt).
+</span><span>[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x1cd42e208c, max_idle_ns: 881590405314 ns
+</span><span>[    0.000050] sched_clock: 56 bits at 62MHz, resolution 16ns, wraps every 4398046511096ns
+</span><span>[    0.001878] Console: colour dummy device 80x25
+</span><span>[    0.002848] Calibrating delay loop (skipped), value calculated using timer frequency.. 125.00 BogoMIPS (lpj=250000)
+</span><span>[    0.002995] pid_max: default: 4096 minimum: 301
+</span><span>[    0.005089] Mount-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+</span><span>[    0.005122] Mountpoint-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+</span><span>[    0.019348] rcu: Hierarchical SRCU implementation.
+</span><span>[    0.021194] smp: Bringing up secondary CPUs ...
+</span><span>[    0.021303] smp: Brought up 1 node, 1 CPU
+</span><span>[    0.021331] SMP: Total of 1 processors activated.
+</span><span>[    0.021372] CPU features: detected: 32-bit EL0 Support
+</span><span>[    0.021431] CPU features: detected: CRC32 instructions
+</span><span>[    0.022349] CPU: All CPU(s) started at EL1
+</span><span>[    0.022470] alternatives: patching kernel code
+</span><span>[    0.027233] random: get_random_bytes called from 0xffffffc01038a914 with crng_init=0
+</span><span>[    0.028666] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+</span><span>[    0.030098] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+</span><span>[    0.032806] DMA: preallocated 128 KiB GFP_KERNEL pool for atomic allocations
+</span><span>[    0.035296] ASID allocator initialised with 65536 entries
+</span><span>[    0.035330] Serial: AMBA PL011 UART driver
+</span><span>[    0.049279] 9000000.pl011: ttyAMA0 at MMIO 0x9000000 (irq = 47, base_baud = 0) is a PL011 rev1
+</span><span>[    0.057230] printk: console [ttyAMA0] enabled
+</span><span>[    0.061698] vgaarb: loaded
+</span><span>[    0.069121] clocksource: Switched to clocksource arch_sys_counter
+</span><span>[    0.072978] NET: Registered PF_INET protocol family
+</span><span>[    0.074091] IP idents hash table entries: 2048 (order: 2, 16384 bytes, linear)
+</span><span>[    0.075695] tcp_listen_portaddr_hash hash table entries: 256 (order: 0, 4096 bytes, linear)
+</span><span>[    0.075954] TCP established hash table entries: 512 (order: 0, 4096 bytes, linear)
+</span><span>[    0.076237] TCP bind hash table entries: 512 (order: 1, 8192 bytes, linear)
+</span><span>[    0.076530] TCP: Hash tables configured (established 512 bind 512)
+</span><span>[    0.077986] UDP hash table entries: 128 (order: 0, 4096 bytes, linear)
+</span><span>[    0.078397] UDP-Lite hash table entries: 128 (order: 0, 4096 bytes, linear)
+</span><span>[    0.079387] PCI: CLS 0 bytes, default 64
+</span><span>[    0.083992] workingset: timestamp_bits=62 max_order=14 bucket_order=0
+</span><span>[    0.084285] 9p: Installing v9fs 9p2000 file system support
+</span><span>[    0.084853] io scheduler mq-deadline registered
+</span><span>[    0.085207] io scheduler kyber registered
+</span><span>[    0.098168] cacheinfo: Unable to detect cache hierarchy for CPU 0
+</span><span>[    0.100453] NET: Registered PF_INET6 protocol family
+</span><span>[    0.105579] Segment Routing with IPv6
+</span><span>[    0.105776] In-situ OAM (IOAM) with IPv6
+</span><span>[    0.105978] sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver
+</span><span>[    0.108356] 9pnet: Installing 9P2000 support
+</span><span>[    0.117062] List of all partitions:
+</span><span>[    0.117262] No filesystem could mount root, tried:
+</span><span>[    0.117277]
+</span><span>[    0.117571] Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+</span><span>[    0.117983] Kernel Offset: disabled
+</span><span>[    0.118090] CPU features: 0x00000000,00000802
+</span><span>[    0.118393] Memory Limit: none
+</span><span>[    0.118767] ---[ end Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0) ]---
+</span></code></pre>
+<p>注意,这个内核没有initramfs,因此必须有启动参数ROOT才能找到根分区,比如<code>ROOT=/dev/nvme0n1p2</code>.ROOT的值的格式与/etc/fstab的格式相同,可以使用<code>ROOT=LABEL=xxx</code>或<code>ROOT=UUID=xxxxxxxxxxxxx</code>.如果这个分区可以被内核识别,同时存在<code>/sbin/init</code>,则<code>init</code>被启动.如果没有指定rootfs,或者无法识别<code>ROOT</code>的目标,则会输出:</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+</span></code></pre>
+<p>大多数情况下,内核可以直接找到<code>ROOT</code>的分区并启动,但是处于故障维护的考虑,我们可能需要一个initramfs.</p>
+<p>关于如何制作initramfs的资料可以参考Gentoo的wiki:<a href="https://wiki.gentoo.org/wiki/Custom_Initramfs">Custom Initramfs</a></p>
+<h2 id="bian-yi-busybox">编译busybox</h2>
+<p>busybox将数十个符合POSIX的Unix工具集成到一个不到2M的可执行文件中,非常适合在内存中运行的initramfs环境.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $DISTDIR &amp;&amp; wget -qO- https://busybox.net/downloads/busybox-1.34.1.tar.bz2 | tar xvj &amp;&amp; cd busybox-1.34.1
+</span><span>
+</span><span># 打一个补丁, 否则clang编译出来的程序会直接崩溃
+</span><span>wget -qO- https://github.com/kraj/meta-clang/raw/master/recipes-core/busybox/busybox/0001-Turn-ptr_to_globals-and-bb_errno-to-be-non-const.patch | patch -p1
+</span><span>
+</span><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE menuconfig
+</span><span># 选中Settings -&gt; Don&#39;t use /usr 和 Build static binary (no shared libs)
+</span><span>make ARCH=$ARCH CFLAGS=&quot;${CFLAGS}&quot; CROSS_COMPILE=$CROSS_COMPILE -j13
+</span><span>mkdir $INITRAMFS/bin &amp;&amp; cp busybox $INITRAMFS/bin
+</span></code></pre>
+<p>验证可以使用.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>&gt; file busybox
+</span><span>busybox: ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statically linked, stripped
+</span><span>&gt; qemu-aarch64 busybox uname -m
+</span><span>aarch64
+</span></code></pre>
+<h2 id="gou-zao-initramfs">构造initramfs</h2>
+<p>以root身份运行以下命令</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span># busybox的mkdir不支持mkdir $INITRAMFS/{bin,dev,proc,sbin,sys}
+</span><span>for i in bin dev proc sbin sys;do
+</span><span>  mkdir $INITRAMFS/$i
+</span><span>done
+</span><span># cp --archive /dev/{null,console,tty} $INITRAMFS/dev/
+</span><span>for i in null console tty;do
+</span><span>  cp --archive /dev/$i $INITRAMFS/dev/
+</span><span>done
+</span></code></pre>
+<p>创建<code>$INITRAMFS/init</code>文件:</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>#!/bin/busybox sh
+</span><span>/bin/busybox --install -s
+</span><span>mount -t devtmpfs devtmpfs /dev
+</span><span>mount -t proc none /proc
+</span><span>mount -t sysfs none /sys
+</span><span>setsid cttyhack sh
+</span><span>poweroff -f
+</span></code></pre>
+<p>将其设置为可运行文件:<code>chmod +x init</code></p>
+<p>最终的文件列表为:</p>
+<pre data-lang="txt" style="background-color:#fdf6e3;color:#657b83;" class="language-txt "><code class="language-txt" data-lang="txt"><span>drwxr-xr-x    - root  ├── bin
+</span><span>.rwxr-xr-x 1.2M root  │  └── busybox
+</span><span>drwxr-xr-x    - root  ├── dev
+</span><span>crw-------  5,1 root  │  ├── console
+</span><span>crw-rw-rw-  1,3 root  │  ├── null
+</span><span>crw-rw-rw-  5,0 root  │  └── tty
+</span><span>.rwxr-xr-x  157 root  ├── init
+</span><span>drwxr-xr-x    - root  ├── proc
+</span><span>drwxr-xr-x    - root  ├── sbin
+</span><span>drwxr-xr-x    - root  └── sys
+</span></code></pre>
+<h2 id="jiang-initramfsda-bao-jin-nei-he">将initramfs打包进内核</h2>
+<p>initramfs可以分开打包, 也可以包含在内核内.</p>
+<p>如果想分开打包,进入内核设置界面</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE LLVM=1 LLVM_IAS=1 menuconfig
+</span></code></pre>
+<p>来到General Setup, 选中<code>Initial RAM filesystem and RAM disk (initramfs/initrd) support</code>, 以及下面想要使用的压缩格式.</p>
+<p>ZSTD压缩率最高且解压速度快, 建议实际部署时使用. gzip最简单, 测试时可以用.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $INITRAMFS &amp;&amp; find . 2&gt;/dev/null | cpio -ov -R root:root -H newc | gzip -9 &gt; ../initramfs.img.gz
+</span></code></pre>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>[*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
+</span><span>()    Initramfs source file(s) (NEW)
+</span><span>[*]   Support initial ramdisk/ramfs compressed using gzip (NEW)
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using bzip2
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using LZMA
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using XZ
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using LZO
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using LZ4
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using ZSTD 
+</span></code></pre>
+<p>使用如下命令打包出initramfs镜像压缩包.</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>cd $INITRAMFS &amp;&amp; find . 2&gt;/dev/null | cpio -ov -R root:root -H newc | gzip -9 &gt; ../initramfs.img.gz
+</span></code></pre>
+<p>如果想打包进内核, 进入内核设置界面, 在Initramfs source file(s)选择<code>$INITRAMFS</code>的地址</p>
+<pre data-lang="txt" style="background-color:#fdf6e3;color:#657b83;" class="language-txt "><code class="language-txt" data-lang="txt"><span>[*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
+</span><span>(/home/han/aarch64-linux-musl/initramfs) Initramfs source file(s)
+</span><span>(0)   User ID to map to 0 (user root) (NEW)
+</span><span>(0)   Group ID to map to 0 (group root) (NEW)
+</span><span>[*]   Support initial ramdisk/ramfs compressed using gzip
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using bzip2
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using LZMA
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using XZ
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using LZO
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using LZ4
+</span><span>[ ]   Support initial ramdisk/ramfs compressed using ZSTD
+</span><span>Built-in initramfs compression mode (Gzip)  ---&gt; 
+</span></code></pre>
+<p>重新编译内核</p>
+<pre data-lang="shell" style="background-color:#fdf6e3;color:#657b83;" class="language-shell "><code class="language-shell" data-lang="shell"><span>make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE -j13
+</span></code></pre>
+<h2 id="ce-shi">测试</h2>
+<p>可以在qemu或者真机上测试内核.</p>
+<pre data-lang="log" style="background-color:#fdf6e3;color:#657b83;" class="language-log "><code class="language-log" data-lang="log"><span>&gt; qemu-system-aarch64 -m 64M -M virt -cpu cortex-a53 -kernel ./Image.gz -initrd ./initramfs.img.gz -nographic -append &quot;console=ttyAMA0&quot;
+</span><span>[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd034]
+</span><span>[    0.000000] Linux version 5.15.1-zen+ (han@musl) (clang version 13.0.0, LLD 13.0.0) #115 ZEN SMP Tue Nov 9 19:27:33 CST 2021
+</span><span>[    0.000000] Machine model: linux,dummy-virt
+</span><span>[    0.000000] Zone ranges:
+</span><span>[    0.000000]   Normal   [mem 0x0000000040000000-0x0000000043ffffff]
+</span><span>[    0.000000] Movable zone start for each node
+</span><span>[    0.000000] Early memory node ranges
+</span><span>[    0.000000]   node   0: [mem 0x0000000040000000-0x0000000043ffffff]
+</span><span>[    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x0000000043ffffff]
+</span><span>[    0.000000] psci: probing for conduit method from DT.
+</span><span>[    0.000000] psci: PSCIv0.2 detected in firmware.
+</span><span>[    0.000000] psci: Using standard PSCI v0.2 function IDs
+</span><span>[    0.000000] psci: Trusted OS migration not required
+</span><span>[    0.000000] percpu: Embedded 16 pages/cpu s34392 r0 d31144 u65536
+</span><span>[    0.000000] Detected VIPT I-cache on CPU0
+</span><span>[    0.000000] CPU features: kernel page table isolation disabled by kernel configuration
+</span><span>[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 16160
+</span><span>[    0.000000] Kernel command line: console=ttyAMA0
+</span><span>[    0.000000] Dentry cache hash table entries: 8192 (order: 4, 65536 bytes, linear)
+</span><span>[    0.000000] Inode-cache hash table entries: 4096 (order: 3, 32768 bytes, linear)
+</span><span>[    0.000000] mem auto-init: stack:all(zero), heap alloc:off, heap free:off
+</span><span>[    0.000000] Memory: 55076K/65536K available (3328K kernel code, 654K rwdata, 412K rodata, 1344K init, 260K bss, 10460K reserved, 0K cma-reserved)
+</span><span>[    0.000000] rcu: Hierarchical RCU implementation.
+</span><span>[    0.000000] rcu: 	RCU restricting CPUs from NR_CPUS=256 to nr_cpu_ids=1.
+</span><span>[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 25 jiffies.
+</span><span>[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=1
+</span><span>[    0.000000] NR_IRQS: 64, nr_irqs: 64, preallocated irqs: 0
+</span><span>[    0.000000] Root IRQ handler: 0xffffffc010169f08
+</span><span>[    0.000000] GICv2m: range[mem 0x08020000-0x08020fff], SPI[80:143]
+</span><span>[    0.000000] arch_timer: cp15 timer(s) running at 62.50MHz (virt).
+</span><span>[    0.000000] clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x1cd42e208c, max_idle_ns: 881590405314 ns
+</span><span>[    0.000052] sched_clock: 56 bits at 62MHz, resolution 16ns, wraps every 4398046511096ns
+</span><span>[    0.001858] Console: colour dummy device 80x25
+</span><span>[    0.002812] Calibrating delay loop (skipped), value calculated using timer frequency.. 125.00 BogoMIPS (lpj=250000)
+</span><span>[    0.002927] pid_max: default: 4096 minimum: 301
+</span><span>[    0.004977] Mount-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+</span><span>[    0.005011] Mountpoint-cache hash table entries: 512 (order: 0, 4096 bytes, linear)
+</span><span>[    0.024230] rcu: Hierarchical SRCU implementation.
+</span><span>[    0.026300] smp: Bringing up secondary CPUs ...
+</span><span>[    0.026386] smp: Brought up 1 node, 1 CPU
+</span><span>[    0.026412] SMP: Total of 1 processors activated.
+</span><span>[    0.026454] CPU features: detected: 32-bit EL0 Support
+</span><span>[    0.026513] CPU features: detected: CRC32 instructions
+</span><span>[    0.027487] CPU: All CPU(s) started at EL1
+</span><span>[    0.027609] alternatives: patching kernel code
+</span><span>[    0.035079] devtmpfs: initialized
+</span><span>[    0.040810] random: get_random_bytes called from 0xffffffc0103dd960 with crng_init=0
+</span><span>[    0.042477] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 7645041785100000 ns
+</span><span>[    0.043860] NET: Registered PF_NETLINK/PF_ROUTE protocol family
+</span><span>[    0.047242] DMA: preallocated 128 KiB GFP_KERNEL pool for atomic allocations
+</span><span>[    0.049753] ASID allocator initialised with 65536 entries
+</span><span>[    0.049816] Serial: AMBA PL011 UART driver
+</span><span>[    0.067495] 9000000.pl011: ttyAMA0 at MMIO 0x9000000 (irq = 47, base_baud = 0) is a PL011 rev1
+</span><span>[    0.075982] printk: console [ttyAMA0] enabled
+</span><span>[    0.092989] vgaarb: loaded
+</span><span>[    0.101630] clocksource: Switched to clocksource arch_sys_counter
+</span><span>[    0.113153] NET: Registered PF_INET protocol family
+</span><span>[    0.114575] IP idents hash table entries: 2048 (order: 2, 16384 bytes, linear)
+</span><span>[    0.117043] tcp_listen_portaddr_hash hash table entries: 256 (order: 0, 4096 bytes, linear)
+</span><span>[    0.117523] TCP established hash table entries: 512 (order: 0, 4096 bytes, linear)
+</span><span>[    0.117866] TCP bind hash table entries: 512 (order: 1, 8192 bytes, linear)
+</span><span>[    0.118189] TCP: Hash tables configured (established 512 bind 512)
+</span><span>[    0.119488] UDP hash table entries: 128 (order: 0, 4096 bytes, linear)
+</span><span>[    0.119748] UDP-Lite hash table entries: 128 (order: 0, 4096 bytes, linear)
+</span><span>[    0.120968] PCI: CLS 0 bytes, default 64
+</span><span>[    0.138685] workingset: timestamp_bits=62 max_order=14 bucket_order=0
+</span><span>[    0.139068] 9p: Installing v9fs 9p2000 file system support
+</span><span>[    0.139586] io scheduler mq-deadline registered
+</span><span>[    0.139796] io scheduler kyber registered
+</span><span>[    0.186347] Unpacking initramfs...
+</span><span>[    0.252316] Freeing initrd memory: 1008K
+</span><span>[    0.274845] cacheinfo: Unable to detect cache hierarchy for CPU 0
+</span><span>[    0.277940] NET: Registered PF_INET6 protocol family
+</span><span>[    0.284542] Segment Routing with IPv6
+</span><span>[    0.284787] In-situ OAM (IOAM) with IPv6
+</span><span>[    0.285422] sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver
+</span><span>[    0.289354] 9pnet: Installing 9P2000 support
+</span><span>[    0.312361] Freeing unused kernel memory: 1344K
+</span><span>[    0.321870] Run /init as init process
+</span><span>/ # uname -a
+</span><span>Linux (none) 5.15.1-zen+ #115 ZEN SMP Tue Nov 9 19:27:33 CST 2021 aarch64 GNU/Linux
+</span><span>/ # ps aux
+</span><span>PID   USER     TIME  COMMAND
+</span><span>    1 0         0:00 {init} /bin/busybox sh /init
+</span><span>    2 0         0:00 [kthreadd]
+</span><span>    3 0         0:00 [rcu_gp]
+</span><span>    4 0         0:00 [rcu_par_gp]
+</span><span>    5 0         0:00 [kworker/0:0-eve]
+</span><span>    6 0         0:00 [kworker/0:0H-ev]
+</span><span>    7 0         0:00 [kworker/u2:0-ev]
+</span><span>    8 0         0:00 [mm_percpu_wq]
+</span><span>    9 0         0:00 [ksoftirqd/0]
+</span><span>   10 0         0:00 [rcu_sched]
+</span><span>   11 0         0:00 [migration/0]
+</span><span>   12 0         0:00 [cpuhp/0]
+</span><span>   13 0         0:00 [kdevtmpfs]
+</span><span>   14 0         0:00 [inet_frag_wq]
+</span><span>   15 0         0:00 [oom_reaper]
+</span><span>   16 0         0:00 [writeback]
+</span><span>   17 0         0:00 [kblockd]
+</span><span>   18 0         0:00 [kworker/0:1-eve]
+</span><span>   19 0         0:00 [kworker/0:1H]
+</span><span>   20 0         0:00 [kworker/u2:1]
+</span><span>   21 0         0:00 [kswapd0]
+</span><span>   22 0         0:00 [mld]
+</span><span>   23 0         0:00 [ipv6_addrconf]
+</span><span>   28 0         0:00 sh
+</span><span>   30 0         0:00 ps aux
+</span><span>/ # free -h
+</span><span>              total        used        free      shared  buff/cache   available
+</span><span>Mem:          56.1M        5.6M       47.1M           0        3.4M       45.8M
+</span><span>Swap:             0           0           0
+</span><span>/ # cat /proc/version
+</span><span>Linux version 5.15.1-zen+ (han@musl) (clang version 13.0.0, LLD 13.0.0) #115 ZEN SMP Tue Nov 9 19:27:33 CST 2021
+</span><span>/ # cat /proc/cpuinfo
+</span><span>processor	: 0
+</span><span>BogoMIPS	: 125.00
+</span><span>Features	: fp asimd aes pmull sha1 sha2 crc32 cpuid
+</span><span>CPU implementer	: 0x41
+</span><span>CPU architecture: 8
+</span><span>CPU variant	: 0x0
+</span><span>CPU part	: 0xd03
+</span><span>CPU revision	: 4
+</span><span>/ # ls /dev/
+</span><span>console      tty14        tty27        tty4         tty52        tty8
+</span><span>full         tty15        tty28        tty40        tty53        tty9
+</span><span>kmsg         tty16        tty29        tty41        tty54        ttyAMA0
+</span><span>null         tty17        tty3         tty42        tty55        urandom
+</span><span>port         tty18        tty30        tty43        tty56        vcs
+</span><span>ptmx         tty19        tty31        tty44        tty57        vcs1
+</span><span>random       tty2         tty32        tty45        tty58        vcsa
+</span><span>tty          tty20        tty33        tty46        tty59        vcsa1
+</span><span>tty0         tty21        tty34        tty47        tty6         vcsu
+</span><span>tty1         tty22        tty35        tty48        tty60        vcsu1
+</span><span>tty10        tty23        tty36        tty49        tty61        vga_arbiter
+</span><span>tty11        tty24        tty37        tty5         tty62        zero
+</span><span>tty12        tty25        tty38        tty50        tty63
+</span><span>tty13        tty26        tty39        tty51        tty7
+</span><span>/ # ls /proc/
+</span><span>1             21            buddyinfo     iomem         self
+</span><span>10            22            bus           ioports       softirqs
+</span><span>11            23            cmdline       irq           stat
+</span><span>12            24            consoles      kmsg          swaps
+</span><span>13            29            cpuinfo       kpagecount    sys
+</span><span>14            3             device-tree   kpageflags    thread-self
+</span><span>15            31            devices       loadavg       timer_list
+</span><span>16            4             diskstats     meminfo       tty
+</span><span>17            5             driver        misc          uptime
+</span><span>18            6             execdomains   mounts        version
+</span><span>19            7             filesystems   net           vmallocinfo
+</span><span>2             8             fs            pagetypeinfo  vmstat
+</span><span>20            9             interrupts    partitions    zoneinfo
+</span><span>/ # ls /sys/
+</span><span>block     class     devices   fs        module
+</span><span>bus       dev       firmware  kernel
+</span><span>/ # exit
+</span><span>[   14.156869] reboot: Power down
+</span></code></pre>
+<p>按Ctrl-D或者输入exit来关机.</p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/linux/">#Linux</a>
+                    
+                        <a href="https://12101111.github.io/tags/llvm/">#LLVM</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;llvm-cross-compile&#x2F;">‹ LLVM cross-compiled Linux From Scratch: C &amp; C++ libraries</a>
+                    
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

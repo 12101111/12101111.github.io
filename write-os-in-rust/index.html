@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 使用Rust编写操作系统(一)</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/write-os-in-rust/#qian-yan" class="toc-link">前言</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/write-os-in-rust/#xiang-guan-zhi-shi" class="toc-link">相关知识</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/write-os-in-rust/#bian-cheng-yu-yan" class="toc-link">编程语言</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/write-os-in-rust/#bian-yi-qi" class="toc-link">编译器</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://12101111.github.io/write-os-in-rust/#rust" class="toc-link">Rust</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust&#x2F;">使用Rust编写操作系统(一)</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2019-03-22</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h1 id="qian-yan">前言</h1>
+<p>Rust语言作为C/C++的安全替代,是21世纪新兴语言中最适合开发操作系统的.</p>
+<p>本文介绍有关使用高级语言,Rust,编写操作系统的一些前置知识.</p>
+<span id="continue-reading"></span>
+<p>使用Rust语言开发的操作系统开源项目有:</p>
+<p><a href="http://redox-os.org">Redox</a> 接近self-host,具有shell,窗口管理器,文件系统,网络,微内核的复杂项目</p>
+<p><a href="https://www.tockos.org">tockos</a> 嵌入式OS</p>
+<p><a href="https://github.com/nebulet/nebulet">Nebulet</a> 一个在ring0运行的WebAssembly虚拟机/系统</p>
+<p><a href="https://github.com/thepowersgang/rust_os">Tifflin</a></p>
+<p>教育目的的项目:</p>
+<p><a href="https://github.com/rcore-os/rCore">清华大学rCore</a></p>
+<p><a href="https://os.phil-opp.com/">blog-os</a></p>
+<p><a href="https://github.com/thepowersgang/rust-barebones-kernel">barebones</a></p>
+<p>什么,你在问cs140e? emmm,那些代码过了不到半年就不能编译了,紧跟nightly才是正道啊.</p>
+<h1 id="xiang-guan-zhi-shi">相关知识</h1>
+<h2 id="bian-cheng-yu-yan">编程语言</h2>
+<p>用于操作系统开发的语言最好具有以下功能(否则需要修改编译器进行hack):</p>
+<ul>
+<li>允许内嵌汇编,或者调用汇编函数.(用于特权指令)</li>
+<li>允许创建按特定位与字节排序的结构.(例如页表)</li>
+<li>具有手动管理内存分配的能力.(操作系统需要管理内存分配)</li>
+<li>具有很小的运行时.(因此不需要过多的汇编或其他语言来引导到该语言)</li>
+<li>编译到机器码,而不是字节码或解释运行.(同上)</li>
+<li>编译器需要支持生成操作系统无关的代码,支持交叉编译(否则不能生成内核二进制文件)</li>
+</ul>
+<p>现在大多数商业操作系统内核使用C作为内核语言.究其原因,主要是现存商业操作系统内核都诞生于上个世纪,作为早期的高级语言,C语言的移植性极高,复杂度较低,而且用C语言开发的第一个项目就是重写原本是汇编编写的Unix操作系统及程序,使其成为可移植的操作系统,因此习惯上使用C编写操作系统.</p>
+<p>另一个可选的语言是C++,目前Google Fuchsia使用C++开发内核,Windows的部分驱动程序也是C++开发的.C++在操作系统开发方面一大问题是其标准委员会不停的往语言中塞入各种功能,其中许多功能是需要操作系统才可以使用的,内核代码不能使用这些功能,比如std命名空间,STL,异常,虚函数,RTTI,dynamic_cast.Fuchsia的内核Zircon的文档<a href="https://fuchsia.googlesource.com/zircon/+/master/docs/cxx.md">C++ in Zircon</a>介绍了使用C++开发系统内核时的注意事项.</p>
+<p>微软曾经试图使用C#开发操作系统,创建了<a href="https://en.wikipedia.org/wiki/Singularity_%28operating_system%29">Singularity</a>及<a href="https://en.wikipedia.org/wiki/Midori_(operating_system)">Midori</a>实验系统项目,最终项目被砍,一位参加项目的员工在博客中记录了这一系统的细节<a href="https://github.com/ZiJing6/blogging-about-midori">(中文翻译)</a>.虽然证明C#这类托管语言可以作为操作系统的内核,但是这需要强大的开发团队,同时具有编译器和操作系统的开发能力,不是个人开发者能涉及的.</p>
+<h2 id="bian-yi-qi">编译器</h2>
+<p>前面提到的各种高级语言,并不能被处理器直接执行.处理器只接受并执行机器码.因此,必须要有合适的编译器将源代码转换成机器码.</p>
+<p>高级语言的编译过程一般为:源文件+语言库-&gt;编译-&gt;汇编代码/IR-&gt;汇编器/编译器后端-&gt;目标文件-&gt;链接-&gt;可执行文件.</p>
+<p>编译内核时有几处与与普通的程序不同:</p>
+<h3 id="yu-yan-ku">语言库</h3>
+<p>大部分库函数不能使用,需要自己实现.常见的有:</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>与输入输出有关的:如C的printf,open.内核必须自己实现输入输出的方法.
+</span><span>与进程/线程有关的.任务管理由内核完成.
+</span><span>与内存分配有关的.对内存的管理由内核完成.内核在开发/启动初期甚至不能访问堆内存,只能使用栈,或者硬编码的地址.
+</span></code></pre>
+<p>能够使用的,一般只有基本数据类型相关的库,例如数学计算,字符串处理,memcpy等.</p>
+<p>常见的C语言库是<a href="https://sourceware.org/newlib/libc.html">newlib</a>,操作系统开发者只需要移植几个系统调用即可使其他C程序运行.</p>
+<h3 id="jiao-cha-bian-yi">交叉编译</h3>
+<p>对于GCC编译器,必须重新编译一份交叉编译器,以实现在开发平台上运行编译器,同时生成的目标文件适用于新平台.详见<a href="https://wiki.osdev.org/GCC_Cross-Compiler">osdev上的教程</a></p>
+<h3 id="hui-bian">汇编</h3>
+<p>仅能被操作系统使用的特权指令一般不能从高级语言翻译过来,必须在高级语言中内嵌或者调用汇编函数以实现对机器的管理功能.</p>
+<p>此外,即使是非常简单的C语言,也不能开机就能被CPU直接执行,由于刚开机时内存中的数据为随机的垃圾,因此有必要在调用C语言的第一个函数前使用汇编程序初始化寄存器,初始化bss段,设置栈,随后再跳转到C语言程序的入口.</p>
+<p>对于x86＋BIOS这种老的架构,还需要从磁盘加载文件，创建GDT，从实模式切换到保护模式，设置段寄存器等等,这些代码都只能使用汇编编写.</p>
+<p>其他语言,如Rust,也需要这种汇编代码.这些代码被称为运行时或者引导程序．</p>
+<h3 id="lian-jie">链接</h3>
+<p>对于普通程序,编译的最后一步是链接.链接器会按照程序的格式(Unix常见为ELF文件,macOS使用mach-o文件,Windows使用PE文件)创建程序头,填写各种记录重定向信息的表,然后将目标文件按顺序链接为一个可执行程序,一般还会动态链接系统C语言库.</p>
+<p>但是对于操作系统内核而言,其并不是被可执行文件加载器加载,也不支持动态链接,而是被引导程序直接加载到内存中,其格式由硬件固件或引导程序特殊定义.可以使用<a href="https://sourceware.org/binutils/docs/ld/Scripts.html">ld script</a>将目标文件链接为其特殊格式.</p>
+<p>UEFI固件下使用的可引导文件格式为标准的PE文件(即格式与Windows可执行程序相同)，使用GNU工具链的内核常使用ELF格式,并使用引导程序加载.嵌入式设备也使用u-boot作为引导程序,而有些嵌入式设备直接从ROM的某一地址执行.</p>
+<h2 id="rust">Rust</h2>
+<p>Rust语言提供了对开发操作系统或裸机程序方便的方法.</p>
+<p>只需要在lib.rs或者main.rs开头添加<code>#![no_std]</code>即可不使用<code>std</code>标准库,而是使用平台无关的<code>core</code>库.<code>core</code>库只包含了基本数据类型及相关的平台无关的函数,可以在任何支持的CPU上运行.</p>
+<p>有关不使用<code>std</code>的rust程序的示例,可以查看<a href="https://os.phil-opp.com/freestanding-rust-binary/">blog os的第一篇教程</a>.<a href="https://zhuanlan.zhihu.com/p/53064186">中文翻译</a></p>
+<p><code>rustc</code>具有交叉编译能力,不需要编译<code>rustc</code>就可以为其他平台编译代码(但有时你需要合适的链接器).
+这种能力来源于<code>rustc</code>使用的<code>llvm</code>后端.<code>rustc</code>默认支持的所有编译目标可以通过以下命令查询.</p>
+<pre data-lang="sh" style="background-color:#fdf6e3;color:#657b83;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b58900;">rustc</span><span style="color:#268bd2;"> --print</span><span> target-list
+</span></code></pre>
+<p>每一行输出唯一的标识了某一种二进制格式.这一字符串有一定的规律,也有一定的历史和人为因素.大致格式为3段式:<code>CPU架构-制造商-操作系统</code>,有的目标为4段式,最后一段是调用abi(如arm使用的<code>eabi</code>为嵌入式<code>abi</code>,<code>eabihf</code>表示支持硬件半浮点)或者使用的c语言库(如<code>gnu</code>表示使用<code>glibc</code>库,<code>musl</code>和<code>uclibc</code>分别表示使用对应的c语言库,<code>android</code>表示使用Android的<code>Bionic</code> c语言库,<code>msvc</code>表示Windows平台的<code>msvcrt</code>库).</p>
+<p>显然适合编译操作系统的目标一般不在列表之中.一般来讲,为pc开发的系统内核使用的目标标识符为<code>x86_64-unknown-none</code>.也可以命名为<code>x86_64-unknown-myos</code>.</p>
+<p>对于自定义目标,<code>rustc</code>不仅需要自定义的目标标识符,更重要的是需要llvm的目标配置(<code>target spec</code>)才能为非内置的目标编译.目标配置使用json定义,可以使用以下命令打印目标配置(目前需要nightly版的<code>rustc</code>)</p>
+<pre data-lang="sh" style="background-color:#fdf6e3;color:#657b83;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b58900;">rustc</span><span style="color:#268bd2;"> -Z</span><span> unstable-options</span><span style="color:#268bd2;"> --print</span><span> target-spec-json  </span><span style="color:#93a1a1;"># 当前平台的目标信息
+</span><span style="color:#b58900;">rustc</span><span style="color:#268bd2;"> -Z</span><span> unstable-options</span><span style="color:#268bd2;"> --target </span><span>&lt;内置的目标&gt; --print target-spec-json  </span><span style="color:#93a1a1;"># 选择的目标信息
+</span></code></pre>
+<p>为内置目标交叉编译时,执行<code>cargo build --target &lt;目标&gt;</code></p>
+<p>为自定义目标交叉编译时,执行<code>cargo build --target &lt;目标配置文件.json&gt;</code></p>
+<p>以上命令很可能会失败:</p>
+<pre data-lang="txt" style="background-color:#fdf6e3;color:#657b83;" class="language-txt "><code class="language-txt" data-lang="txt"><span>error[E0463]: can&#39;t find crate for `core`
+</span><span>  |
+</span><span>  = note: the `x86_64-unknown-redox` target may not be installed
+</span></code></pre>
+<p>对于<code>tire 1</code>和<code>tire 2</code>平台,rust官方提供了二进制的<code>std</code>库文件,只需要使用rustup添加即可:</p>
+<pre data-lang="sh" style="background-color:#fdf6e3;color:#657b83;" class="language-sh "><code class="language-sh" data-lang="sh"><span style="color:#b58900;">rustup</span><span> target list  </span><span style="color:#93a1a1;"># 列出所有官方提供`std`库的二进制文件的目标,可见比rustc实际支持的编译目标少
+</span><span style="color:#b58900;">rustup</span><span> target add &lt;目标&gt;
+</span></code></pre>
+<p>对于<code>tire3</code>目标或自定义目标,官方不提供<code>core</code>的二进制文件.编译自己的库时,必须同时编译<code>core</code>和<code>compiler_builtins</code>两个只有源代码的库.</p>
+<p>这些内置库目前不能由cargo自动编译,可以使用第三方工具<code>cargo-xbuild</code>来编译.</p>
+<p>有关如何编写目标配置文件并编译的示例,见<a href="https://os.phil-opp.com/minimal-rust-kernel/">blog os第二篇文章</a>,<a href="https://zhuanlan.zhihu.com/p/56433770">(中文翻译)</a></p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/rust/">#Rust</a>
+                    
+                        <a href="https://12101111.github.io/tags/os/">#OS</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;install-archlinux-on-fydeos&#x2F;">‹ 在FydeOS上安装ArchLinux</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;oldthing&#x2F;">计算机的旧事 ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>

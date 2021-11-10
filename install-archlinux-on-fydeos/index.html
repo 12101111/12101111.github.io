@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title>12101111&#x27;s blog - 在FydeOS上安装ArchLinux</title>
+
+      
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://12101111.github.io/rss.xml">
+      
+
+      
+    <script src="https://12101111.github.io/slideout.min.js"></script>
+
+
+      
+          <link rel="stylesheet" href="https://12101111.github.io/site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Coding...</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                            Categories
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;12101111.github.io">Coding...</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;categories">
+                                    Categories
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#qian-yan" class="toc-link">前言</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#1-crostinijie-gou" class="toc-link">-1.Crostini结构</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#0-yi-zhi-wen-ti" class="toc-link">0.已知问题</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#1-jin-ru-termina-an-zhuang-rong-qi" class="toc-link">1.进入Termina,安装容器</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#2-jin-ru-rong-qi-de-shell" class="toc-link">2.进入容器的shell</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#3-deng-lu-dao-rong-qi" class="toc-link">3.登录到容器</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#4-zhong-ming-ming-rong-qi" class="toc-link">4.重命名容器</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#5-ben-di-hua" class="toc-link">5.本地化</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://12101111.github.io/install-archlinux-on-fydeos/#can-kao" class="toc-link">参考</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;12101111.github.io&#x2F;install-archlinux-on-fydeos&#x2F;">在FydeOS上安装ArchLinux</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2018-12-22</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <h1 id="qian-yan">前言</h1>
+<p>FydeOS是一个国产的ChromiumOS发行版,是目前唯一像ChromeOS一样支持安装Android应用的ChromiumOS发行版.FydeOS像ChromeOS一样也支持运行Linux程序,但是默认的发行版是Debian,包又老又少,因此决定换Archlinux.</p>
+<span id="continue-reading"></span>
+<h1 id="1-crostinijie-gou">-1.Crostini结构</h1>
+<p>ChromiumOS运行Linux的项目叫Crostini.<a href="https://chromium.googlesource.com/chromiumos/docs/+/master/containers_and_vms.md#Glossary">ChromiumOS的文档</a>详细的介绍了其架构.</p>
+<pre style="background-color:#fdf6e3;color:#657b83;"><code><span>ChromiumOS</span><span>
+</span><span>    Chrome浏览器</span><span>
+</span><span>
+</span><span>    Android运行环境</span><span>
+</span><span>        Android应用</span><span>
+</span><span>
+</span><span>    crosvm虚拟机</span><span>
+</span><span>        Termina</span><span>
+</span><span>            Linux容器</span><span>
+</span><span>                penguin</span><span>
+</span><span>                archlinux</span><span>
+</span><span>                其他Linux容器实例</span><span>
+</span><span>
+</span><span>        其他虚拟机实例</span><span>
+</span></code></pre>
+<p>这里(机器)翻译/修改一下官方文档,以便理解其中的法文命名的专业名词.</p>
+<p>Crostini是使Linux应用程序支持易于使用并与Chrome OS完美集成的总称。它侧重于为您提供一个容器的终端，可以轻松访问以开发人员为中心的工具。与此对比,Crouton提供了非官方的Linux支持,不是很安全,也不是很方便,但特权更大。</p>
+<p>crosh是Chrome OS上使用前端技术构建的一个终端模拟器，使用CTRL-ALT-T可以打开它。</p>
+<p>终端应用是该环境的第一个入口。它基本上只是crosh的快捷方式。</p>
+<p>crosvm是一个虚拟机监视器，负责管理KVM，guest VM以及进行低级（基于Linux virtio驱动）的通信。</p>
+<p>Termina是一个虚拟机映像，带有精简的Chrome OS linux内核和用户态工具。它的唯一目标是尽快启动并开始运行容器。许多程序/工具都是自定义的。其名字是“终端terminal”缺少一个字母，但并非有意如此。</p>
+<p>Concierge(礼宾部门)是一个在Chrome OS中运行的守护进程，它处理VM和容器的生命周期管理，并使用gRPC over vsock与Maitred进行通信。</p>
+<p>Maitred(侍者总管)是VM内部的init和服务/容器管理器，负责与Concierge（在VM外部运行）进行通信。Concierge发出请求，Maitred负责执行这些请求。</p>
+<p>Tremplin(法国著名酒店)是一个在VM中运行的守护进程，为LXD提供gRPC的包装。这包括一些基本功能，如创建和启动容器，还提供其他Crostini特定的集成，例如设置容器的主用户，以及在guest虚拟机中设置匹配Chrome OS版本的apt存储库。</p>
+<p>Cicerone(侍酒师认证)是一个在Chrome OS中运行的守护程序，它在容器开始运行后直接处理与VM和容器的所有通信。具体来说，它与Tremplin（在VM内部运行）和Garcon（在VM内部的容器中运行）进行通信。</p>
+<p>Garcon(侍者)在容器内部运行，并提供与Cicerone/Chrome的集成，以实现更方便/自然的行为。例如，如果容器想要打开URL，Garcon会负责管理该请求。</p>
+<p>9P协议是<a href="https://zh.wikipedia.org/zh-cn/Plan9">Plan 9（贝尔实验室九号计划）</a>的遗产,一种优秀的网络协议,能远程的访问文件,就像访问本地文件一样。贝尔实验室解散后,大多数科学家都来到了Google,并将9P移植到Linux.</p>
+<p>Seneschal(总管)是一个在Chrome OS中运行的守护进程，用于处理9P服务器的生命周期管理。当Concierge启动VM时，它会向Seneschal发送一条消息，以便为该VM启动9s实例。然后，在配置VM时，Concierge会向Maitred发送一条消息，指示它连接到9s实例并将其挂载到VM中。</p>
+<p>9s是9P文件系统协议的服务器。每个VM都有一个9s的实例，它使VM可以访问存储在VM外部的用户数据。其中包括“下载”文件夹，Google云端硬盘和可移动媒体等内容。每个9s实例的生命周期由Seneschal管理。每个9s实例启动时无法访问任何文件。通过向Seneschal发送消息来授予对特定路径的访问权限，这使得所请求的路径可用于指定的9s实例。共享路径的请求只能由某些用户操作触发。</p>
+<p>Sommelier(侍酒师)是Wayland代理合成器，在容器内运行。Sommelier可以在容器内的Wayland应用程序和Chrome之间无缝转发内容，输入事件，剪贴板数据等。Chrome OS不支持X协议，因此，Sommelier还负责启动XWayland（以rootless模式），充当客户端的X窗口管理器，并将容器内的X协议转换为Chrome OS的Wayland协议。</p>
+<p>penguin(企鹅)是默认的容器。</p>
+<h1 id="0-yi-zhi-wen-ti">0.已知问题</h1>
+<p>Linux支持处于测试版阶段,有一定概率启动失败,<code>终端</code>应用无限转圈,尤其是执行<code>sudo reboot</code>后.正常的启动时间为10秒,如果一分钟之后启动不了,可以重启系统重试.</p>
+<h1 id="1-jin-ru-termina-an-zhuang-rong-qi">1.进入Termina,安装容器</h1>
+<p>使用CTRL-ALT-T可以打开打开<code>crosh</code>.在其中输入<code>vmc start termina</code>以启动<code>Termina</code>虚拟机.</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>crosh&gt; vmc start termina</span><span>
+</span><span>(termina) chronos@localhost ~ $</span><span>
+</span></code></pre>
+<p><code>lxc list</code>列出已经安装的容器.</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>(termina) chronos@localhost ~ $ lxc list</span><span>
+</span><span>+---------+---------+-----------------------+------+------------+-----------+</span><span>
+</span><span>| NAME    | STATE   | IPV4                  | IPV6 | TYPE       | SNAPSHOTS |</span><span>
+</span><span>+---------+---------+-----------------------+------+------------+-----------+</span><span>
+</span><span>| penguin | RUNNING | 100.115.92.202 (eth0) |      | PERSISTENT | 0         |</span><span>
+</span><span>+---------+---------+-----------------------+------+------------+-----------+</span><span>
+</span></code></pre>
+<p>使用<code>run_container.sh</code>命令可以下载并安装<code>Archlinux</code>容器.由于FydeOS相对于ChromiumOS对此命令进行了修改,编辑这个sh脚本撤销更改.由于termina是只读的,将脚本复制到临时目录/tmp</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>cp /usr/bin/run_container.sh /tmp</span><span>
+</span><span>cd /tmp</span><span>
+</span><span>vim run_container.sh</span><span>
+</span></code></pre>
+<p>找到以下片段</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#93a1a1;"># lxc init &quot;google:${FLAGS_lxd_image}&quot; &quot;${FLAGS_container_name}&quot; || \</span><span style="color:#93a1a1;">
+</span><span style="color:#93a1a1;">#   die &quot;Unable to create container from image &#39;${FLAGS_lxd_image}&#39;&quot;</span><span style="color:#93a1a1;">
+</span><span style="color:#586e75;">local </span><span style="color:#268bd2;">container_root</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">/usr/share/intergrade_container</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#586e75;">local </span><span style="color:#268bd2;">lxd_info</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">container_root</span><span>}</span><span style="color:#2aa198;">/lxd.tar.xz</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#586e75;">local </span><span style="color:#268bd2;">root_file</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">container_root</span><span>}</span><span style="color:#2aa198;">/rootfs.squashfs</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#586e75;">local </span><span style="color:#268bd2;">container_alias</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">intergrade_fydemina</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#b58900;">lxc</span><span> image import </span><span style="color:#859900;">$</span><span style="color:#268bd2;">lxd_info </span><span style="color:#859900;">$</span><span style="color:#268bd2;">root_file --alias </span><span style="color:#859900;">$</span><span style="color:#268bd2;">container_alias </span><span style="color:#859900;">|| </span><span style="color:#b58900;">\</span><span>
+</span><span>    </span><span style="color:#b58900;">die </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Unable to import image from </span><span style="color:#859900;">$</span><span style="color:#268bd2;">root_file</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#b58900;">lxc</span><span> init </span><span style="color:#859900;">$</span><span style="color:#268bd2;">container_alias </span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">FLAGS_container_name</span><span>} </span><span style="color:#859900;">|| </span><span style="color:#b58900;">\</span><span>
+</span><span>    </span><span style="color:#b58900;">die </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Unable to create container from image </span><span style="color:#859900;">$</span><span style="color:#268bd2;">container_alias</span><span style="color:#839496;">&quot;</span><span>
+</span></code></pre>
+<p>修改为</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">lxc</span><span> init </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">google:</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">FLAGS_lxd_image</span><span>}</span><span style="color:#839496;">&quot; &quot;</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">FLAGS_container_name</span><span>}</span><span style="color:#839496;">&quot; </span><span style="color:#859900;">|| </span><span style="color:#b58900;">\</span><span>
+</span><span>    </span><span style="color:#b58900;">die </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">Unable to create container from image &#39;</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">FLAGS_lxd_image</span><span>}</span><span style="color:#2aa198;">&#39;</span><span style="color:#839496;">&quot;</span><span>
+</span></code></pre>
+<p>运行以下命令.请确保用户名是<strong>设置</strong>应用里显示的用户名.你可以自行选择<code>container_name</code>指定的容器名,<code>lxd_image</code>指定的linux镜像,或者<code>lxd_remote</code>指定的镜像源.</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>bash ./run_container.sh --container_name arch --user 你的用户名 --lxd_image archlinux/current --lxd_remote https://mirrors.tuna.tsinghua.edu.cn/lxc-images/</span><span>
+</span></code></pre>
+<p>确保下载成功并且创建用户成功(忽略那几个无法加入用户组的错误).</p>
+<h1 id="2-jin-ru-rong-qi-de-shell">2.进入容器的shell</h1>
+<p>执行<code>lxc exec arch -- bash</code>以执行容器的shell</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>(termina) chronos@localhost /tmp $ lxc exec arch -- bash</span><span>
+</span><span>[root@arch ~]#</span><span>
+</span></code></pre>
+<p>在容器中执行以下命令</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#93a1a1;">#设置密码.千万不要给root设置密码,否则ChromiumOS集成服务将无法运行</span><span style="color:#93a1a1;">
+</span><span style="color:#b58900;">passwd</span><span> 你的用户名</span><span>
+</span><span style="color:#93a1a1;">#把用户加入wheel组</span><span style="color:#93a1a1;">
+</span><span style="color:#b58900;">usermod</span><span style="color:#268bd2;"> -aG</span><span> wheel 你的用户名</span><span>
+</span></code></pre>
+<p>设置源,把tuna ustc 163等中国的源剪切粘贴到前面.vi中dd剪切整行,p粘贴,/搜索</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">vi</span><span> /etc/pacman.d/mirrorlist</span><span>
+</span></code></pre>
+<p>设置archlinuxcn源</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">vi</span><span> /etc/pacman.conf</span><span>
+</span></code></pre>
+<p>在最后插入</p>
+<pre data-lang="ini" style="background-color:#fdf6e3;color:#657b83;" class="language-ini "><code class="language-ini" data-lang="ini"><span style="color:#268bd2;">[archlinuxcn]</span><span>
+</span><span style="color:#268bd2;">Server </span><span style="color:#859900;">= </span><span style="color:#cb4b16;">https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch</span><span>
+</span></code></pre>
+<p>安装依赖</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">pacman</span><span style="color:#268bd2;"> -Syu</span><span> archlinuxcn-keyring base-devel git gtk3 openssh xdg-utils xkeyboard-config</span><span>
+</span></code></pre>
+<p>启用sudo无密码,执行<code>visudo</code></p>
+<p>删除以下行前的注释</p>
+<pre data-lang="ini" style="background-color:#fdf6e3;color:#657b83;" class="language-ini "><code class="language-ini" data-lang="ini"><span style="color:#859900;">%wheel   ALL=</span><span>(</span><span style="color:#859900;">ALL:ALL</span><span>) </span><span style="color:#859900;">NOPASSWD: ALL</span><span>
+</span></code></pre>
+<p>退出到termina <code>exit</code></p>
+<h1 id="3-deng-lu-dao-rong-qi">3.登录到容器</h1>
+<p><strong>登录</strong>到你创建的用户(之前执行bash的方法不是登录,无法加载服务).</p>
+<p>运行<code>lxc console arch</code>,然后直接输入用户名.</p>
+<pre data-lang="output" style="background-color:#fdf6e3;color:#657b83;" class="language-output "><code class="language-output" data-lang="output"><span>(termina) chronos@localhost /tmp $ lxc console arch</span><span>
+</span><span>To detach from the console, press: &lt;ctrl&gt;+a q</span><span>
+</span><span>你的用户名</span><span>
+</span><span>Password:</span><span>
+</span><span>[你的用户名@arch ~]$</span><span>
+</span></code></pre>
+<p>登录成功后安装aur上的<code>cros-container-guest-tools-git</code>.由于需要从<code>chromium.googlesource.com</code>下载文件,因此请自行解决网络问题.注意,Android或者Chromium OS里的代理设置不会应用到虚拟机.</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">git</span><span> clone https://aur.archlinux.org/cros-container-guest-tools-git.git</span><span>
+</span><span style="color:#859900;">cd</span><span> cros-container-guest-tools-git</span><span>
+</span><span style="color:#b58900;">makepkg</span><span style="color:#268bd2;"> -i</span><span>
+</span><span style="color:#93a1a1;">#解决.config不存在导致没有设置默认浏览器的问题</span><span style="color:#93a1a1;">
+</span><span style="color:#b58900;">mkdir </span><span style="color:#d33682;">~</span><span>/.config</span><span>
+</span><span style="color:#b58900;">xdg-settings</span><span> set default-web-browser garcon_host_browser.desktop</span><span>
+</span></code></pre>
+<p>解决Archlinux里<code>xkeyboard-config</code>更新导致<code>Sommelier</code>不支持两个键码的问题
+打开<code>/usr/share/X11/xkb/keycodes/evdev</code>,注释或者删除<code>&lt;i372&gt;</code> 和 <code>&lt;i374&gt;</code>开头的两行.</p>
+<p><code>cros-container-guest-tools-git</code>应用于ChromiumOS的最新版本,FydeOS暂时没有更新到R71,不支持<code>x-auth</code>功能,因此需要修改文件(更新后就不用改了).</p>
+<p>打开<code>/usr/lib/systemd/user/sommelier-x@.service</code>,把</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#268bd2;">ExecStart</span><span>=</span><span style="color:#2aa198;">/opt/google/cros-containers/bin/sommelier </span><span style="color:#b58900;">\</span><span>
+</span><span>              </span><span style="color:#b58900;">-X</span><span> \</span><span>
+</span><span>              </span><span style="color:#268bd2;">--x-display</span><span>=</span><span style="color:#859900;">%</span><span style="color:#268bd2;">i </span><span style="color:#b58900;">\</span><span>
+</span><span>              </span><span style="color:#268bd2;">--sd-notify</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">READY=1</span><span style="color:#839496;">&quot; </span><span style="color:#b58900;">\</span><span>
+</span><span>              </span><span style="color:#b58900;">--no-exit-with-child</span><span> \</span><span>
+</span><span>              </span><span style="color:#268bd2;">--x-auth</span><span>=</span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">HOME</span><span>}</span><span style="color:#2aa198;">/.Xauthority </span><span style="color:#b58900;">\</span><span>
+</span><span>              </span><span style="color:#b58900;">/bin/sh</span><span style="color:#268bd2;"> -c</span><span> \</span><span>
+</span><span>                  </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">systemctl --user set-environment </span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">DISPLAY_VAR</span><span>}</span><span style="color:#2aa198;">=</span><span style="color:#859900;">$</span><span style="color:#d33682;">$</span><span style="color:#2aa198;">{DISPLAY}; \</span><span style="color:#2aa198;">
+</span><span style="color:#2aa198;">                   systemctl --user set-environment </span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">XCURSOR_SIZE_VAR</span><span>}</span><span style="color:#2aa198;">=</span><span style="color:#859900;">$</span><span style="color:#d33682;">$</span><span style="color:#2aa198;">{XCURSOR_SIZE}; \</span><span style="color:#2aa198;">
+</span><span style="color:#2aa198;">                   systemctl --user import-environment SOMMELIER_VERSION; \</span><span style="color:#2aa198;">
+</span><span style="color:#2aa198;">                   touch </span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">HOME</span><span>}</span><span style="color:#2aa198;">/.Xauthority; \</span><span style="color:#2aa198;">
+</span><span style="color:#2aa198;">                   xauth -f </span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">HOME</span><span>}</span><span style="color:#2aa198;">/.Xauthority add </span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">HOST</span><span>}</span><span style="color:#2aa198;">:%i . </span><span style="color:#859900;">$</span><span>(</span><span style="color:#b58900;">xxd</span><span style="color:#268bd2;"> -l</span><span style="color:#2aa198;"> 16</span><span style="color:#268bd2;"> -p</span><span style="color:#2aa198;"> /dev/urandom</span><span>)</span><span style="color:#2aa198;">; \</span><span style="color:#2aa198;">
+</span><span style="color:#2aa198;">                   . /etc/sommelierrc</span><span style="color:#839496;">&quot;</span><span>
+</span></code></pre>
+<p>改为</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#268bd2;">ExecStart</span><span>=</span><span style="color:#2aa198;">/opt/google/cros-containers/bin/sommelier </span><span style="color:#b58900;">\</span><span>
+</span><span>              </span><span style="color:#b58900;">-X</span><span> \</span><span>
+</span><span>              </span><span style="color:#268bd2;">--x-display</span><span>=</span><span style="color:#859900;">%</span><span style="color:#268bd2;">i </span><span style="color:#b58900;">\</span><span>
+</span><span>              </span><span style="color:#268bd2;">--sd-notify</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">READY=1</span><span style="color:#839496;">&quot; </span><span style="color:#b58900;">\</span><span>
+</span><span>              </span><span style="color:#b58900;">--no-exit-with-child</span><span> \</span><span>
+</span><span>              </span><span style="color:#b58900;">/bin/sh</span><span style="color:#268bd2;"> -c</span><span> \</span><span>
+</span><span>                  </span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">systemctl --user set-environment </span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">DISPLAY_VAR</span><span>}</span><span style="color:#2aa198;">=</span><span style="color:#859900;">$</span><span style="color:#d33682;">$</span><span style="color:#2aa198;">{DISPLAY}; \</span><span style="color:#2aa198;">
+</span><span style="color:#2aa198;">                   systemctl --user set-environment </span><span style="color:#859900;">$</span><span>{</span><span style="color:#268bd2;">XCURSOR_SIZE_VAR</span><span>}</span><span style="color:#2aa198;">=</span><span style="color:#859900;">$</span><span style="color:#d33682;">$</span><span style="color:#2aa198;">{XCURSOR_SIZE}; \</span><span style="color:#2aa198;">
+</span><span style="color:#2aa198;">                   systemctl --user import-environment SOMMELIER_VERSION; \</span><span style="color:#2aa198;">
+</span><span style="color:#2aa198;">                   . /etc/sommelierrc</span><span style="color:#839496;">&quot;</span><span>
+</span></code></pre>
+<p>启用<code>cros-container-guest-tools-git</code>附带的所有systemd服务</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">sudo</span><span> systemctl enable cros-sftp</span><span>
+</span><span style="color:#b58900;">systemctl</span><span style="color:#268bd2;"> --user</span><span> enable sommelier@0.service</span><span>
+</span><span style="color:#b58900;">systemctl</span><span style="color:#268bd2;"> --user</span><span> enable sommelier@1.service</span><span>
+</span><span style="color:#b58900;">systemctl</span><span style="color:#268bd2;"> --user</span><span> enable sommelier-x@0.service</span><span>
+</span><span style="color:#b58900;">systemctl</span><span style="color:#268bd2;"> --user</span><span> enable sommelier-x@1.service</span><span>
+</span><span style="color:#b58900;">systemctl</span><span style="color:#268bd2;"> --user</span><span> enable cros-garcon.service</span><span>
+</span></code></pre>
+<h1 id="4-zhong-ming-ming-rong-qi">4.重命名容器</h1>
+<p>由于一些限制,目前<code>Crostini</code>的Chromium OS集成仅名为<code>penguin</code>的容器可以启用,因此需要重命名容器.(不要删除自带的Debian容器)</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">[你的用户名@arch </span><span style="color:#d33682;">~</span><span>]$ exit</span><span>
+</span><span style="color:#b58900;">按下ctrl-A</span><span> Q</span><span>
+</span><span>(</span><span style="color:#b58900;">termina</span><span>) chronos@localhost /tmp $ lxc stop arch</span><span>
+</span><span>(</span><span style="color:#b58900;">termina</span><span>) chronos@localhost /tmp $ lxc stop penguin</span><span>
+</span><span>(</span><span style="color:#b58900;">termina</span><span>) chronos@localhost /tmp $ lxc rename penguin debian</span><span>
+</span><span>(</span><span style="color:#b58900;">termina</span><span>) chronos@localhost /tmp $ lxc rename arch penguin</span><span>
+</span></code></pre>
+<p>重启虚拟机</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">sudo</span><span> reboot</span><span>
+</span></code></pre>
+<h1 id="5-ben-di-hua">5.本地化</h1>
+<p>打开终端应用,等待几秒,archlinux就启动了,随后做一些本地化</p>
+<p>设置时区<code>sudo timedatectl set-timezone Asia/Shanghai</code></p>
+<p>设置中文语言</p>
+<p>编辑<code>/etc/locale.gen</code>,删除<code>zh_CN.UTF-8</code>前的注释,然后执行<code>sudo locale-gen</code></p>
+<p>修改<code>/etc/locale.conf</code></p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#268bd2;">LANG</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LANGUAGE</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_CTYPE</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_NUMERIC</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_TIME</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_COLLATE</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_MONETARY</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_MESSAGES</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_PAPER</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_NAME</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_ADDRESS</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_TELEPHONE</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_MEASUREMENT</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">LC_IDENTIFICATION</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">zh_CN.UTF-8</span><span style="color:#839496;">&quot;</span><span>
+</span></code></pre>
+<p>安装字体,输入法.这里还安装了搜狗输入法,可能会出现bug,请酌情选择.</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">sudo</span><span> pacman</span><span style="color:#268bd2;"> -S</span><span> fcitx-im fcitx-configtool fcitx-sogoupinyin wqy-microhei</span><span>
+</span></code></pre>
+<p>打开<code>/usr/lib/systemd/user/cros-garcon.service.d/cros-garcon-override.conf</code></p>
+<p>插入</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#268bd2;">Environment</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">GTK_IM_MODULE=fcitx</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">Environment</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">QT_IM_MODULE=fcitx</span><span style="color:#839496;">&quot;</span><span>
+</span><span style="color:#268bd2;">Environment</span><span>=</span><span style="color:#839496;">&quot;</span><span style="color:#2aa198;">XMODIFIERS=@im=fcitx</span><span style="color:#839496;">&quot;</span><span>
+</span></code></pre>
+<p>执行</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#859900;">echo</span><span> /usr/bin/fcitx-autostart &gt; </span><span style="color:#859900;">$</span><span style="color:#268bd2;">HOME</span><span>/.sommelierrc</span><span>
+</span></code></pre>
+<p>重启容器</p>
+<pre data-lang="bash" style="background-color:#fdf6e3;color:#657b83;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b58900;">sudo</span><span> reboot</span><span>
+</span></code></pre>
+<p>运行<code>fcitx-config-gtk3</code>配置输入法.</p>
+<h1 id="can-kao">参考</h1>
+<p><a href="https://www.reddit.com/r/Crostini/wiki/howto/run-arch-linux">https://www.reddit.com/r/Crostini/wiki/howto/run-arch-linux</a></p>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https://12101111.github.io/tags/linux/">#Linux</a>
+                    
+                        <a href="https://12101111.github.io/tags/chromiumos/">#ChromiumOS</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;rustxue-xi-zi-liao&#x2F;">‹ Rust学习资料</a>
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;12101111.github.io&#x2F;write-os-in-rust&#x2F;">使用Rust编写操作系统(一) ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https://12101111.github.io/even.js" ></script>
+      
+    </body>
+
+</html>
